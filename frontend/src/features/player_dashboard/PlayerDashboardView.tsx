@@ -18,14 +18,6 @@ import { RoleBenchmarkTab } from './tabs/RoleBenchmarkTab';
 
 
 
-import { EvidenceAudioTab } from './tabs/EvidenceAudioTab';
-
-
-
-import { ScoutingFeedTab } from './tabs/ScoutingFeedTab';
-
-
-
 import { PlayerProfileTab } from './tabs/PlayerProfileTab';
 
 
@@ -2708,14 +2700,6 @@ export function PlayerDashboardView({
 
 
 
-    { id: 'evidence', label: 'Comms & Evidence', icon: <Mic className="w-4 h-4" /> },
-
-
-
-    { id: 'scouting', label: 'Scouting Timeline', icon: <Eye className="w-4 h-4" /> },
-
-
-
     { id: 'profile', label: 'My Profile', icon: <User className="w-4 h-4" /> },
 
 
@@ -3325,30 +3309,6 @@ export function PlayerDashboardView({
 
 
         )}
-
-
-
-
-
-
-
-        {activeTab === 'evidence' && (
-
-
-
-          <EvidenceAudioTab onShowToast={addToast} theme={theme} />
-
-
-
-        )}
-
-
-
-
-
-
-
-        {activeTab === 'scouting' && <ScoutingFeedTab theme={theme} />}
 
 
 

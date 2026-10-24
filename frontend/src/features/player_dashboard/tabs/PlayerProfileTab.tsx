@@ -82,17 +82,17 @@ const gamePosters: Record<string, string> = {
 const defaultClips: GameplayVideoClip[] = [
   {
     id: "vod-cs2-1",
-    title: "CS2 Mirage A-Site AWP Entry & Mid Window Smoke Assist",
+    title: "CS2 Best Moments 2025 Highlights (Pro AWPer / Entry Clutch)",
     game: "CS2",
-    videoUrl: "/videos/cs2_mirage_clip.mp4",
+    videoUrl: "/videos/cs2_best_moments_2025.mp4",
     thumbnail: "/images/games/cs2.jpg",
-    duration: "0m 48s",
+    duration: "1m 15s",
     resolution: "1080p 60fps HD",
-    tag: "AWP Entry / First Blood",
+    tag: "AWP Highlights / Multi-Kill",
     uploadedAt: "Today, 18:30 IST",
-    fileSize: "6.7 MB",
-    aiScore: 29.4,
-    tacticalVerdict: "Pixel-perfect AWP peek angle on Mirage connector with instant trade re-frag."
+    fileSize: "10.9 MB",
+    aiScore: 29.6,
+    tacticalVerdict: "Aggressive AWP angle isolation, instant flick re-frags, and high-tempo site executes from 2025 pro highlights."
   },
   {
     id: "vod-val-1",
@@ -1218,11 +1218,11 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
         {activeGameView === 'CS2' && (
           <div className={`mt-3 p-3 rounded-[6px] border ${isLight ? "bg-slate-50 border-slate-200" : "bg-[#18181b]/80 border-[#26262a]"}`}>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 mb-2">
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500 dark:text-[#9a9aa2] flex items-center gap-1.5">
-                <Zap className="w-3.5 h-3.5 text-[#e8ff59]" />
-                Public CS2 Steam64 IDs For Verification Testing (Click to Autofill & View Live Analytics):
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-600 dark:text-[#9a9aa2] flex items-center gap-1.5">
+                <Zap className="w-3.5 h-3.5 text-slate-700 dark:text-[#ededed]" />
+                Public CS2 Steam64 IDs (Click to Autofill & View Live Analytics):
               </span>
-              <span className="text-[10px] font-mono text-emerald-400 font-semibold">
+              <span className="text-[10px] font-mono text-slate-500 dark:text-[#9a9aa2]">
                 Leetify & PandaScore Verified
               </span>
             </div>
@@ -1247,10 +1247,10 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
                     currentDetails?.gameId === preset.gameId
                       ? isLight
                         ? "bg-slate-900 border-slate-900 text-white shadow-xs font-bold"
-                        : "bg-[#e8ff59] border-[#e8ff59] text-black font-bold shadow-xs"
+                        : "bg-white border-white text-black font-bold shadow-xs"
                       : isLight
                       ? "bg-white border-slate-300 text-slate-800 hover:border-slate-500"
-                      : "bg-[#0b0b0c] border-[#26262a] text-[#ededed] hover:border-[#e8ff59]/50 hover:text-white"
+                      : "bg-[#0b0b0c] border-[#26262a] text-[#ededed] hover:border-slate-500 hover:text-white"
                   }`}
                 >
                   <span className="font-bold">{preset.ign}</span>
@@ -1487,86 +1487,93 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
         {/* Dynamic Live Telemetry & Combat Analytics Engine (Rendered directly below ID/Information) */}
         {currentDetails?.gameId && (
           <div className={`mt-5 rounded-[8px] border overflow-hidden transition-all ${
-            isLight ? "bg-slate-50/70 border-slate-200" : "bg-[#0b0b0c] border-[#26262a]"
+            isLight ? "bg-white border-slate-200 shadow-xs" : "bg-[#0b0b0c] border-[#26262a]"
           }`}>
             {/* Analytics Header */}
             <div className={`px-4 py-3 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-2 ${
-              isLight ? "bg-white border-slate-200" : "bg-[#131315] border-[#26262a]"
+              isLight ? "bg-slate-50/80 border-slate-200" : "bg-[#131315] border-[#26262a]"
             }`}>
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-[6px] bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
-                  <Activity className="w-4 h-4 animate-pulse" />
+                <div className={`w-8 h-8 rounded-[6px] flex items-center justify-center border ${
+                  isLight ? "bg-slate-100 border-slate-300 text-slate-800" : "bg-[#18181b] border-[#26262a] text-[#ededed]"
+                }`}>
+                  <Activity className="w-4 h-4" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
                     <h4 className={`text-xs font-black tracking-wide uppercase ${isLight ? "text-slate-900" : "text-[#ededed]"}`}>
                       {activeGameView} Combat Telemetry & Match Engine Analytics
                     </h4>
-                    <span className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+                    <span className={`px-2 py-0.5 rounded text-[9px] font-mono font-bold border ${
+                      isLight 
+                        ? "bg-slate-100 border-slate-300 text-slate-800" 
+                        : "bg-[#18181b] border-[#36363c] text-[#ededed]"
+                    }`}>
                       LIVE INGEST ACTIVE
                     </span>
                   </div>
-                  <p className="text-[10px] font-mono text-slate-500 dark:text-[#9a9aa2] mt-0.5">
-                    Ingested for ID: <span className="font-bold text-emerald-400">{currentDetails.gameId}</span> ({currentDetails.ign || 'Player'}) • Rank: {currentDetails.rank || 'Uncalibrated'}
+                  <p className={`text-[10px] font-mono mt-0.5 ${isLight ? "text-slate-600" : "text-[#9a9aa2]"}`}>
+                    Ingested for ID: <span className="font-bold text-slate-900 dark:text-white">{currentDetails.gameId}</span> ({currentDetails.ign || 'Player'}) • Rank: {currentDetails.rank || 'Uncalibrated'}
                   </p>
                 </div>
               </div>
 
               <div className="flex items-center gap-2 text-[10px] font-mono">
-                <span className="px-2 py-0.5 rounded border border-emerald-500/30 bg-emerald-500/5 text-emerald-400">
+                <span className={`px-2 py-0.5 rounded border ${
+                  isLight ? "border-slate-200 bg-white text-slate-600" : "border-[#26262a] bg-[#18181b] text-[#9a9aa2]"
+                }`}>
                   {activeGameView === 'CS2' ? 'Leetify GCG & PandaScore v2.4' : `${activeGameView} Telemetry Engine`}
                 </span>
               </div>
             </div>
 
-            {/* Primary Telemetry KPI Grid */}
+            {/* Primary Telemetry KPI Grid - Clean, high-contrast, non-colourful */}
             <div className="p-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
               {/* 1. Primary Firepower (ADR / ACS / Avg Dmg) */}
-              <div className={`p-3 rounded-[6px] border ${isLight ? "bg-white border-slate-200" : "bg-[#131315] border-[#26262a]"}`}>
+              <div className={`p-3 rounded-[6px] border ${isLight ? "bg-slate-50/60 border-slate-200" : "bg-[#131315] border-[#26262a]"}`}>
                 <span className="text-[10px] font-mono font-bold text-slate-500 dark:text-[#9a9aa2] block truncate">
                   {activeGameView === 'CS2' ? 'ADR (DAMAGE/RND)' : activeGameView === 'Valorant' ? 'ACS (COMBAT SCORE)' : 'PRIMARY COMBAT STAT'}
                 </span>
-                <div className={`text-lg font-black font-mono mt-1 ${isLight ? "text-slate-900" : "text-[#ededed]"}`}>
+                <div className={`text-lg font-black font-mono mt-1 ${isLight ? "text-slate-900" : "text-white"}`}>
                   {currentDetails.primaryStat || '87.4 ADR'}
                 </div>
-                <span className="text-[9px] text-emerald-400 font-mono font-bold block mt-0.5">
-                  Top 4.2% Bracket
+                <span className="text-[9px] text-slate-500 dark:text-[#9a9aa2] font-mono block mt-0.5">
+                  Top 4.2% Global
                 </span>
               </div>
 
               {/* 2. Rating 2.0 / Match Impact */}
-              <div className={`p-3 rounded-[6px] border ${isLight ? "bg-white border-slate-200" : "bg-[#131315] border-[#26262a]"}`}>
+              <div className={`p-3 rounded-[6px] border ${isLight ? "bg-slate-50/60 border-slate-200" : "bg-[#131315] border-[#26262a]"}`}>
                 <span className="text-[10px] font-mono font-bold text-slate-500 dark:text-[#9a9aa2] block truncate">
                   {activeGameView === 'CS2' ? 'RATING 2.0' : 'COMBAT IMPACT'}
                 </span>
-                <div className="text-lg font-black font-mono mt-1 text-[#e8ff59]">
+                <div className={`text-lg font-black font-mono mt-1 ${isLight ? "text-slate-900" : "text-white"}`}>
                   {computedRating}
                 </div>
                 <span className="text-[9px] text-slate-500 dark:text-[#9a9aa2] font-mono block mt-0.5">
-                  High Impact Fragger
+                  Pro Tier Rating
                 </span>
               </div>
 
               {/* 3. K/D Ratio */}
-              <div className={`p-3 rounded-[6px] border ${isLight ? "bg-white border-slate-200" : "bg-[#131315] border-[#26262a]"}`}>
+              <div className={`p-3 rounded-[6px] border ${isLight ? "bg-slate-50/60 border-slate-200" : "bg-[#131315] border-[#26262a]"}`}>
                 <span className="text-[10px] font-mono font-bold text-slate-500 dark:text-[#9a9aa2] block truncate">
                   KILL / DEATH (K/D)
                 </span>
-                <div className={`text-lg font-black font-mono mt-1 ${isLight ? "text-slate-900" : "text-[#ededed]"}`}>
+                <div className={`text-lg font-black font-mono mt-1 ${isLight ? "text-slate-900" : "text-white"}`}>
                   {computedKd}
                 </div>
-                <span className="text-[9px] text-emerald-400 font-mono font-bold block mt-0.5">
+                <span className="text-[9px] text-slate-500 dark:text-[#9a9aa2] font-mono block mt-0.5">
                   +0.42 Net Diff / Match
                 </span>
               </div>
 
               {/* 4. Win Rate */}
-              <div className={`p-3 rounded-[6px] border ${isLight ? "bg-white border-slate-200" : "bg-[#131315] border-[#26262a]"}`}>
+              <div className={`p-3 rounded-[6px] border ${isLight ? "bg-slate-50/60 border-slate-200" : "bg-[#131315] border-[#26262a]"}`}>
                 <span className="text-[10px] font-mono font-bold text-slate-500 dark:text-[#9a9aa2] block truncate">
                   MATCH WIN RATE
                 </span>
-                <div className="text-lg font-black font-mono mt-1 text-emerald-400">
+                <div className={`text-lg font-black font-mono mt-1 ${isLight ? "text-slate-900" : "text-white"}`}>
                   {currentDetails.winRate || '68%'}
                 </div>
                 <span className="text-[9px] text-slate-500 dark:text-[#9a9aa2] font-mono block mt-0.5">
@@ -1575,11 +1582,11 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
               </div>
 
               {/* 5. Headshot % */}
-              <div className={`p-3 rounded-[6px] border ${isLight ? "bg-white border-slate-200" : "bg-[#131315] border-[#26262a]"}`}>
+              <div className={`p-3 rounded-[6px] border ${isLight ? "bg-slate-50/60 border-slate-200" : "bg-[#131315] border-[#26262a]"}`}>
                 <span className="text-[10px] font-mono font-bold text-slate-500 dark:text-[#9a9aa2] block truncate">
                   HEADSHOT CONV.
                 </span>
-                <div className={`text-lg font-black font-mono mt-1 ${isLight ? "text-slate-900" : "text-[#ededed]"}`}>
+                <div className={`text-lg font-black font-mono mt-1 ${isLight ? "text-slate-900" : "text-white"}`}>
                   {computedHs}%
                 </div>
                 <span className="text-[9px] text-slate-500 dark:text-[#9a9aa2] font-mono block mt-0.5">
@@ -1588,26 +1595,26 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
               </div>
 
               {/* 6. Opening Duel Win Rate */}
-              <div className={`p-3 rounded-[6px] border ${isLight ? "bg-white border-slate-200" : "bg-[#131315] border-[#26262a]"}`}>
+              <div className={`p-3 rounded-[6px] border ${isLight ? "bg-slate-50/60 border-slate-200" : "bg-[#131315] border-[#26262a]"}`}>
                 <span className="text-[10px] font-mono font-bold text-slate-500 dark:text-[#9a9aa2] block truncate">
                   OPENING DUEL WIN
                 </span>
-                <div className={`text-lg font-black font-mono mt-1 ${isLight ? "text-slate-900" : "text-[#ededed]"}`}>
+                <div className={`text-lg font-black font-mono mt-1 ${isLight ? "text-slate-900" : "text-white"}`}>
                   {computedOpening}%
                 </div>
-                <span className="text-[9px] text-emerald-400 font-mono font-bold block mt-0.5">
+                <span className="text-[9px] text-slate-500 dark:text-[#9a9aa2] font-mono block mt-0.5">
                   First Pick Success
                 </span>
               </div>
             </div>
 
             {/* Secondary Tactical Telemetry & Radar Skill Breakdown */}
-            <div className={`px-4 pb-4 pt-1 grid grid-cols-1 md:grid-cols-2 gap-3.5 text-xs`}>
+            <div className="px-4 pb-4 pt-1 grid grid-cols-1 md:grid-cols-2 gap-3.5 text-xs">
               {/* Tactical Teamwork & Utility Metrics */}
-              <div className={`p-3.5 rounded-[6px] border ${isLight ? "bg-white border-slate-200" : "bg-[#131315] border-[#26262a]"}`}>
+              <div className={`p-3.5 rounded-[6px] border ${isLight ? "bg-slate-50/60 border-slate-200" : "bg-[#131315] border-[#26262a]"}`}>
                 <div className="flex items-center justify-between mb-2.5 pb-2 border-b border-slate-200 dark:border-[#26262a]">
                   <span className="font-bold text-[11px] uppercase tracking-wider text-slate-900 dark:text-[#ededed] flex items-center gap-1.5">
-                    <Cpu className="w-3.5 h-3.5 text-emerald-400" />
+                    <Cpu className="w-3.5 h-3.5 text-slate-600 dark:text-slate-400" />
                     Leetify Tactical & Utility Telemetry
                   </span>
                   <span className="text-[10px] font-mono text-slate-500 dark:text-[#9a9aa2]">
@@ -1617,7 +1624,7 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
                 <div className="space-y-2 text-[11px] font-mono">
                   <div className="flex items-center justify-between">
                     <span className="text-slate-500 dark:text-[#9a9aa2]">Trade Re-Frag Efficiency (3.0s):</span>
-                    <span className="font-bold text-emerald-400">84.8% Success</span>
+                    <span className="font-bold text-slate-900 dark:text-[#ededed]">84.8% Success</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-slate-500 dark:text-[#9a9aa2]">Flash Assist Blind Duration:</span>
@@ -1629,64 +1636,64 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-slate-500 dark:text-[#9a9aa2]">1vX Clutch Conversion:</span>
-                    <span className="font-bold text-[#e8ff59]">{computedClutch}% (1v1: 76%, 1v2: 38%)</span>
+                    <span className="font-bold text-slate-900 dark:text-[#ededed]">{computedClutch}% (1v1: 76%, 1v2: 38%)</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-slate-500 dark:text-[#9a9aa2]">Round Win Delta on First Frag:</span>
-                    <span className="font-bold text-emerald-400">+14.2% Probability</span>
+                    <span className="font-bold text-slate-900 dark:text-[#ededed]">+14.2% Probability</span>
                   </div>
                 </div>
               </div>
 
-              {/* AI Combat Decision Scores */}
-              <div className={`p-3.5 rounded-[6px] border ${isLight ? "bg-white border-slate-200" : "bg-[#131315] border-[#26262a]"}`}>
+              {/* Combat Competency Percentiles - Clean, uniform, monochromatic progress bars */}
+              <div className={`p-3.5 rounded-[6px] border ${isLight ? "bg-slate-50/60 border-slate-200" : "bg-[#131315] border-[#26262a]"}`}>
                 <div className="flex items-center justify-between mb-2.5 pb-2 border-b border-slate-200 dark:border-[#26262a]">
                   <span className="font-bold text-[11px] uppercase tracking-wider text-slate-900 dark:text-[#ededed] flex items-center gap-1.5">
-                    <BarChart2 className="w-3.5 h-3.5 text-[#e8ff59]" />
+                    <BarChart2 className="w-3.5 h-3.5 text-slate-600 dark:text-slate-400" />
                     Combat Competency Percentiles
                   </span>
-                  <span className="text-[10px] font-mono text-emerald-400 font-bold">
+                  <span className="text-[10px] font-mono text-slate-500 dark:text-[#9a9aa2] font-semibold">
                     Scout Benchmark
                   </span>
                 </div>
-                <div className="space-y-2 text-[11px]">
+                <div className="space-y-2.5 text-[11px]">
                   <div>
-                    <div className="flex justify-between text-[10px] font-mono text-slate-500 dark:text-[#9a9aa2] mb-0.5">
+                    <div className="flex justify-between text-[10px] font-mono text-slate-600 dark:text-[#9a9aa2] mb-1">
                       <span>Aim Precision & Crosshair Placement</span>
-                      <span className="font-bold text-slate-900 dark:text-[#ededed]">94%</span>
+                      <span className="font-bold text-slate-900 dark:text-white">94%</span>
                     </div>
-                    <div className="w-full bg-slate-200 dark:bg-[#1f1f23] h-1.5 rounded-full overflow-hidden">
-                      <div className="bg-emerald-400 h-full rounded-full" style={{ width: '94%' }} />
+                    <div className="w-full bg-slate-200 dark:bg-[#222226] h-1.5 rounded-full overflow-hidden">
+                      <div className="bg-slate-900 dark:bg-white h-full rounded-full" style={{ width: '94%' }} />
                     </div>
                   </div>
 
                   <div>
-                    <div className="flex justify-between text-[10px] font-mono text-slate-500 dark:text-[#9a9aa2] mb-0.5">
+                    <div className="flex justify-between text-[10px] font-mono text-slate-600 dark:text-[#9a9aa2] mb-1">
                       <span>Map Geometry & Angle Isolation</span>
-                      <span className="font-bold text-slate-900 dark:text-[#ededed]">90%</span>
+                      <span className="font-bold text-slate-900 dark:text-white">90%</span>
                     </div>
-                    <div className="w-full bg-slate-200 dark:bg-[#1f1f23] h-1.5 rounded-full overflow-hidden">
-                      <div className="bg-[#e8ff59] h-full rounded-full" style={{ width: '90%' }} />
+                    <div className="w-full bg-slate-200 dark:bg-[#222226] h-1.5 rounded-full overflow-hidden">
+                      <div className="bg-slate-900 dark:bg-white h-full rounded-full" style={{ width: '90%' }} />
                     </div>
                   </div>
 
                   <div>
-                    <div className="flex justify-between text-[10px] font-mono text-slate-500 dark:text-[#9a9aa2] mb-0.5">
+                    <div className="flex justify-between text-[10px] font-mono text-slate-600 dark:text-[#9a9aa2] mb-1">
                       <span>Economic & Utility Discipline</span>
-                      <span className="font-bold text-slate-900 dark:text-[#ededed]">86%</span>
+                      <span className="font-bold text-slate-900 dark:text-white">86%</span>
                     </div>
-                    <div className="w-full bg-slate-200 dark:bg-[#1f1f23] h-1.5 rounded-full overflow-hidden">
-                      <div className="bg-cyan-400 h-full rounded-full" style={{ width: '86%' }} />
+                    <div className="w-full bg-slate-200 dark:bg-[#222226] h-1.5 rounded-full overflow-hidden">
+                      <div className="bg-slate-900 dark:bg-white h-full rounded-full" style={{ width: '86%' }} />
                     </div>
                   </div>
 
                   <div>
-                    <div className="flex justify-between text-[10px] font-mono text-slate-500 dark:text-[#9a9aa2] mb-0.5">
+                    <div className="flex justify-between text-[10px] font-mono text-slate-600 dark:text-[#9a9aa2] mb-1">
                       <span>Retake & Post-Plant Execution</span>
-                      <span className="font-bold text-slate-900 dark:text-[#ededed]">89%</span>
+                      <span className="font-bold text-slate-900 dark:text-white">89%</span>
                     </div>
-                    <div className="w-full bg-slate-200 dark:bg-[#1f1f23] h-1.5 rounded-full overflow-hidden">
-                      <div className="bg-amber-400 h-full rounded-full" style={{ width: '89%' }} />
+                    <div className="w-full bg-slate-200 dark:bg-[#222226] h-1.5 rounded-full overflow-hidden">
+                      <div className="bg-slate-900 dark:bg-white h-full rounded-full" style={{ width: '89%' }} />
                     </div>
                   </div>
                 </div>
