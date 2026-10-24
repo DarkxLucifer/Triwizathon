@@ -68,16 +68,53 @@ const gameIcons: Record<GameType, React.ReactNode> = {
   "CS2": <Zap className="w-4 h-4 text-emerald-500" />,
 };
 
+const gamePosters: Record<string, string> = {
+  "CS2": "/images/games/cs2.jpg",
+  "Valorant": "/images/games/valorant.jpg",
+  "BGMI": "/images/games/bgmi.jpg",
+  "Free Fire": "/images/games/apex.jpg",
+  "Mobile Legends": "/images/games/fortnite.jpg",
+};
+
 const defaultClips: GameplayVideoClip[] = [
+  {
+    id: "vod-cs2-1",
+    title: "CS2 Mirage A-Site AWP Entry & Mid Window Smoke Assist",
+    game: "CS2",
+    videoUrl: "/videos/cs2_mirage_clip.mp4",
+    thumbnail: "/images/games/cs2.jpg",
+    duration: "0m 48s",
+    resolution: "1080p 60fps HD",
+    tag: "AWP Entry / First Blood",
+    uploadedAt: "Today, 18:30 IST",
+    fileSize: "6.7 MB",
+    aiScore: 29.4,
+    tacticalVerdict: "Pixel-perfect AWP peek angle on Mirage connector with instant trade re-frag."
+  },
+  {
+    id: "vod-val-1",
+    title: "Valorant Haven A-Site Retake & 1v3 Clutch (Cold Valorant)",
+    game: "Valorant",
+    videoUrl: "/videos/valorant_clutch_clip.mp4",
+    thumbnail: "/images/games/valorant.jpg",
+    duration: "0m 55s",
+    resolution: "1080p 60fps HD",
+    tag: "Retake / Post-Plant Clutch",
+    uploadedAt: "Yesterday, 20:15 IST",
+    fileSize: "9.8 MB",
+    aiScore: 29.2,
+    tacticalVerdict: "Disciplined crosshair placement and isolating 1v1 engagements on A-Long post-plant defuse."
+  },
   {
     id: "vod-1",
     title: "1v4 Erangel School Compound Breach & Zone Calling (M416 + DBS Laser)",
     game: "BGMI",
     videoUrl: "/videos/bgmi_room_clip.mp4",
+    thumbnail: "/images/games/bgmi.jpg",
     duration: "1m 24s",
     resolution: "1080p 60fps HD",
     tag: "1v4 Clutch / Entry Breach",
-    uploadedAt: "Today, 14:20 IST",
+    uploadedAt: "2 days ago",
     fileSize: "14.5 MB",
     aiScore: 28.8,
     tacticalVerdict: "Flawless crosshair placement, rapid DBS double-tap, and split-second zone calling under Phase 5 circle collapse."
@@ -87,26 +124,14 @@ const defaultClips: GameplayVideoClip[] = [
     title: "BGMI Tournament Scrim 3v3 Frontline Assault & Zone Calling",
     game: "BGMI",
     videoUrl: "/videos/bgmi_assault_clip.mp4",
+    thumbnail: "/images/games/bgmi.jpg",
     duration: "1m 08s",
     resolution: "1080p 60fps HD",
     tag: "Frontline Assault / High Ground",
-    uploadedAt: "Yesterday, 19:40 IST",
+    uploadedAt: "3 days ago",
     fileSize: "8.9 MB",
     aiScore: 27.6,
     tacticalVerdict: "Aggressive vehicular flank cutoff and simultaneous smoke line deploy to secure high-ground rotation."
-  },
-  {
-    id: "vod-3",
-    title: "Valorant Haven A-Site Retake & 1v3 Clutch (Cold Valorant)",
-    game: "Valorant",
-    videoUrl: "/videos/valorant_clutch_clip.mp4",
-    duration: "0m 55s",
-    resolution: "1080p 60fps HD",
-    tag: "Retake / Post-Plant Clutch",
-    uploadedAt: "2 days ago",
-    fileSize: "9.8 MB",
-    aiScore: 29.2,
-    tacticalVerdict: "Disciplined crosshair placement and isolating 1v1 engagements on A-Long post-plant defuse."
   }
 ];
 
@@ -257,7 +282,7 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
   const [selectedClip, setSelectedClip] = useState<GameplayVideoClip | null>(null);
   const [isPlayerModalOpen, setIsPlayerModalOpen] = useState(false);
   const [uploadTitle, setUploadTitle] = useState("");
-  const [uploadMap, setUploadMap] = useState("Erangel");
+  const [uploadMap, setUploadMap] = useState("Mirage");
   const [clipFilter, setClipFilter] = useState<"current" | "all">("current");
   const [isUploading, setIsUploading] = useState(false);
   const mediaInputRef = useRef<HTMLInputElement>(null);
@@ -369,9 +394,64 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
     }
   };
 
+    const generateVideoThumbnail = (file: File): Promise<string> => {
+    return new Promise((resolve) => {
+      if (!file.type.startsWith("video/")) {
+        resolve("");
+        return;
+      }
+      try {
+        const url = URL.createObjectURL(file);
+        const video = document.createElement("video");
+        video.preload = "metadata";
+        video.muted = true;
+        video.playsInline = true;
+        video.src = url;
+
+        let finished = false;
+        const finish = (result: string) => {
+          if (!finished) {
+            finished = true;
+            URL.revokeObjectURL(url);
+            resolve(result);
+          }
+        };
+
+        video.onloadeddata = () => {
+          video.currentTime = Math.min(1.0, (video.duration && video.duration > 1) ? 1.0 : 0.1);
+        };
+
+        video.onseeked = () => {
+          try {
+            const canvas = document.createElement("canvas");
+            canvas.width = video.videoWidth || 640;
+            canvas.height = video.videoHeight || 360;
+            const ctx = canvas.getContext("2d");
+            if (ctx && canvas.width > 0 && canvas.height > 0) {
+              ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+              const dataUrl = canvas.toDataURL("image/jpeg", 0.82);
+              finish(dataUrl);
+              return;
+            }
+          } catch {
+            // fallback
+          }
+          finish("");
+        };
+
+        video.onerror = () => finish("");
+        setTimeout(() => finish(""), 2200);
+      } catch {
+        resolve("");
+      }
+    });
+  };
+
   const handleMediaUpload = async (file: File) => {
     setIsUploading(true);
     const clipTitle = uploadTitle.trim() || `${activeGameView} ${file.name.replace(/\.[^/.]+$/, "")}`;
+    const generatedThumb = await generateVideoThumbnail(file);
+    const clipPoster = generatedThumb || gamePosters[activeGameView] || "/images/games/cs2.jpg";
     try {
       const token = localStorage.getItem('scoutforge_access_token') || undefined;
       const savedClip = await playerApi.uploadClip(file, clipTitle, uploadMap, token);
@@ -381,6 +461,7 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
         title: savedClip.title,
         game: activeGameView,
         videoUrl: URL.createObjectURL(file),
+        thumbnail: clipPoster,
         duration: `${Math.round(savedClip.duration_seconds || 45)}s`,
         resolution: file.type.startsWith("audio/") ? "Voice Audio Comms (48kHz)" : "1080p 60fps HD",
         tag: file.type.startsWith("audio/") ? "Tactical Audio / Comms" : `${uploadMap} POV Gameplay`,
@@ -402,6 +483,7 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
         title: clipTitle,
         game: activeGameView,
         videoUrl: URL.createObjectURL(file),
+        thumbnail: clipPoster,
         duration: file.type.startsWith("audio/") ? "0m 45s" : "1m 32s",
         resolution: file.type.startsWith("audio/") ? "Voice Audio Comms (48kHz)" : "1080p 60fps HD",
         tag: file.type.startsWith("audio/") ? "Tactical Audio / Comms" : `${uploadMap} POV Gameplay`,
@@ -442,7 +524,7 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
     : mediaClips;
 
   const safeGame = normalizeGameType(activeGameView);
-  const currentDetails = perGameDetails[safeGame] || perGameDetails.BGMI || {
+  const currentDetails = perGameDetails[safeGame] || perGameDetails.CS2 || perGameDetails.BGMI || {
     ign: 'Vortex',
     gameId: '5128940192',
     rank: 'Conqueror Top 100',
@@ -801,7 +883,18 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
 
         {/* 5-Game Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-3.5 mt-4">
-          {player.gamesPlayed.map((gameItem) => {
+          {(() => {
+            const gamePriority: Record<string, number> = {
+              'CS2': 1,
+              'Valorant': 2,
+              'Free Fire': 3,
+              'Mobile Legends': 4,
+              'BGMI': 5,
+            };
+            const ordered = [...(player.gamesPlayed || [])].sort(
+              (a, b) => (gamePriority[a.id] || 99) - (gamePriority[b.id] || 99)
+            );
+            return ordered.map((gameItem) => {
             const isSelected = activeGameView === gameItem.id;
             const isPrimary = player.activeGame === gameItem.id;
             return (
@@ -871,7 +964,8 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
                 </div>
               </div>
             );
-          })}
+          });
+        })()}
         </div>
 
         {/* Selected Title Action Banner */}
@@ -1458,12 +1552,37 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
                   >
                     {/* Media Thumbnail */}
                     <div className="relative aspect-video w-full bg-slate-950 flex items-center justify-center overflow-hidden">
-                      <div className="absolute inset-0 bg-radial from-slate-900 to-black opacity-90" />
-                      <div className="relative z-10 flex flex-col items-center gap-1.5">
-                        <div className="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-500/50 flex items-center justify-center group-hover:scale-110 group-hover:bg-emerald-500 transition-all text-emerald-400 group-hover:text-black">
+                      {clip.thumbnail ? (
+                        <img
+                          src={clip.thumbnail}
+                          alt={clip.title}
+                          className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      ) : clip.videoUrl && !isAudioOnly ? (
+                        <video
+                          src={`${clip.videoUrl}#t=0.5`}
+                          preload="metadata"
+                          poster={gamePosters[clip.game] || "/images/games/cs2.jpg"}
+                          className="absolute inset-0 w-full h-full object-cover pointer-events-none group-hover:scale-105 transition-transform duration-300"
+                          muted
+                          playsInline
+                        />
+                      ) : (
+                        <img
+                          src={gamePosters[clip.game] || "/images/games/cs2.jpg"}
+                          alt={clip.title}
+                          className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 opacity-60"
+                        />
+                      )}
+
+                      {/* Dark Overlay Gradient for contrast and legibility */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/30 group-hover:via-black/15 transition-colors pointer-events-none" />
+
+                      <div className="relative z-10 flex flex-col items-center gap-1.5 pointer-events-none">
+                        <div className="w-12 h-12 rounded-full bg-emerald-500/30 border border-emerald-400/60 backdrop-blur-xs flex items-center justify-center group-hover:scale-110 group-hover:bg-emerald-500 transition-all text-emerald-300 group-hover:text-black shadow-lg">
                           {isAudioOnly ? <Mic className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 ml-0.5 fill-current" />}
                         </div>
-                        <span className="text-[10px] font-mono text-slate-400 font-bold">
+                        <span className="text-[10px] font-mono text-slate-200 font-bold drop-shadow">
                           {isAudioOnly ? "Play Voice Audio" : "Watch POV VOD"}
                         </span>
                       </div>

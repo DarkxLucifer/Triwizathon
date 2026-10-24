@@ -410,11 +410,11 @@ export function PlayerDashboardView({
 
 
 
-      role: 'Assaulter',
+      role: 'AWPer',
 
 
 
-      secondaryRole: 'IGL',
+      secondaryRole: 'Lurker',
 
 
 
@@ -426,11 +426,11 @@ export function PlayerDashboardView({
 
 
 
-      cohort: 'BGIS Tier 1 Contender',
+      cohort: 'PandaScore Tier 1 Contender',
 
 
 
-      topStrength: 'Close-Range Spray Transfer (91st %ile)',
+      topStrength: 'First Blood Pick & Multi-Kill Rounds (92nd %ile)',
 
 
 
@@ -575,369 +575,96 @@ export function PlayerDashboardView({
 
 
   const initialGamesPlayed: GameProfile[] = [
-
-
-
     {
-
-
-
-      id: 'BGMI',
-
-
-
-      name: 'BGMI',
-
-
-
-      shortName: 'BGMI',
-
-
-
-      badge: 'Mobile BR',
-
-
-
-      ign: '5128940192 (Vortex)',
-
-
-
-      rank: 'Conqueror Top 100',
-
-
-
-      primaryRole: 'Assaulter',
-
-
-
-      secondaryRole: 'IGL',
-
-
-
-      tier: 'BGIS Verified',
-
-
-
-      fitScore: 88,
-
-
-
-      matchesSampled: 64,
-
-
-
-      kdOrKda: '5.82',
-
-
-
-      primaryStatLabel: 'Avg Dmg',
-
-
-
-      primaryStatValue: '842.0',
-
-
-
-      winRate: '72%',
-
-
-
-      server: 'India (20ms)',
-
-
-
-    },
-
-
-
-    {
-
-
-
-      id: 'Valorant',
-
-
-
-      name: 'Valorant',
-
-
-
-      shortName: 'VAL',
-
-
-
-      badge: 'PC FPS',
-
-
-
-      ign: 'Vortex#VAL',
-
-
-
-      rank: 'Radiant #412',
-
-
-
-      primaryRole: 'Duelist',
-
-
-
-      secondaryRole: 'Initiator',
-
-
-
-      tier: 'Tier 1 VCT',
-
-
-
-      fitScore: 84,
-
-
-
-      matchesSampled: 52,
-
-
-
-      kdOrKda: '1.34',
-
-
-
-      primaryStatLabel: 'ACS',
-
-
-
-      primaryStatValue: '284.5',
-
-
-
-      winRate: '68%',
-
-
-
-      server: 'Mumbai (18ms)',
-
-
-
-    },
-
-
-
-    {
-
-
-
       id: 'CS2',
-
-
-
       name: 'CS2',
-
-
-
       shortName: 'CS2',
-
-
-
       badge: 'PC Tactical',
-
-
-
       ign: 'Vortex_CS',
-
-
-
       rank: 'FACEIT Level 10',
-
-
-
       primaryRole: 'AWPer',
-
-
-
       secondaryRole: 'Lurker',
-
-
-
-      tier: 'Semi-Pro Cohort',
-
-
-
-      fitScore: 76,
-
-
-
-      matchesSampled: 45,
-
-
-
-      kdOrKda: '1.35',
-
-
-
+      tier: 'PandaScore Pro Verified',
+      fitScore: 92,
+      matchesSampled: 74,
+      kdOrKda: '1.42',
       primaryStatLabel: 'ADR',
-
-
-
-      primaryStatValue: '87.4',
-
-
-
-      winRate: '62%',
-
-
-
+      primaryStatValue: '91.8',
+      winRate: '68%',
       server: 'Mumbai (15ms)',
-
-
-
     },
-
-
-
     {
-
-
-
+      id: 'Valorant',
+      name: 'Valorant',
+      shortName: 'VAL',
+      badge: 'PC FPS',
+      ign: 'Vortex#VAL',
+      rank: 'Radiant #412',
+      primaryRole: 'Duelist',
+      secondaryRole: 'Initiator',
+      tier: 'Tier 1 VCT',
+      fitScore: 84,
+      matchesSampled: 52,
+      kdOrKda: '1.34',
+      primaryStatLabel: 'ACS',
+      primaryStatValue: '284.5',
+      winRate: '68%',
+      server: 'Mumbai (18ms)',
+    },
+    {
       id: 'Free Fire',
-
-
-
       name: 'Free Fire',
-
-
-
       shortName: 'FF',
-
-
-
       badge: 'Mobile BR',
-
-
-
       ign: 'Vortex_FF#77',
-
-
-
       rank: 'Grandmaster V',
-
-
-
       primaryRole: 'Rusher',
-
-
-
       secondaryRole: 'Sniper',
-
-
-
       tier: 'FFWS Circuit',
-
-
-
       fitScore: 81,
-
-
-
       matchesSampled: 48,
-
-
-
       kdOrKda: '4.60',
-
-
-
       primaryStatLabel: 'HS Rate',
-
-
-
       primaryStatValue: '68.4%',
-
-
-
       winRate: '64%',
-
-
-
       server: 'India (24ms)',
-
-
-
     },
-
-
-
     {
-
-
-
       id: 'Mobile Legends',
-
-
-
       name: 'Mobile Legends',
-
-
-
       shortName: 'MLBB',
-
-
-
       badge: 'Mobile MOBA',
-
-
-
       ign: 'VortexMLBB',
-
-
-
       rank: 'Mythical Glory 1,240★',
-
-
-
       primaryRole: 'Jungler',
-
-
-
       secondaryRole: 'Assassin',
-
-
-
       tier: 'MPL Qualifier',
-
-
-
       fitScore: 86,
-
-
-
       matchesSampled: 58,
-
-
-
       kdOrKda: '8.40',
-
-
-
       primaryStatLabel: 'Gold/Min',
-
-
-
       primaryStatValue: '740 GPM',
-
-
-
       winRate: '76%',
-
-
-
       server: 'South Asia (32ms)',
-
-
-
     },
-
-
-
+    {
+      id: 'BGMI',
+      name: 'BGMI',
+      shortName: 'BGMI',
+      badge: 'Mobile BR',
+      ign: '5128940192 (Vortex)',
+      rank: 'Conqueror Top 100',
+      primaryRole: 'Assaulter',
+      secondaryRole: 'IGL',
+      tier: 'BGIS Verified',
+      fitScore: 88,
+      matchesSampled: 64,
+      kdOrKda: '5.82',
+      primaryStatLabel: 'Avg Dmg',
+      primaryStatValue: '842.0',
+      winRate: '72%',
+      server: 'India (20ms)',
+    },
   ];
 
 
@@ -2062,7 +1789,7 @@ export function PlayerDashboardView({
 
 
 
-    activeGame: 'BGMI',
+    activeGame: 'CS2',
 
 
 
@@ -3001,7 +2728,7 @@ export function PlayerDashboardView({
 
 
 
-  const gameOptions: GameType[] = ['BGMI', 'Valorant', 'CS2', 'Free Fire', 'Mobile Legends'];
+  const gameOptions: GameType[] = ['CS2', 'Valorant', 'Free Fire', 'Mobile Legends', 'BGMI'];
 
 
 
