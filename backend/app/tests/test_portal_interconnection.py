@@ -348,4 +348,61 @@ def test_extract_game_credentials_endpoint(client, player_token):
     assert "role" in data
     assert "primary_stat" in data
     assert "win_rate" in data
-    assert "source" in data
+    assert data["source"]
+    assert data["is_complete"] is True
+    assert len(data["missing_fields"]) == 0
+
+
+def test_verify_game_identifier_endpoint(client, player_token):
+    """Verifies that wrong account IDs are rejected with invalid_format, while valid IDs return verified data."""
+    headers = {"Authorization": f"Bearer {player_token}"}
+
+    # 1. Invalid CS2 Steam64 ID
+    res1 = client.get("/api/player/me/verify-identifier?game_title=CS2&identifier=12345", headers=headers)
+    assert res1.status_code == 200
+    data1 = res1.json()
+    assert data1["valid"] is False
+    assert data1["status"] == "invalid_format"
+    assert "Invalid Steam64 ID" in data1["message"]
+
+    # 2. Valid CS2 Pro ID (s1mple)
+    res2 = client.get("/api/player/me/verify-identifier?game_title=CS2&identifier=76561198034202275", headers=headers)
+    assert res2.status_code == 200
+    data2 = res2.json()
+    assert data2["valid"] is True
+    assert data2["status"] == "verified_pro"
+    assert data2["data"]["ign"] == "s1mple"
+
+    # 3. Invalid Valorant format (missing #)
+    res3 = client.get("/api/player/me/verify-identifier?game_title=Valorant&identifier=InvalidIdNoTag", headers=headers)
+    assert res3.status_code == 200
+    assert res3.json()["valid"] is False
+
+    # 4. Valid Valorant format
+    res4 = client.get("/api/player/me/verify-identifier?game_title=Valorant&identifier=TenZ%230001", headers=headers)
+    assert res4.status_code == 200
+    assert res4.json()["valid"] is True
+
+    # 5. Invalid BGMI UID (wrong length)
+    res5 = client.get("/api/player/me/verify-identifier?game_title=BGMI&identifier=999", headers=headers)
+    assert res5.status_code == 200
+    assert res5.json()["valid"] is False
+
+
+def test_extract_credentials_missing_info_flow(client, player_token):
+    """Verifies that missing info in screenshot/text flags incomplete credentials and lists missing fields."""
+    headers = {"Authorization": f"Bearer {player_token}"}
+
+    payload = {
+        "game_title": "BGMI",
+        "raw_text": "Player name is ShadowSniper, UID: 9988776655."
+    }
+
+    res = client.post("/api/player/me/extract-credentials", data=payload, headers=headers)
+    assert res.status_code == 200
+    data = res.json()
+    assert data["is_complete"] is False
+    assert "Competitive Rank" in data["missing_fields"]
+    assert "Primary Combat Metric (Avg Dmg / ADR)" in data["missing_fields"]
+    assert "Partially extracted" in data["message"]
+

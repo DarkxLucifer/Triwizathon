@@ -221,13 +221,17 @@ export const playerApi = {
       token?: string;
     } = {}
   ): Promise<{
-    ign: string;
-    game_id: string;
-    rank: string;
-    role: string;
-    tier: string;
-    primary_stat: string;
-    win_rate: string;
+    status: 'complete' | 'partial' | 'unreadable';
+    is_complete: boolean;
+    ign?: string | null;
+    game_id?: string | null;
+    rank?: string | null;
+    role?: string | null;
+    tier?: string | null;
+    primary_stat?: string | null;
+    win_rate?: string | null;
+    missing_fields?: string[];
+    message?: string;
     source: string;
   }> {
     const formData = new FormData();
@@ -240,6 +244,36 @@ export const playerApi = {
       token: options.token,
       isFormData: true,
       body: formData,
+    });
+  },
+
+  async verifyIdentifier(
+    gameTitle: string,
+    identifier: string,
+    token?: string
+  ): Promise<{
+    valid: boolean;
+    status: string;
+    message: string;
+    data?: {
+      ign?: string;
+      game_id?: string;
+      rank?: string;
+      role?: string;
+      tier?: string;
+      primary_stat?: string;
+      win_rate?: string;
+      kd?: string;
+      rating?: string;
+    } | null;
+  }> {
+    const params = new URLSearchParams({
+      game_title: gameTitle,
+      identifier: identifier.trim(),
+    });
+    return apiFetch(`/player/me/verify-identifier?${params.toString()}`, {
+      method: 'GET',
+      token,
     });
   },
 };

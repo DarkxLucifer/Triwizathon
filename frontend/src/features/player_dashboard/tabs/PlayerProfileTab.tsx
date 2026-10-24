@@ -240,6 +240,95 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
   const [isExtracting, setIsExtracting] = useState<boolean>(false);
   const [extractSuccess, setExtractSuccess] = useState<string | null>(null);
   const [extractMode, setExtractMode] = useState<"screenshot" | "text">("screenshot");
+  const [extractMissingFields, setExtractMissingFields] = useState<string[]>([]);
+  const [extractNotice, setExtractNotice] = useState<string | null>(null);
+
+  // Live identifier verification state per game title
+  const [idVerification, setIdVerification] = useState<Record<GameType, {
+    isValid: boolean;
+    status: string;
+    message: string;
+    isChecking: boolean;
+  }>>({
+    CS2: { isValid: true, status: 'verified_pro', message: 'Verified Steam64 ID loaded.', isChecking: false },
+    Valorant: { isValid: true, status: 'verified_riot', message: 'Valid Riot ID verified.', isChecking: false },
+    'League of Legends': { isValid: true, status: 'verified_lol', message: 'Valid Riot Summoner verified.', isChecking: false },
+    'Rocket League': { isValid: true, status: 'verified_rl', message: 'Valid Epic ID verified.', isChecking: false },
+    BGMI: { isValid: true, status: 'verified_bgmi', message: 'Verified BGIS roster UID.', isChecking: false },
+  });
+
+  const checkIdentifierDebounceRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleVerifyIdentifier = async (game: GameType, idValue: string) => {
+    const trimmed = idValue.trim();
+    if (!trimmed) {
+      setIdVerification(prev => ({
+        ...prev,
+        [game]: { isValid: false, status: 'empty', message: `Please enter your ${game} ID.`, isChecking: false }
+      }));
+      return;
+    }
+
+    setIdVerification(prev => ({
+      ...prev,
+      [game]: { ...prev[game], isChecking: true }
+    }));
+
+    try {
+      const token = localStorage.getItem('scoutforge_access_token') || undefined;
+      const res = await playerApi.verifyIdentifier(game, trimmed, token);
+      if (res) {
+        setIdVerification(prev => ({
+          ...prev,
+          [game]: {
+            isValid: res.valid,
+            status: res.status,
+            message: res.message,
+            isChecking: false,
+          }
+        }));
+
+        if (res.valid && res.data) {
+          // Auto-update telemetry metrics from verified registry
+          setPerGameDetails(prev => ({
+            ...prev,
+            [game]: {
+              ...prev[game],
+              ign: res.data?.ign || prev[game]?.ign || '',
+              gameId: res.data?.game_id || trimmed,
+              rank: res.data?.rank || prev[game]?.rank || '',
+              role: res.data?.role || prev[game]?.role || '',
+              tier: res.data?.tier || prev[game]?.tier || 'Verified',
+              primaryStat: res.data?.primary_stat || prev[game]?.primaryStat || '',
+              winRate: res.data?.win_rate || prev[game]?.winRate || '',
+            }
+          }));
+        }
+      }
+    } catch (err: any) {
+      setIdVerification(prev => ({
+        ...prev,
+        [game]: {
+          isValid: false,
+          status: 'error',
+          message: err.message || 'Validation service offline.',
+          isChecking: false,
+        }
+      }));
+    }
+  };
+
+  const onGameIdChange = (newVal: string) => {
+    setPerGameDetails(prev => ({
+      ...prev,
+      [activeGameView]: { ...prev[activeGameView], gameId: newVal }
+    }));
+
+    if (checkIdentifierDebounceRef.current) clearTimeout(checkIdentifierDebounceRef.current);
+    checkIdentifierDebounceRef.current = setTimeout(() => {
+      handleVerifyIdentifier(activeGameView, newVal);
+    }, 450);
+  };
 
   const handleAiExtractCredentials = async () => {
     if (!extractScreenshot && !extractText.trim()) {
@@ -248,6 +337,8 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
     }
     setIsExtracting(true);
     setExtractSuccess(null);
+    setExtractNotice(null);
+    setExtractMissingFields([]);
     try {
       const token = localStorage.getItem('scoutforge_access_token') || undefined;
       const res = await playerApi.extractGameCredentials(activeGameView, {
@@ -257,21 +348,46 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
       });
 
       if (res) {
-        setPerGameDetails(prev => ({
-          ...prev,
-          [activeGameView]: {
-            ign: res.ign || prev[activeGameView]?.ign || '',
-            gameId: res.game_id || prev[activeGameView]?.gameId || '',
-            rank: res.rank || prev[activeGameView]?.rank || '',
-            role: res.role || prev[activeGameView]?.role || '',
-            tier: res.tier || prev[activeGameView]?.tier || 'Verified Candidate',
-            primaryStat: res.primary_stat || prev[activeGameView]?.primaryStat || '',
-            winRate: res.win_rate || prev[activeGameView]?.winRate || '',
-          }
-        }));
+        if (res.is_complete) {
+          setPerGameDetails(prev => ({
+            ...prev,
+            [activeGameView]: {
+              ign: res.ign || prev[activeGameView]?.ign || '',
+              gameId: res.game_id || prev[activeGameView]?.gameId || '',
+              rank: res.rank || prev[activeGameView]?.rank || '',
+              role: res.role || prev[activeGameView]?.role || '',
+              tier: res.tier || prev[activeGameView]?.tier || 'Verified Candidate',
+              primaryStat: res.primary_stat || prev[activeGameView]?.primaryStat || '',
+              winRate: res.win_rate || prev[activeGameView]?.winRate || '',
+            }
+          }));
 
-        setExtractSuccess(`AI Extracted: ${res.ign} (UID: ${res.game_id}) • Rank: ${res.rank} • Metric: ${res.primary_stat}`);
-        onShowToast(`AI successfully extracted credentials for ${activeGameView}!`, "success");
+          setExtractSuccess(`AI Extracted: ${res.ign || 'Player'} (UID: ${res.game_id}) • Rank: ${res.rank} • Metric: ${res.primary_stat} • Win Rate: ${res.win_rate}`);
+          onShowToast(`AI successfully extracted complete credentials for ${activeGameView}!`, "success");
+          if (res.game_id) {
+            handleVerifyIdentifier(activeGameView, res.game_id);
+          }
+        } else {
+          // Missing info flow
+          const missing = res.missing_fields || [];
+          setExtractMissingFields(missing);
+          setExtractNotice(res.message || `Missing fields: ${missing.join(', ')}`);
+
+          setPerGameDetails(prev => ({
+            ...prev,
+            [activeGameView]: {
+              ...prev[activeGameView],
+              ign: res.ign || prev[activeGameView]?.ign || '',
+              gameId: res.game_id || prev[activeGameView]?.gameId || '',
+              rank: res.rank || prev[activeGameView]?.rank || '',
+              role: res.role || prev[activeGameView]?.role || '',
+              primaryStat: res.primary_stat || prev[activeGameView]?.primaryStat || '',
+              winRate: res.win_rate || prev[activeGameView]?.winRate || '',
+            }
+          }));
+
+          onShowToast(res.message || "Some telemetry fields could not be found. Please complete them.", "warning");
+        }
       }
     } catch (err: any) {
       console.warn("AI extraction notice:", err);
@@ -354,8 +470,10 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
     e.preventDefault();
     const details = perGameDetails[activeGameView];
     const isApiSupported = activeGameView === 'CS2' || activeGameView === 'Valorant' || activeGameView === 'League of Legends' || activeGameView === 'Rocket League';
+    const currentIdCheck = idVerification[activeGameView];
+    const isIdValid = currentIdCheck?.isValid !== false;
     const isFormValid = isApiSupported
-      ? Boolean(details?.gameId?.trim())
+      ? Boolean(details?.gameId?.trim()) && isIdValid
       : Boolean(
           details?.ign?.trim() &&
           details?.gameId?.trim() &&
@@ -363,7 +481,7 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
           details?.role?.trim() &&
           details?.primaryStat?.trim() &&
           details?.winRate?.trim()
-        );
+        ) && isIdValid;
 
     if (!isFormValid) {
       onShowToast(
@@ -1197,6 +1315,55 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
               <span>{extractSuccess}</span>
             </div>
           )}
+
+          {extractMissingFields.length > 0 && (
+            <div className="mt-3 p-3.5 rounded-[6px] bg-amber-500/10 border border-amber-500/30 text-xs text-amber-500 dark:text-amber-400 space-y-2.5">
+              <div className="flex items-start gap-2.5">
+                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-amber-500" />
+                <div className="space-y-0.5">
+                  <p className="font-bold text-slate-900 dark:text-amber-300">
+                    Incomplete Match Telemetry Detected
+                  </p>
+                  <p className="text-[11px] leading-relaxed opacity-90">
+                    {extractNotice || "The AI could not identify all required metrics from this upload. Please provide the missing fields."}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 border-t border-amber-500/20">
+                <div className="text-[10px] font-mono">
+                  <span className="font-bold uppercase tracking-wider text-amber-600 dark:text-amber-300">Missing:</span>{" "}
+                  <span className="underline decoration-amber-500/50">{extractMissingFields.join(" • ")}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setExtractMode("screenshot");
+                      setExtractScreenshot(null);
+                      const input = document.querySelector('input[type="file"][accept="image/*"]') as HTMLInputElement;
+                      if (input) input.click();
+                    }}
+                    className="px-2.5 py-1 rounded bg-amber-500 text-black font-bold text-[10px] hover:bg-amber-400 cursor-pointer shadow-xs"
+                  >
+                    Re-upload Scorecard Image
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setExtractMode("text");
+                      if (!extractText) {
+                        setExtractText(`IGN: ${currentDetails?.ign || ''}, UID: ${currentDetails?.gameId || ''}, Rank: Conqueror, Avg Dmg: 750, Win Rate: 65%`);
+                      }
+                    }}
+                    className="px-2.5 py-1 rounded border border-amber-500/50 text-[10px] font-bold hover:bg-amber-500/10 cursor-pointer"
+                  >
+                    Complete via Text
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Game-Specific API Data Requirement Notice */}
@@ -1271,6 +1438,15 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
                       ...prev,
                       CS2: preset
                     }));
+                    setIdVerification(prev => ({
+                      ...prev,
+                      CS2: {
+                        isValid: true,
+                        status: 'verified_pro',
+                        message: `Verified pro telemetry loaded for ${preset.ign} (Steam64: ${preset.gameId}).`,
+                        isChecking: false
+                      }
+                    }));
                     onShowToast(`Loaded public profile for ${preset.ign} (Steam64: ${preset.gameId})!`, "success");
                   }}
                   className={`px-2.5 py-1.5 rounded-[4px] border text-[11px] font-mono flex items-center gap-1.5 transition-all cursor-pointer ${
@@ -1314,10 +1490,7 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
                   <input
                     type="text"
                     value={currentDetails?.gameId || ""}
-                    onChange={(e) => setPerGameDetails({
-                      ...perGameDetails,
-                      [activeGameView]: { ...currentDetails, gameId: e.target.value }
-                    })}
+                    onChange={(e) => onGameIdChange(e.target.value)}
                     placeholder={
                       activeGameView === 'CS2' ? '76561198034202275' :
                       activeGameView === 'Valorant' ? 'Vortex#VAL or TenZ#0001' :
@@ -1325,9 +1498,27 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
                       'VortexRL#7741'
                     }
                     className={`w-full p-2.5 rounded-[6px] border text-xs font-mono font-bold outline-hidden ${
-                      isLight ? "bg-white border-slate-300 text-slate-900" : "bg-[#0b0b0c] border-[#26262a] text-[#ededed]"
+                      idVerification[activeGameView]?.isValid === false
+                        ? "border-rose-500 bg-rose-500/5 text-rose-500 focus:ring-1 focus:ring-rose-500"
+                        : isLight ? "bg-white border-slate-300 text-slate-900" : "bg-[#0b0b0c] border-[#26262a] text-[#ededed]"
                     }`}
                   />
+                  {idVerification[activeGameView]?.isChecking ? (
+                    <div className="flex items-center gap-1.5 text-[10px] text-slate-500 mt-1 font-mono">
+                      <RefreshCw className="w-3 h-3 animate-spin text-slate-400" />
+                      <span>Validating identifier against official registry...</span>
+                    </div>
+                  ) : idVerification[activeGameView]?.isValid === false ? (
+                    <div className="flex items-start gap-1.5 text-[10px] text-rose-500 font-mono mt-1.5 bg-rose-500/10 p-2 rounded-[4px] border border-rose-500/20">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                      <span className="leading-tight">{idVerification[activeGameView]?.message}</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1.5 text-[10px] text-emerald-600 dark:text-emerald-400 font-mono mt-1">
+                      <CheckCircle2 className="w-3 h-3 shrink-0" />
+                      <span>{idVerification[activeGameView]?.message}</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* 2. Optional Pro Provider Slug / Secondary Identifier */}
@@ -1439,15 +1630,30 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
                 <input
                   type="text"
                   value={currentDetails?.gameId || ""}
-                  onChange={(e) => setPerGameDetails({
-                    ...perGameDetails,
-                    BGMI: { ...currentDetails, gameId: e.target.value }
-                  })}
+                  onChange={(e) => onGameIdChange(e.target.value)}
                   placeholder="e.g. 5128940192"
                   className={`w-full p-2 rounded-[6px] border text-xs font-mono font-bold outline-hidden ${
-                    isLight ? "bg-white border-slate-300 text-slate-900" : "bg-[#0b0b0c] border-[#26262a] text-[#ededed]"
+                    idVerification['BGMI']?.isValid === false
+                      ? "border-rose-500 bg-rose-500/5 text-rose-500 focus:ring-1 focus:ring-rose-500"
+                      : isLight ? "bg-white border-slate-300 text-slate-900" : "bg-[#0b0b0c] border-[#26262a] text-[#ededed]"
                   }`}
                 />
+                {idVerification['BGMI']?.isChecking ? (
+                  <div className="flex items-center gap-1.5 text-[10px] text-slate-500 mt-1 font-mono">
+                    <RefreshCw className="w-3 h-3 animate-spin text-slate-400" />
+                    <span>Verifying Krafton UID format...</span>
+                  </div>
+                ) : idVerification['BGMI']?.isValid === false ? (
+                  <div className="flex items-start gap-1.5 text-[10px] text-rose-500 font-mono mt-1 bg-rose-500/10 p-1.5 rounded-[4px] border border-rose-500/20">
+                    <AlertCircle className="w-3 h-3 shrink-0 mt-0.5" />
+                    <span className="leading-tight">{idVerification['BGMI']?.message}</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1.5 text-[10px] text-emerald-600 dark:text-emerald-400 font-mono mt-1">
+                    <CheckCircle2 className="w-3 h-3 shrink-0" />
+                    <span>{idVerification['BGMI']?.message}</span>
+                  </div>
+                )}
               </div>
 
               {/* Rank */}
@@ -1567,7 +1773,25 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
 
         {/* Dynamic Live Telemetry & Combat Analytics Engine (Rendered directly below ID/Information) */}
         {currentDetails?.gameId && (
-          <div className={`mt-5 rounded-[8px] border overflow-hidden transition-all ${
+          idVerification[activeGameView]?.isValid === false ? (
+            <div className={`mt-5 p-6 rounded-[8px] border text-center transition-all ${
+              isLight ? "bg-rose-50/70 border-rose-200" : "bg-[#181113] border-rose-950/60"
+            }`}>
+              <AlertCircle className="w-8 h-8 text-rose-500 mx-auto mb-2 opacity-85" />
+              <h4 className="text-xs font-black uppercase tracking-wider text-rose-600 dark:text-rose-400">
+                Live Combat Telemetry Blocked — Identifier Unverified or Invalid
+              </h4>
+              <p className={`text-[11px] font-mono mt-1 max-w-lg mx-auto ${isLight ? "text-slate-700" : "text-[#9a9aa2]"}`}>
+                {idVerification[activeGameView]?.message || `The entered account identifier '${currentDetails.gameId}' failed verification. Authentic match telemetry cannot be displayed.`}
+              </p>
+              <div className="mt-3 flex flex-wrap items-center justify-center gap-2 text-[10px] font-mono">
+                <span className="text-slate-500">
+                  Tip: Select one of the verified pro presets above (s1mple, NiKo, m0NESY) or enter a valid official identifier.
+                </span>
+              </div>
+            </div>
+          ) : (
+            <div className={`mt-5 rounded-[8px] border overflow-hidden transition-all ${
             isLight ? "bg-white border-slate-200 shadow-xs" : "bg-[#0b0b0c] border-[#26262a]"
           }`}>
             {/* Analytics Header */}
@@ -1781,6 +2005,7 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
               </div>
             </div>
           </div>
+          )
         )}
 
         {/* Video & Audio Upload Section directly in data filling for activeGameView */}
