@@ -152,12 +152,22 @@ export function PlayerDirectoryView({
   };
 
   return (
-    <div className="bg-[#0b0b0c] text-[#ededed] p-6 -m-6 min-h-[calc(100vh-3.5rem)] space-y-4 font-sans text-[14px]">
+    <div
+      className={`${
+        isLight ? 'bg-[#F8FAFC] text-slate-900' : 'bg-[#0b0b0c] text-[#ededed]'
+      } p-6 -m-6 min-h-[calc(100vh-3.5rem)] space-y-4 font-sans text-[14px] transition-colors`}
+    >
       {/* Top Toolbar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#26262a]">
+      <div
+        className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b ${
+          isLight ? 'border-slate-200' : 'border-[#26262a]'
+        }`}
+      >
         <div>
-          <h1 className="text-[18px] font-bold text-[#ededed]">Player directory</h1>
-          <p className="text-[12px] text-[#9a9aa2] mt-0.5">
+          <h1 className={`text-[18px] font-bold ${isLight ? 'text-slate-900' : 'text-[#ededed]'}`}>
+            Player directory
+          </h1>
+          <p className={`text-[12px] ${isLight ? 'text-slate-500' : 'text-[#9a9aa2]'} mt-0.5`}>
             Verified players, role benchmarks, and financial metrics.
           </p>
         </div>
@@ -167,27 +177,42 @@ export function PlayerDirectoryView({
             <button
               type="button"
               onClick={() => onNavigate('comparison')}
-              className="px-3 py-1.5 rounded-[6px] text-[13px] font-medium border border-[#26262a] bg-[#131315] hover:bg-[#1a1a1d] text-[#ededed] cursor-pointer transition-colors"
+              className={`px-3 py-1.5 rounded-[6px] text-[13px] font-medium border ${
+                isLight
+                  ? 'border-slate-300 bg-white hover:bg-slate-50 text-slate-900 shadow-sm'
+                  : 'border-[#26262a] bg-[#131315] hover:bg-[#1a1a1d] text-[#ededed]'
+              } cursor-pointer transition-colors`}
             >
               Compare ({comparisonPlayerIds.length})
             </button>
           )}
 
           <div className="relative">
-            <Search className="w-4 h-4 text-[#9a9aa2] absolute left-3 top-2.5" style={{ strokeWidth: 1.5 }} />
+            <Search
+              className={`w-4 h-4 ${isLight ? 'text-slate-400' : 'text-[#9a9aa2]'} absolute left-3 top-2.5`}
+              style={{ strokeWidth: 1.5 }}
+            />
             <input
               type="text"
               placeholder="Search handle, name, team..."
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
-              className="bg-[#131315] border border-[#26262a] rounded-[6px] pl-9 pr-3 py-1 text-[13px] text-[#ededed] placeholder-[#9a9aa2] focus:outline-none w-56"
+              className={`${
+                isLight
+                  ? 'bg-white border-slate-300 text-slate-900 placeholder-slate-400 focus:border-slate-400'
+                  : 'bg-[#131315] border-[#26262a] text-[#ededed] placeholder-[#9a9aa2]'
+              } border rounded-[6px] pl-9 pr-3 py-1 text-[13px] focus:outline-none w-56`}
             />
           </div>
 
           <select
             value={selectedRole}
             onChange={e => setSelectedRole(e.target.value)}
-            className="bg-[#131315] border border-[#26262a] rounded-[6px] px-2.5 py-1 text-[13px] text-[#ededed] focus:outline-none cursor-pointer"
+            className={`${
+              isLight
+                ? 'bg-white border-slate-300 text-slate-900'
+                : 'bg-[#131315] border-[#26262a] text-[#ededed]'
+            } border rounded-[6px] px-2.5 py-1 text-[13px] focus:outline-none cursor-pointer`}
           >
             <option value="all">All roles</option>
             <option value="IGL">IGL</option>
@@ -200,7 +225,11 @@ export function PlayerDirectoryView({
           <select
             value={selectedTier}
             onChange={e => setSelectedTier(e.target.value)}
-            className="bg-[#131315] border border-[#26262a] rounded-[6px] px-2.5 py-1 text-[13px] text-[#ededed] focus:outline-none cursor-pointer"
+            className={`${
+              isLight
+                ? 'bg-white border-slate-300 text-slate-900'
+                : 'bg-[#131315] border-[#26262a] text-[#ededed]'
+            } border rounded-[6px] px-2.5 py-1 text-[13px] focus:outline-none cursor-pointer`}
           >
             <option value="all">All tiers</option>
             <option value="Tier 1">Tier 1</option>
@@ -211,17 +240,33 @@ export function PlayerDirectoryView({
       </div>
 
       {/* Sortable Table Container */}
-      <div className="border border-[#26262a] rounded-[6px] bg-[#131315] overflow-x-auto">
+      <div
+        className={`border ${
+          isLight ? 'border-slate-200 bg-white shadow-sm' : 'border-[#26262a] bg-[#131315]'
+        } rounded-[6px] overflow-x-auto`}
+      >
         <table className="w-full border-collapse text-left text-[14px]">
-          <thead className="sticky top-0 bg-[#0b0b0c] z-10 border-b border-[#26262a]">
+          <thead
+            className={`sticky top-0 ${
+              isLight
+                ? 'bg-slate-50 border-slate-200 text-slate-500'
+                : 'bg-[#0b0b0c] border-[#26262a] text-[#9a9aa2]'
+            } z-10 border-b`}
+          >
             <tr>
-              <th className="py-2.5 px-3 w-10 text-center text-[12px] font-normal text-[#9a9aa2]">
+              <th
+                className={`py-2.5 px-3 w-10 text-center text-[12px] font-normal ${
+                  isLight ? 'text-slate-500' : 'text-[#9a9aa2]'
+                }`}
+              >
                 <span className="sr-only">Compare</span>
               </th>
 
               <th
                 onClick={() => handleSort('player')}
-                className="py-2.5 px-3 text-[12px] font-normal text-[#9a9aa2] cursor-pointer select-none group"
+                className={`py-2.5 px-3 text-[12px] font-normal ${
+                  isLight ? 'text-slate-500' : 'text-[#9a9aa2]'
+                } cursor-pointer select-none group`}
               >
                 <div className="flex items-center gap-1.5">
                   <span>Player</span>
@@ -231,7 +276,9 @@ export function PlayerDirectoryView({
 
               <th
                 onClick={() => handleSort('role')}
-                className="py-2.5 px-3 text-[12px] font-normal text-[#9a9aa2] cursor-pointer select-none group"
+                className={`py-2.5 px-3 text-[12px] font-normal ${
+                  isLight ? 'text-slate-500' : 'text-[#9a9aa2]'
+                } cursor-pointer select-none group`}
               >
                 <div className="flex items-center gap-1.5">
                   <span>Role</span>
@@ -241,7 +288,9 @@ export function PlayerDirectoryView({
 
               <th
                 onClick={() => handleSort('tier')}
-                className="py-2.5 px-3 text-[12px] font-normal text-[#9a9aa2] cursor-pointer select-none group"
+                className={`py-2.5 px-3 text-[12px] font-normal ${
+                  isLight ? 'text-slate-500' : 'text-[#9a9aa2]'
+                } cursor-pointer select-none group`}
               >
                 <div className="flex items-center gap-1.5">
                   <span>Tier</span>
@@ -251,7 +300,9 @@ export function PlayerDirectoryView({
 
               <th
                 onClick={() => handleSort('gemScore')}
-                className="py-2.5 px-3 text-right text-[12px] font-normal text-[#9a9aa2] cursor-pointer select-none group"
+                className={`py-2.5 px-3 text-right text-[12px] font-normal ${
+                  isLight ? 'text-slate-500' : 'text-[#9a9aa2]'
+                } cursor-pointer select-none group`}
               >
                 <div className="flex items-center justify-end gap-1.5">
                   <span>Gem score</span>
@@ -261,7 +312,9 @@ export function PlayerDirectoryView({
 
               <th
                 onClick={() => handleSort('adr')}
-                className="py-2.5 px-3 text-right text-[12px] font-normal text-[#9a9aa2] cursor-pointer select-none group"
+                className={`py-2.5 px-3 text-right text-[12px] font-normal ${
+                  isLight ? 'text-slate-500' : 'text-[#9a9aa2]'
+                } cursor-pointer select-none group`}
               >
                 <div className="flex items-center justify-end gap-1.5">
                   <span>ADR</span>
@@ -271,7 +324,9 @@ export function PlayerDirectoryView({
 
               <th
                 onClick={() => handleSort('visibilityGap')}
-                className="py-2.5 px-3 text-right text-[12px] font-normal text-[#9a9aa2] cursor-pointer select-none group"
+                className={`py-2.5 px-3 text-right text-[12px] font-normal ${
+                  isLight ? 'text-slate-500' : 'text-[#9a9aa2]'
+                } cursor-pointer select-none group`}
               >
                 <div className="flex items-center justify-end gap-1.5">
                   <span>Visibility gap</span>
@@ -281,7 +336,9 @@ export function PlayerDirectoryView({
 
               <th
                 onClick={() => handleSort('matches')}
-                className="py-2.5 px-3 text-right text-[12px] font-normal text-[#9a9aa2] cursor-pointer select-none group"
+                className={`py-2.5 px-3 text-right text-[12px] font-normal ${
+                  isLight ? 'text-slate-500' : 'text-[#9a9aa2]'
+                } cursor-pointer select-none group`}
               >
                 <div className="flex items-center justify-end gap-1.5">
                   <span>Matches</span>
@@ -291,7 +348,9 @@ export function PlayerDirectoryView({
 
               <th
                 onClick={() => handleSort('trajectory')}
-                className="py-2.5 px-3 text-right text-[12px] font-normal text-[#9a9aa2] cursor-pointer select-none group"
+                className={`py-2.5 px-3 text-right text-[12px] font-normal ${
+                  isLight ? 'text-slate-500' : 'text-[#9a9aa2]'
+                } cursor-pointer select-none group`}
               >
                 <div className="flex items-center justify-end gap-1.5">
                   <span>Trajectory</span>
@@ -301,7 +360,9 @@ export function PlayerDirectoryView({
 
               <th
                 onClick={() => handleSort('buyout')}
-                className="py-2.5 px-3 text-right text-[12px] font-normal text-[#9a9aa2] cursor-pointer select-none group"
+                className={`py-2.5 px-3 text-right text-[12px] font-normal ${
+                  isLight ? 'text-slate-500' : 'text-[#9a9aa2]'
+                } cursor-pointer select-none group`}
               >
                 <div className="flex items-center justify-end gap-1.5">
                   <span>Est. buyout</span>
@@ -309,7 +370,11 @@ export function PlayerDirectoryView({
                 </div>
               </th>
 
-              <th className="py-2.5 px-3 text-right text-[12px] font-normal text-[#9a9aa2]">
+              <th
+                className={`py-2.5 px-3 text-right text-[12px] font-normal ${
+                  isLight ? 'text-slate-500' : 'text-[#9a9aa2]'
+                }`}
+              >
                 Actions
               </th>
             </tr>
@@ -318,7 +383,12 @@ export function PlayerDirectoryView({
           <tbody>
             {sorted.length === 0 ? (
               <tr>
-                <td colSpan={11} className="py-8 text-center text-[#9a9aa2] text-[13px]">
+                <td
+                  colSpan={11}
+                  className={`py-8 text-center ${
+                    isLight ? 'text-slate-500' : 'text-[#9a9aa2]'
+                  } text-[13px]`}
+                >
                   No players match current criteria.
                 </td>
               </tr>
@@ -329,9 +399,15 @@ export function PlayerDirectoryView({
                 return (
                   <tr
                     key={player.id}
-                    className={`border-b border-[#26262a] transition-colors duration-[120ms] hover:bg-[#131315] ${
+                    className={`border-b ${
+                      isLight
+                        ? 'border-slate-100 hover:bg-slate-50'
+                        : 'border-[#26262a] hover:bg-[#131315]'
+                    } transition-colors duration-[120ms] ${
                       isSelected
-                        ? 'border-l-2 border-l-[#e8ff59] bg-[#131315]'
+                        ? isLight
+                          ? 'border-l-2 border-l-slate-900 bg-slate-50/80 font-medium'
+                          : 'border-l-2 border-l-[#e8ff59] bg-[#131315]'
                         : 'border-l-2 border-l-transparent'
                     }`}
                   >
@@ -341,70 +417,116 @@ export function PlayerDirectoryView({
                         type="checkbox"
                         checked={isSelected}
                         onChange={() => onToggleCompare(player.id)}
-                        className="w-4 h-4 rounded-[3px] border border-[#26262a] bg-[#131315] accent-[#e8ff59] cursor-pointer"
+                        className={`w-4 h-4 rounded-[3px] border ${
+                          isLight
+                            ? 'border-slate-300 bg-white accent-slate-900'
+                            : 'border-[#26262a] bg-[#131315] accent-[#e8ff59]'
+                        } cursor-pointer`}
                         aria-label={`Compare ${player.handle}`}
                       />
                     </td>
 
-                    {/* Player: handle bold, real name + team + region in muted text below */}
+                    {/* Player */}
                     <td className="py-3 px-3">
-                      <div className="font-bold text-[#ededed]">
+                      <div
+                        className={`font-bold ${
+                          isLight ? 'text-slate-900' : 'text-[#ededed]'
+                        }`}
+                      >
                         {formatPlayerName(player.handle)}
                       </div>
-                      <div className="text-[12px] text-[#9a9aa2] mt-0.5">
+                      <div
+                        className={`text-[12px] ${
+                          isLight ? 'text-slate-500' : 'text-[#9a9aa2]'
+                        } mt-0.5`}
+                      >
                         {player.realName} · {player.currentTeamName} · {player.region}
                       </div>
                     </td>
 
-                    {/* Role: plain muted text */}
-                    <td className="py-3 px-3 text-[#9a9aa2]">
+                    {/* Role */}
+                    <td
+                      className={`py-3 px-3 ${
+                        isLight ? 'text-slate-600' : 'text-[#9a9aa2]'
+                      }`}
+                    >
                       {player.primaryRole}
                     </td>
 
-                    {/* Tier: plain muted text */}
-                    <td className="py-3 px-3 text-[#9a9aa2]">
+                    {/* Tier */}
+                    <td
+                      className={`py-3 px-3 ${
+                        isLight ? 'text-slate-600' : 'text-[#9a9aa2]'
+                      }`}
+                    >
                       {player.tier}
                     </td>
 
-                    {/* Gem Score: right-aligned, font-mono tabular-nums, --accent color */}
-                    <td className="py-3 px-3 text-right font-mono tabular-nums font-semibold text-[#e8ff59]">
+                    {/* Gem Score */}
+                    <td
+                      className={`py-3 px-3 text-right font-mono tabular-nums font-semibold ${
+                        isLight ? 'text-emerald-600' : 'text-[#e8ff59]'
+                      }`}
+                    >
                       {gemScore}
                     </td>
 
-                    {/* ADR: right-aligned, font-mono tabular-nums */}
-                    <td className="py-3 px-3 text-right font-mono tabular-nums text-[#ededed]">
+                    {/* ADR */}
+                    <td
+                      className={`py-3 px-3 text-right font-mono tabular-nums ${
+                        isLight ? 'text-slate-800' : 'text-[#ededed]'
+                      }`}
+                    >
                       {player.stats.adr.toFixed(1)}
                     </td>
 
-                    {/* Visibility Gap: right-aligned, font-mono tabular-nums */}
-                    <td className="py-3 px-3 text-right font-mono tabular-nums text-[#ededed]">
+                    {/* Visibility Gap */}
+                    <td
+                      className={`py-3 px-3 text-right font-mono tabular-nums ${
+                        isLight ? 'text-slate-800' : 'text-[#ededed]'
+                      }`}
+                    >
                       {(player.visibilityGap * 100).toFixed(0)}%
                     </td>
 
-                    {/* Matches: right-aligned, font-mono tabular-nums */}
-                    <td className="py-3 px-3 text-right font-mono tabular-nums text-[#ededed]">
+                    {/* Matches */}
+                    <td
+                      className={`py-3 px-3 text-right font-mono tabular-nums ${
+                        isLight ? 'text-slate-800' : 'text-[#ededed]'
+                      }`}
+                    >
                       {player.matchesPlayed}
                     </td>
 
-                    {/* Trajectory: right-aligned, font-mono tabular-nums, --up / --down */}
+                    {/* Trajectory */}
                     <td
                       className={`py-3 px-3 text-right font-mono tabular-nums ${
-                        player.improvementTrend >= 0 ? 'text-[#4ade80]' : 'text-[#f87171]'
+                        player.improvementTrend >= 0
+                          ? isLight
+                            ? 'text-emerald-600'
+                            : 'text-[#4ade80]'
+                          : 'text-red-500'
                       }`}
                     >
                       {player.improvementTrend >= 0 ? '+' : ''}
                       {(player.improvementTrend * 100).toFixed(0)}%
                     </td>
 
-                    {/* Est. Buyout: right-aligned, font-mono tabular-nums, normal text color, thin 3px bar */}
-                    <td className="py-3 px-3 text-right font-mono tabular-nums text-[#ededed]">
+                    {/* Est. Buyout */}
+                    <td
+                      className={`py-3 px-3 text-right font-mono tabular-nums ${
+                        isLight ? 'text-slate-900' : 'text-[#ededed]'
+                      }`}
+                    >
                       <div>${player.buyoutUsd.toLocaleString()}</div>
                       <div
                         title="Reliability metric"
-                        className="w-12 h-[3px] bg-[#26262a] rounded-full overflow-hidden ml-auto mt-1"
+                        className={`w-12 h-[3px] ${
+                          isLight ? 'bg-slate-200' : 'bg-[#26262a]'
+                        } rounded-full overflow-hidden ml-auto mt-1`}
                       >
                         <div
-                          className="h-full bg-[#9a9aa2]"
+                          className={`h-full ${isLight ? 'bg-slate-400' : 'bg-[#9a9aa2]'}`}
                           style={{
                             width: `${Math.min(92, Math.max(30, confidence.score))}%`,
                           }}
@@ -412,12 +534,16 @@ export function PlayerDirectoryView({
                       </div>
                     </td>
 
-                    {/* Actions: plain text link "Details" */}
+                    {/* Actions */}
                     <td className="py-3 px-3 text-right">
                       <button
                         type="button"
                         onClick={() => onNavigate('recommendations')}
-                        className="text-[13px] text-[#9a9aa2] hover:text-[#ededed] hover:underline cursor-pointer bg-transparent border-0 p-0"
+                        className={`text-[13px] ${
+                          isLight
+                            ? 'text-slate-500 hover:text-slate-900'
+                            : 'text-[#9a9aa2] hover:text-[#ededed]'
+                        } hover:underline cursor-pointer bg-transparent border-0 p-0`}
                       >
                         Details
                       </button>

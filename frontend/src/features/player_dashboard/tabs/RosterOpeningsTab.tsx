@@ -80,6 +80,7 @@ interface RosterOpeningsTabProps {
   onPostGameplay: (newPost: Omit<GameplayPost, "id" | "postedAgo" | "likesCount" | "viewsCount">) => void;
   onShowToast: (message: string, type?: "success" | "info" | "warning") => void;
   theme?: 'dark' | 'light';
+  initialSubTab?: 'org-roles' | 'player-gameplays' | 'my-applications';
 }
 
 const gameIcons: Record<GameType, React.ReactNode> = {
@@ -153,9 +154,16 @@ export const RosterOpeningsTab: React.FC<RosterOpeningsTabProps> = ({
   onPostGameplay,
   onShowToast,
   theme = 'dark',
+  initialSubTab,
 }) => {
   const isLight = theme === 'light';
-  const [activeSubTab, setActiveSubTab] = useState<"org-roles" | "player-gameplays" | "my-applications">("org-roles");
+  const [activeSubTab, setActiveSubTab] = useState<"org-roles" | "player-gameplays" | "my-applications">(initialSubTab || "org-roles");
+
+  React.useEffect(() => {
+    if (initialSubTab) {
+      setActiveSubTab(initialSubTab);
+    }
+  }, [initialSubTab]);
   const [selectedGameFilter, setSelectedGameFilter] = useState<string>("All");
   const [selectedSkillFilter, setSelectedSkillFilter] = useState<SkillCategory>("All");
   const [searchQuery, setSearchQuery] = useState("");

@@ -161,6 +161,7 @@ import {
 
 
   Search,
+  CheckCircle2,
 
 
 
@@ -3083,7 +3084,7 @@ export function PlayerDashboardView({
 
 
 
-    { id: 'openings', label: 'Roster Openings & Applications', icon: <Briefcase className="w-4 h-4" /> },
+    { id: 'applied', label: 'Applied Applications', icon: <CheckCircle2 className="w-4 h-4" /> },
 
 
 
@@ -3676,55 +3677,32 @@ export function PlayerDashboardView({
 
 
         {activeTab === 'openings' && (
-
-
-
           <RosterOpeningsTab
-
-
-
             player={player}
-
-
-
             openings={openings}
-
-
-
             applications={applications}
-
-
-
             gameplayPosts={gameplayPosts}
-
-
-
             onApply={handleApplyToOpening}
-
-
-
             onPostGameplay={handlePostGameplay}
-
-
-
             onShowToast={addToast}
-
-
-
             theme={theme}
-
-
+            initialSubTab="org-roles"
           />
-
-
-
         )}
 
-
-
-
-
-
+        {activeTab === 'applied' && (
+          <RosterOpeningsTab
+            player={player}
+            openings={openings}
+            applications={applications}
+            gameplayPosts={gameplayPosts}
+            onApply={handleApplyToOpening}
+            onPostGameplay={handlePostGameplay}
+            onShowToast={addToast}
+            theme={theme}
+            initialSubTab="my-applications"
+          />
+        )}
 
         {activeTab === 'benchmark' && (
 
@@ -3797,6 +3775,9 @@ export function PlayerDashboardView({
             theme={theme}
 
             onUpdatePlayer={handleUpdateAvailability}
+            applications={applications}
+            onViewApplications={() => setActiveTab('applied')}
+            onViewOpenings={() => setActiveTab('openings')}
 
           />
 

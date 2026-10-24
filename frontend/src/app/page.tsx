@@ -138,7 +138,7 @@ export default function ScoutForgeApp() {
 
   useEffect(() => {
 
-    if (authRole === 'organiser' && (activeNav === 'player_portal' || activeNav === 'dossier')) {
+    if (authRole === 'organiser' && (activeNav === 'player_portal' || activeNav === 'dossier' || activeNav === 'openings')) {
 
       setActiveNav('leaderboards');
 
@@ -533,7 +533,7 @@ export default function ScoutForgeApp() {
 
             {/* 7. Player Portal / Gamer Dashboard View */}
 
-            {(activeNav === 'player_portal' || activeNav === 'dossier') && (
+            {(activeNav === 'player_portal' || activeNav === 'dossier' || activeNav === 'openings') && (
 
               <PlayerDashboardView
 
@@ -541,7 +541,7 @@ export default function ScoutForgeApp() {
 
                 players={store.players}
 
-                initialTab={activeNav === 'dossier' ? 'profile' : 'overview'}
+                initialTab={activeNav === 'dossier' ? 'profile' : activeNav === 'openings' ? 'openings' : 'overview'}
 
                 onToggleCompare={store.toggleComparisonPlayer}
 

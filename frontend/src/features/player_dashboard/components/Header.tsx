@@ -32,6 +32,7 @@ interface HeaderProps {
 const tabLabels: Record<TabType, string> = {
   overview: "Overview",
   openings: "Roster Openings & Trials",
+  applied: "Applied Applications",
   players: "Player Directory",
   benchmark: "Role Benchmark",
   evidence: "Evidence & Audio",

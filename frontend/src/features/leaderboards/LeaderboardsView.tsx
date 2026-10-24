@@ -800,17 +800,29 @@ export function LeaderboardsView({ onNavigate, theme = 'dark' }: LeaderboardsVie
   }, [sortedPlayers, selectedPlayerId]);
 
   return (
-    <div className="bg-[#0b0b0c] text-[#ededed] p-6 -m-6 min-h-[calc(100vh-3.5rem)] space-y-4 font-sans text-[14px]">
+    <div
+      className={`${
+        isLight ? 'bg-[#F8FAFC] text-slate-900' : 'bg-[#0b0b0c] text-[#ededed]'
+      } p-6 -m-6 min-h-[calc(100vh-3.5rem)] space-y-4 font-sans text-[14px] transition-colors`}
+    >
       {/* Title */}
       <div className="pb-2">
-        <h1 className="text-[18px] font-bold text-[#ededed]">Leaderboards</h1>
-        <p className="text-[12px] text-[#9a9aa2] mt-0.5">
+        <h1 className={`text-[18px] font-bold ${isLight ? 'text-slate-900' : 'text-[#ededed]'}`}>
+          Leaderboards
+        </h1>
+        <p className={`text-[12px] ${isLight ? 'text-slate-500' : 'text-[#9a9aa2]'} mt-0.5`}>
           Competitive performance rankings across verified rosters and titles.
         </p>
       </div>
 
-      {/* FILTER BAR (above the table, no cards, no pills, no glow, 6px radius) */}
-      <div className="border border-[#26262a] rounded-[6px] bg-[#131315] divide-y divide-[#26262a]">
+      {/* FILTER BAR */}
+      <div
+        className={`border ${
+          isLight
+            ? 'border-slate-200 bg-white shadow-sm divide-slate-100'
+            : 'border-[#26262a] bg-[#131315] divide-[#26262a]'
+        } rounded-[6px] divide-y`}
+      >
         {/* Row 1: Game segmented text control & Search Input */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-2.5">
           {/* Game Segmented Text Control: BGMI | Valorant | CS2 */}
@@ -824,7 +836,11 @@ export function LeaderboardsView({ onNavigate, theme = 'dark' }: LeaderboardsVie
                   onClick={() => handleGameChange(game)}
                   className={`text-[13px] font-medium transition-colors cursor-pointer pb-1.5 -mb-px ${
                     isSelected
-                      ? 'text-[#e8ff59] border-b-2 border-[#e8ff59]'
+                      ? isLight
+                        ? 'text-slate-900 border-b-2 border-slate-900 font-semibold'
+                        : 'text-[#e8ff59] border-b-2 border-[#e8ff59]'
+                      : isLight
+                      ? 'text-slate-500 hover:text-slate-900 border-b-2 border-transparent'
                       : 'text-[#9a9aa2] hover:text-[#ededed] border-b-2 border-transparent'
                   }`}
                 >
@@ -836,7 +852,11 @@ export function LeaderboardsView({ onNavigate, theme = 'dark' }: LeaderboardsVie
 
           {/* Search Input & Result count */}
           <div className="flex items-center gap-3">
-            <span className="text-[12px] text-[#9a9aa2] font-mono">
+            <span
+              className={`text-[12px] ${
+                isLight ? 'text-slate-500' : 'text-[#9a9aa2]'
+              } font-mono`}
+            >
               Showing {sortedPlayers.length} {sortedPlayers.length === 1 ? 'player' : 'players'}
             </span>
             <input
@@ -844,19 +864,27 @@ export function LeaderboardsView({ onNavigate, theme = 'dark' }: LeaderboardsVie
               placeholder="Search by player name..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="bg-[#0b0b0c] border border-[#26262a] rounded-[6px] px-3 py-1 text-[12px] text-[#ededed] placeholder-[#9a9aa2] focus:outline-none w-52"
+              className={`${
+                isLight
+                  ? 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400 focus:bg-white'
+                  : 'bg-[#0b0b0c] border-[#26262a] text-[#ededed] placeholder-[#9a9aa2]'
+              } border rounded-[6px] px-3 py-1 text-[12px] focus:outline-none w-52`}
             />
           </div>
         </div>
 
-        {/* Row 2: Role Plain Text Options ("All roles" + the roles for the selected game) */}
+        {/* Row 2: Role Plain Text Options */}
         <div className="flex flex-wrap items-center gap-5 px-4 py-2">
           <button
             type="button"
             onClick={() => setSelectedRole('All roles')}
             className={`text-[12px] transition-colors cursor-pointer pb-1 -mb-px ${
               selectedRole === 'All roles'
-                ? 'text-[#e8ff59] border-b-2 border-[#e8ff59] font-medium'
+                ? isLight
+                  ? 'text-slate-900 border-b-2 border-slate-900 font-semibold'
+                  : 'text-[#e8ff59] border-b-2 border-[#e8ff59] font-medium'
+                : isLight
+                ? 'text-slate-500 hover:text-slate-900 border-b-2 border-transparent'
                 : 'text-[#9a9aa2] hover:text-[#ededed] border-b-2 border-transparent'
             }`}
           >
@@ -872,7 +900,11 @@ export function LeaderboardsView({ onNavigate, theme = 'dark' }: LeaderboardsVie
                 onClick={() => setSelectedRole(roleName)}
                 className={`text-[12px] transition-colors cursor-pointer pb-1 -mb-px ${
                   isSelected
-                    ? 'text-[#e8ff59] border-b-2 border-[#e8ff59] font-medium'
+                    ? isLight
+                      ? 'text-slate-900 border-b-2 border-slate-900 font-semibold'
+                      : 'text-[#e8ff59] border-b-2 border-[#e8ff59] font-medium'
+                    : isLight
+                    ? 'text-slate-500 hover:text-slate-900 border-b-2 border-transparent'
                     : 'text-[#9a9aa2] hover:text-[#ededed] border-b-2 border-transparent'
                 }`}
               >
@@ -887,19 +919,35 @@ export function LeaderboardsView({ onNavigate, theme = 'dark' }: LeaderboardsVie
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Table Column */}
         <div className={activePlayer ? 'lg:col-span-8' : 'lg:col-span-12'}>
-          <div className="border border-[#26262a] rounded-[6px] bg-[#131315] overflow-x-auto">
+          <div
+            className={`border ${
+              isLight ? 'border-slate-200 bg-white shadow-sm' : 'border-[#26262a] bg-[#131315]'
+            } rounded-[6px] overflow-x-auto`}
+          >
             {sortedPlayers.length === 0 ? (
-              <div className="py-12 text-center text-[#9a9aa2] text-[13px]">
+              <div
+                className={`py-12 text-center ${
+                  isLight ? 'text-slate-500' : 'text-[#9a9aa2]'
+                } text-[13px]`}
+              >
                 No players for this role yet.
               </div>
             ) : (
               <table className="w-full text-left text-[14px] border-collapse">
-                <thead className="sticky top-0 bg-[#131315] z-10 border-b border-[#26262a]">
+                <thead
+                  className={`sticky top-0 ${
+                    isLight
+                      ? 'bg-slate-50 border-slate-200 text-slate-500'
+                      : 'bg-[#131315] border-[#26262a] text-[#9a9aa2]'
+                  } z-10 border-b`}
+                >
                   <tr>
                     {/* Rank */}
                     <th
                       onClick={() => handleSort('rank')}
-                      className="py-2.5 px-3 w-14 text-center text-[12px] font-normal text-[#9a9aa2] cursor-pointer select-none group"
+                      className={`py-2.5 px-3 w-14 text-center text-[12px] font-normal ${
+                        isLight ? 'text-slate-500' : 'text-[#9a9aa2]'
+                      } cursor-pointer select-none group`}
                     >
                       <div className="flex items-center justify-center gap-1">
                         <span>Rank</span>
@@ -910,7 +958,9 @@ export function LeaderboardsView({ onNavigate, theme = 'dark' }: LeaderboardsVie
                     {/* Player */}
                     <th
                       onClick={() => handleSort('handle')}
-                      className="py-2.5 px-3 text-[12px] font-normal text-[#9a9aa2] cursor-pointer select-none group"
+                      className={`py-2.5 px-3 text-[12px] font-normal ${
+                        isLight ? 'text-slate-500' : 'text-[#9a9aa2]'
+                      } cursor-pointer select-none group`}
                     >
                       <div className="flex items-center gap-1.5">
                         <span>Player</span>
@@ -921,7 +971,9 @@ export function LeaderboardsView({ onNavigate, theme = 'dark' }: LeaderboardsVie
                     {/* Role */}
                     <th
                       onClick={() => handleSort('role')}
-                      className="py-2.5 px-3 text-[12px] font-normal text-[#9a9aa2] cursor-pointer select-none group"
+                      className={`py-2.5 px-3 text-[12px] font-normal ${
+                        isLight ? 'text-slate-500' : 'text-[#9a9aa2]'
+                      } cursor-pointer select-none group`}
                     >
                       <div className="flex items-center gap-1.5">
                         <span>Role</span>
@@ -932,7 +984,9 @@ export function LeaderboardsView({ onNavigate, theme = 'dark' }: LeaderboardsVie
                     {/* Team */}
                     <th
                       onClick={() => handleSort('team')}
-                      className="py-2.5 px-3 text-[12px] font-normal text-[#9a9aa2] cursor-pointer select-none group"
+                      className={`py-2.5 px-3 text-[12px] font-normal ${
+                        isLight ? 'text-slate-500' : 'text-[#9a9aa2]'
+                      } cursor-pointer select-none group`}
                     >
                       <div className="flex items-center gap-1.5">
                         <span>Team</span>
@@ -943,7 +997,9 @@ export function LeaderboardsView({ onNavigate, theme = 'dark' }: LeaderboardsVie
                     {/* Score */}
                     <th
                       onClick={() => handleSort('score')}
-                      className="py-2.5 px-3 text-right text-[12px] font-normal text-[#9a9aa2] cursor-pointer select-none group"
+                      className={`py-2.5 px-3 text-right text-[12px] font-normal ${
+                        isLight ? 'text-slate-500' : 'text-[#9a9aa2]'
+                      } cursor-pointer select-none group`}
                     >
                       <div className="flex items-center justify-end gap-1.5">
                         <span>Score</span>
@@ -956,7 +1012,9 @@ export function LeaderboardsView({ onNavigate, theme = 'dark' }: LeaderboardsVie
                       <>
                         <th
                           onClick={() => handleSort('kd')}
-                          className="py-2.5 px-3 text-right text-[12px] font-normal text-[#9a9aa2] cursor-pointer select-none group"
+                          className={`py-2.5 px-3 text-right text-[12px] font-normal ${
+                            isLight ? 'text-slate-500' : 'text-[#9a9aa2]'
+                          } cursor-pointer select-none group`}
                         >
                           <div className="flex items-center justify-end gap-1.5">
                             <span>K/D</span>
@@ -965,7 +1023,9 @@ export function LeaderboardsView({ onNavigate, theme = 'dark' }: LeaderboardsVie
                         </th>
                         <th
                           onClick={() => handleSort('winRate')}
-                          className="py-2.5 px-3 text-right text-[12px] font-normal text-[#9a9aa2] cursor-pointer select-none group"
+                          className={`py-2.5 px-3 text-right text-[12px] font-normal ${
+                            isLight ? 'text-slate-500' : 'text-[#9a9aa2]'
+                          } cursor-pointer select-none group`}
                         >
                           <div className="flex items-center justify-end gap-1.5">
                             <span>Win rate</span>
@@ -974,7 +1034,9 @@ export function LeaderboardsView({ onNavigate, theme = 'dark' }: LeaderboardsVie
                         </th>
                         <th
                           onClick={() => handleSort('impact')}
-                          className="py-2.5 px-3 text-right text-[12px] font-normal text-[#9a9aa2] cursor-pointer select-none group"
+                          className={`py-2.5 px-3 text-right text-[12px] font-normal ${
+                            isLight ? 'text-slate-500' : 'text-[#9a9aa2]'
+                          } cursor-pointer select-none group`}
                         >
                           <div className="flex items-center justify-end gap-1.5">
                             <span>Impact</span>
@@ -983,7 +1045,9 @@ export function LeaderboardsView({ onNavigate, theme = 'dark' }: LeaderboardsVie
                         </th>
                         <th
                           onClick={() => handleSort('consistency')}
-                          className="py-2.5 px-3 text-right text-[12px] font-normal text-[#9a9aa2] cursor-pointer select-none group"
+                          className={`py-2.5 px-3 text-right text-[12px] font-normal ${
+                            isLight ? 'text-slate-500' : 'text-[#9a9aa2]'
+                          } cursor-pointer select-none group`}
                         >
                           <div className="flex items-center justify-end gap-1.5">
                             <span>Consistency</span>
@@ -997,7 +1061,9 @@ export function LeaderboardsView({ onNavigate, theme = 'dark' }: LeaderboardsVie
                       <>
                         <th
                           onClick={() => handleSort('acs')}
-                          className="py-2.5 px-3 text-right text-[12px] font-normal text-[#9a9aa2] cursor-pointer select-none group"
+                          className={`py-2.5 px-3 text-right text-[12px] font-normal ${
+                            isLight ? 'text-slate-500' : 'text-[#9a9aa2]'
+                          } cursor-pointer select-none group`}
                         >
                           <div className="flex items-center justify-end gap-1.5">
                             <span>ACS</span>
@@ -1006,7 +1072,9 @@ export function LeaderboardsView({ onNavigate, theme = 'dark' }: LeaderboardsVie
                         </th>
                         <th
                           onClick={() => handleSort('kd')}
-                          className="py-2.5 px-3 text-right text-[12px] font-normal text-[#9a9aa2] cursor-pointer select-none group"
+                          className={`py-2.5 px-3 text-right text-[12px] font-normal ${
+                            isLight ? 'text-slate-500' : 'text-[#9a9aa2]'
+                          } cursor-pointer select-none group`}
                         >
                           <div className="flex items-center justify-end gap-1.5">
                             <span>K/D</span>
@@ -1015,7 +1083,9 @@ export function LeaderboardsView({ onNavigate, theme = 'dark' }: LeaderboardsVie
                         </th>
                         <th
                           onClick={() => handleSort('winRate')}
-                          className="py-2.5 px-3 text-right text-[12px] font-normal text-[#9a9aa2] cursor-pointer select-none group"
+                          className={`py-2.5 px-3 text-right text-[12px] font-normal ${
+                            isLight ? 'text-slate-500' : 'text-[#9a9aa2]'
+                          } cursor-pointer select-none group`}
                         >
                           <div className="flex items-center justify-end gap-1.5">
                             <span>Win rate</span>
@@ -1029,7 +1099,9 @@ export function LeaderboardsView({ onNavigate, theme = 'dark' }: LeaderboardsVie
                       <>
                         <th
                           onClick={() => handleSort('adr')}
-                          className="py-2.5 px-3 text-right text-[12px] font-normal text-[#9a9aa2] cursor-pointer select-none group"
+                          className={`py-2.5 px-3 text-right text-[12px] font-normal ${
+                            isLight ? 'text-slate-500' : 'text-[#9a9aa2]'
+                          } cursor-pointer select-none group`}
                         >
                           <div className="flex items-center justify-end gap-1.5">
                             <span>ADR</span>
@@ -1038,7 +1110,9 @@ export function LeaderboardsView({ onNavigate, theme = 'dark' }: LeaderboardsVie
                         </th>
                         <th
                           onClick={() => handleSort('kpr')}
-                          className="py-2.5 px-3 text-right text-[12px] font-normal text-[#9a9aa2] cursor-pointer select-none group"
+                          className={`py-2.5 px-3 text-right text-[12px] font-normal ${
+                            isLight ? 'text-slate-500' : 'text-[#9a9aa2]'
+                          } cursor-pointer select-none group`}
                         >
                           <div className="flex items-center justify-end gap-1.5">
                             <span>KPR</span>
@@ -1047,7 +1121,9 @@ export function LeaderboardsView({ onNavigate, theme = 'dark' }: LeaderboardsVie
                         </th>
                         <th
                           onClick={() => handleSort('winRate')}
-                          className="py-2.5 px-3 text-right text-[12px] font-normal text-[#9a9aa2] cursor-pointer select-none group"
+                          className={`py-2.5 px-3 text-right text-[12px] font-normal ${
+                            isLight ? 'text-slate-500' : 'text-[#9a9aa2]'
+                          } cursor-pointer select-none group`}
                         >
                           <div className="flex items-center justify-end gap-1.5">
                             <span>Win rate</span>
@@ -1063,69 +1139,120 @@ export function LeaderboardsView({ onNavigate, theme = 'dark' }: LeaderboardsVie
                   {sortedPlayers.map((player, index) => {
                     const isSelected = activePlayer?.id === player.id;
                     const initials = player.handle.slice(0, 2).toUpperCase();
-                    // Rank is recalculated within the filtered list (rank 1 = best in that role)
                     const recalculatedRank = index + 1;
 
                     return (
                       <tr
                         key={player.id}
                         onClick={() => setSelectedPlayerId(player.id)}
-                        className={`border-b border-[#26262a] transition-colors duration-[120ms] cursor-pointer hover:bg-[#1a1a1d] ${
+                        className={`border-b ${
+                          isLight
+                            ? 'border-slate-100 hover:bg-slate-50'
+                            : 'border-[#26262a] hover:bg-[#1a1a1d]'
+                        } transition-colors duration-[120ms] cursor-pointer ${
                           isSelected
-                            ? 'border-l-2 border-l-[#e8ff59] bg-[#18181b]'
+                            ? isLight
+                              ? 'border-l-2 border-l-slate-900 bg-slate-50/80 font-medium'
+                              : 'border-l-2 border-l-[#e8ff59] bg-[#18181b]'
                             : 'border-l-2 border-l-transparent'
                         }`}
                       >
-                        {/* Recalculated Rank: plain number only */}
-                        <td className="py-3 px-3 text-center font-mono tabular-nums text-[13px] text-[#9a9aa2]">
+                        {/* Recalculated Rank */}
+                        <td
+                          className={`py-3 px-3 text-center font-mono tabular-nums text-[13px] ${
+                            isLight ? 'text-slate-500' : 'text-[#9a9aa2]'
+                          }`}
+                        >
                           {recalculatedRank}
                         </td>
 
-                        {/* Player: 28px initials avatar in --surface, handle bold, real name below */}
+                        {/* Player */}
                         <td className="py-3 px-3">
                           <div className="flex items-center gap-2.5">
-                            <div className="w-7 h-7 rounded-[4px] bg-[#131315] border border-[#26262a] flex items-center justify-center text-[11px] font-mono font-bold text-[#ededed] shrink-0">
+                            <div
+                              className={`w-7 h-7 rounded-[4px] ${
+                                isLight
+                                  ? 'bg-slate-100 border-slate-200 text-slate-700'
+                                  : 'bg-[#131315] border-[#26262a] text-[#ededed]'
+                              } border flex items-center justify-center text-[11px] font-mono font-bold shrink-0`}
+                            >
                               {initials}
                             </div>
                             <div>
-                              <div className="font-bold text-[#ededed]">
+                              <div
+                                className={`font-bold ${
+                                  isLight ? 'text-slate-900' : 'text-[#ededed]'
+                                }`}
+                              >
                                 {player.handle}
                               </div>
-                              <div className="text-[12px] text-[#9a9aa2] mt-0.5">
+                              <div
+                                className={`text-[12px] ${
+                                  isLight ? 'text-slate-500' : 'text-[#9a9aa2]'
+                                } mt-0.5`}
+                              >
                                 {player.realName} · {player.country}
                               </div>
                             </div>
                           </div>
                         </td>
 
-                        {/* Role: plain muted text, NO colored pills */}
-                        <td className="py-3 px-3 text-[#9a9aa2]">
+                        {/* Role */}
+                        <td
+                          className={`py-3 px-3 ${
+                            isLight ? 'text-slate-600' : 'text-[#9a9aa2]'
+                          }`}
+                        >
                           {player.role}
                         </td>
 
-                        {/* Team: plain text */}
-                        <td className="py-3 px-3 text-[#ededed]">
+                        {/* Team */}
+                        <td
+                          className={`py-3 px-3 ${
+                            isLight ? 'text-slate-700' : 'text-[#ededed]'
+                          }`}
+                        >
                           {player.team}
                         </td>
 
-                        {/* Score: lime text only, monospace tabular-nums, no background highlighter */}
-                        <td className="py-3 px-3 text-right font-mono tabular-nums font-semibold text-[#e8ff59]">
+                        {/* Score */}
+                        <td
+                          className={`py-3 px-3 text-right font-mono tabular-nums font-semibold ${
+                            isLight ? 'text-emerald-600' : 'text-[#e8ff59]'
+                          }`}
+                        >
                           {player.score}
                         </td>
 
                         {/* Game-specific stat cells */}
                         {selectedGame === 'BGMI' && (
                           <>
-                            <td className="py-3 px-3 text-right font-mono tabular-nums text-[#ededed]">
+                            <td
+                              className={`py-3 px-3 text-right font-mono tabular-nums ${
+                                isLight ? 'text-slate-800' : 'text-[#ededed]'
+                              }`}
+                            >
                               {player.kd?.toFixed(2)}
                             </td>
-                            <td className="py-3 px-3 text-right font-mono tabular-nums text-[#ededed]">
+                            <td
+                              className={`py-3 px-3 text-right font-mono tabular-nums ${
+                                isLight ? 'text-slate-800' : 'text-[#ededed]'
+                              }`}
+                            >
                               {player.winRate}%
                             </td>
-                            <td className="py-3 px-3 text-right font-mono tabular-nums text-[#ededed]">
+                            <td
+                              className={`py-3 px-3 text-right font-mono tabular-nums ${
+                                isLight ? 'text-slate-800' : 'text-[#ededed]'
+                              }`}
+                            >
                               {player.impact}
                             </td>
-                            <td className="py-3 px-3 text-right font-mono tabular-nums text-[#ededed]">
+                            <td
+                              className={`py-3 px-3 text-right font-mono tabular-nums ${
+                                isLight ? 'text-slate-800' : 'text-[#ededed]'
+                              }`}
+                            >
                               {player.consistency}
                             </td>
                           </>
@@ -1133,13 +1260,25 @@ export function LeaderboardsView({ onNavigate, theme = 'dark' }: LeaderboardsVie
 
                         {selectedGame === 'Valorant' && (
                           <>
-                            <td className="py-3 px-3 text-right font-mono tabular-nums text-[#ededed]">
+                            <td
+                              className={`py-3 px-3 text-right font-mono tabular-nums ${
+                                isLight ? 'text-slate-800' : 'text-[#ededed]'
+                              }`}
+                            >
                               {player.acs}
                             </td>
-                            <td className="py-3 px-3 text-right font-mono tabular-nums text-[#ededed]">
+                            <td
+                              className={`py-3 px-3 text-right font-mono tabular-nums ${
+                                isLight ? 'text-slate-800' : 'text-[#ededed]'
+                              }`}
+                            >
                               {player.kd?.toFixed(2)}
                             </td>
-                            <td className="py-3 px-3 text-right font-mono tabular-nums text-[#ededed]">
+                            <td
+                              className={`py-3 px-3 text-right font-mono tabular-nums ${
+                                isLight ? 'text-slate-800' : 'text-[#ededed]'
+                              }`}
+                            >
                               {player.winRate}%
                             </td>
                           </>
@@ -1147,13 +1286,25 @@ export function LeaderboardsView({ onNavigate, theme = 'dark' }: LeaderboardsVie
 
                         {selectedGame === 'CS2' && (
                           <>
-                            <td className="py-3 px-3 text-right font-mono tabular-nums text-[#ededed]">
+                            <td
+                              className={`py-3 px-3 text-right font-mono tabular-nums ${
+                                isLight ? 'text-slate-800' : 'text-[#ededed]'
+                              }`}
+                            >
                               {player.adr?.toFixed(1)}
                             </td>
-                            <td className="py-3 px-3 text-right font-mono tabular-nums text-[#ededed]">
+                            <td
+                              className={`py-3 px-3 text-right font-mono tabular-nums ${
+                                isLight ? 'text-slate-800' : 'text-[#ededed]'
+                              }`}
+                            >
                               {player.kpr?.toFixed(2)}
                             </td>
-                            <td className="py-3 px-3 text-right font-mono tabular-nums text-[#ededed]">
+                            <td
+                              className={`py-3 px-3 text-right font-mono tabular-nums ${
+                                isLight ? 'text-slate-800' : 'text-[#ededed]'
+                              }`}
+                            >
                               {player.winRate}%
                             </td>
                           </>
@@ -1167,37 +1318,67 @@ export function LeaderboardsView({ onNavigate, theme = 'dark' }: LeaderboardsVie
           </div>
         </div>
 
-        {/* Player Detail Panel: name, team, region, plain definition list of stats, then 4-5 horizontal bars with numbers at the right end */}
+        {/* Player Detail Panel */}
         {activePlayer && (
-          <div className="lg:col-span-4 border border-[#26262a] rounded-[6px] bg-[#131315] p-4 space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-[#26262a]">
+          <div
+            className={`lg:col-span-4 border ${
+              isLight ? 'border-slate-200 bg-white shadow-sm' : 'border-[#26262a] bg-[#131315]'
+            } rounded-[6px] p-4 space-y-4`}
+          >
+            <div
+              className={`flex items-center justify-between pb-3 border-b ${
+                isLight ? 'border-slate-200' : 'border-[#26262a]'
+              }`}
+            >
               <div>
-                <h2 className="text-[16px] font-bold text-[#ededed]">
+                <h2
+                  className={`text-[16px] font-bold ${
+                    isLight ? 'text-slate-900' : 'text-[#ededed]'
+                  }`}
+                >
                   {activePlayer.handle}
                 </h2>
-                <p className="text-[12px] text-[#9a9aa2] mt-0.5">
+                <p
+                  className={`text-[12px] ${
+                    isLight ? 'text-slate-500' : 'text-[#9a9aa2]'
+                  } mt-0.5`}
+                >
                   {activePlayer.team} · {activePlayer.region} · {activePlayer.game}
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setSelectedPlayerId(null)}
-                className="text-[#9a9aa2] hover:text-[#ededed] cursor-pointer"
+                className={`${
+                  isLight ? 'text-slate-400 hover:text-slate-700' : 'text-[#9a9aa2] hover:text-[#ededed]'
+                } cursor-pointer`}
                 aria-label="Close details"
               >
                 <X className="w-4 h-4" style={{ strokeWidth: 1.5 }} />
               </button>
             </div>
 
-            {/* Plain definition list of stats (label left, value right) */}
-            <div className="space-y-2 text-[13px] border-b border-[#26262a] pb-4">
+            {/* Plain definition list of stats */}
+            <div
+              className={`space-y-2 text-[13px] border-b ${
+                isLight ? 'border-slate-100' : 'border-[#26262a]'
+              } pb-4`}
+            >
               <div className="flex justify-between items-center">
-                <span className="text-[#9a9aa2]">Role</span>
-                <span className="text-[#ededed]">{activePlayer.role}</span>
+                <span className={isLight ? 'text-slate-500' : 'text-[#9a9aa2]'}>Role</span>
+                <span className={isLight ? 'text-slate-900 font-medium' : 'text-[#ededed]'}>
+                  {activePlayer.role}
+                </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-[#9a9aa2]">Performance score</span>
-                <span className="font-mono tabular-nums font-semibold text-[#e8ff59]">
+                <span className={isLight ? 'text-slate-500' : 'text-[#9a9aa2]'}>
+                  Performance score
+                </span>
+                <span
+                  className={`font-mono tabular-nums font-semibold ${
+                    isLight ? 'text-emerald-600' : 'text-[#e8ff59]'
+                  }`}
+                >
                   {activePlayer.score}
                 </span>
               </div>
@@ -1205,26 +1386,46 @@ export function LeaderboardsView({ onNavigate, theme = 'dark' }: LeaderboardsVie
               {selectedGame === 'BGMI' && (
                 <>
                   <div className="flex justify-between items-center">
-                    <span className="text-[#9a9aa2]">K/D ratio</span>
-                    <span className="font-mono tabular-nums text-[#ededed]">
+                    <span className={isLight ? 'text-slate-500' : 'text-[#9a9aa2]'}>
+                      K/D ratio
+                    </span>
+                    <span
+                      className={`font-mono tabular-nums ${
+                        isLight ? 'text-slate-900' : 'text-[#ededed]'
+                      }`}
+                    >
                       {activePlayer.kd?.toFixed(2)}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-[#9a9aa2]">Win rate</span>
-                    <span className="font-mono tabular-nums text-[#ededed]">
+                    <span className={isLight ? 'text-slate-500' : 'text-[#9a9aa2]'}>Win rate</span>
+                    <span
+                      className={`font-mono tabular-nums ${
+                        isLight ? 'text-slate-900' : 'text-[#ededed]'
+                      }`}
+                    >
                       {activePlayer.winRate}%
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-[#9a9aa2]">Impact</span>
-                    <span className="font-mono tabular-nums text-[#ededed]">
+                    <span className={isLight ? 'text-slate-500' : 'text-[#9a9aa2]'}>Impact</span>
+                    <span
+                      className={`font-mono tabular-nums ${
+                        isLight ? 'text-slate-900' : 'text-[#ededed]'
+                      }`}
+                    >
                       {activePlayer.impact}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-[#9a9aa2]">Consistency</span>
-                    <span className="font-mono tabular-nums text-[#ededed]">
+                    <span className={isLight ? 'text-slate-500' : 'text-[#9a9aa2]'}>
+                      Consistency
+                    </span>
+                    <span
+                      className={`font-mono tabular-nums ${
+                        isLight ? 'text-slate-900' : 'text-[#ededed]'
+                      }`}
+                    >
                       {activePlayer.consistency}
                     </span>
                   </div>
@@ -1234,20 +1435,36 @@ export function LeaderboardsView({ onNavigate, theme = 'dark' }: LeaderboardsVie
               {selectedGame === 'Valorant' && (
                 <>
                   <div className="flex justify-between items-center">
-                    <span className="text-[#9a9aa2]">Average combat score (ACS)</span>
-                    <span className="font-mono tabular-nums text-[#ededed]">
+                    <span className={isLight ? 'text-slate-500' : 'text-[#9a9aa2]'}>
+                      Average combat score (ACS)
+                    </span>
+                    <span
+                      className={`font-mono tabular-nums ${
+                        isLight ? 'text-slate-900' : 'text-[#ededed]'
+                      }`}
+                    >
                       {activePlayer.acs}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-[#9a9aa2]">K/D ratio</span>
-                    <span className="font-mono tabular-nums text-[#ededed]">
+                    <span className={isLight ? 'text-slate-500' : 'text-[#9a9aa2]'}>
+                      K/D ratio
+                    </span>
+                    <span
+                      className={`font-mono tabular-nums ${
+                        isLight ? 'text-slate-900' : 'text-[#ededed]'
+                      }`}
+                    >
                       {activePlayer.kd?.toFixed(2)}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-[#9a9aa2]">Win rate</span>
-                    <span className="font-mono tabular-nums text-[#ededed]">
+                    <span className={isLight ? 'text-slate-500' : 'text-[#9a9aa2]'}>Win rate</span>
+                    <span
+                      className={`font-mono tabular-nums ${
+                        isLight ? 'text-slate-900' : 'text-[#ededed]'
+                      }`}
+                    >
                       {activePlayer.winRate}%
                     </span>
                   </div>
@@ -1257,20 +1474,36 @@ export function LeaderboardsView({ onNavigate, theme = 'dark' }: LeaderboardsVie
               {selectedGame === 'CS2' && (
                 <>
                   <div className="flex justify-between items-center">
-                    <span className="text-[#9a9aa2]">Average damage per round (ADR)</span>
-                    <span className="font-mono tabular-nums text-[#ededed]">
+                    <span className={isLight ? 'text-slate-500' : 'text-[#9a9aa2]'}>
+                      Average damage per round (ADR)
+                    </span>
+                    <span
+                      className={`font-mono tabular-nums ${
+                        isLight ? 'text-slate-900' : 'text-[#ededed]'
+                      }`}
+                    >
                       {activePlayer.adr?.toFixed(1)}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-[#9a9aa2]">Kills per round (KPR)</span>
-                    <span className="font-mono tabular-nums text-[#ededed]">
+                    <span className={isLight ? 'text-slate-500' : 'text-[#9a9aa2]'}>
+                      Kills per round (KPR)
+                    </span>
+                    <span
+                      className={`font-mono tabular-nums ${
+                        isLight ? 'text-slate-900' : 'text-[#ededed]'
+                      }`}
+                    >
                       {activePlayer.kpr?.toFixed(2)}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-[#9a9aa2]">Win rate</span>
-                    <span className="font-mono tabular-nums text-[#ededed]">
+                    <span className={isLight ? 'text-slate-500' : 'text-[#9a9aa2]'}>Win rate</span>
+                    <span
+                      className={`font-mono tabular-nums ${
+                        isLight ? 'text-slate-900' : 'text-[#ededed]'
+                      }`}
+                    >
                       {activePlayer.winRate}%
                     </span>
                   </div>
@@ -1278,20 +1511,34 @@ export function LeaderboardsView({ onNavigate, theme = 'dark' }: LeaderboardsVie
               )}
             </div>
 
-            {/* Skill breakdown: 5 horizontal bars with the number at the right end */}
+            {/* Skill breakdown */}
             <div className="space-y-2.5">
-              <h3 className="text-[12px] font-normal text-[#9a9aa2]">
+              <h3 className={`text-[12px] font-normal ${isLight ? 'text-slate-500' : 'text-[#9a9aa2]'}`}>
                 Skill breakdown
               </h3>
               {Object.entries(activePlayer.skills).map(([skill, val]) => (
                 <div key={skill} className="space-y-1">
                   <div className="flex justify-between items-center text-[12px]">
-                    <span className="text-[#9a9aa2] capitalize">{skill}</span>
-                    <span className="font-mono tabular-nums text-[#ededed] font-medium">{val}</span>
+                    <span className={`${isLight ? 'text-slate-600' : 'text-[#9a9aa2]'} capitalize`}>
+                      {skill}
+                    </span>
+                    <span
+                      className={`font-mono tabular-nums ${
+                        isLight ? 'text-slate-900 font-semibold' : 'text-[#ededed] font-medium'
+                      }`}
+                    >
+                      {val}
+                    </span>
                   </div>
-                  <div className="w-full h-1.5 bg-[#26262a] rounded-full overflow-hidden">
+                  <div
+                    className={`w-full h-1.5 ${
+                      isLight ? 'bg-slate-100' : 'bg-[#26262a]'
+                    } rounded-full overflow-hidden`}
+                  >
                     <div
-                      className="h-full bg-[#ededed] transition-all duration-300"
+                      className={`h-full ${
+                        isLight ? 'bg-slate-800' : 'bg-[#ededed]'
+                      } transition-all duration-300`}
                       style={{ width: `${val}%` }}
                     />
                   </div>
@@ -1299,14 +1546,22 @@ export function LeaderboardsView({ onNavigate, theme = 'dark' }: LeaderboardsVie
               ))}
             </div>
 
-            {/* Plain Action Link */}
-            <div className="pt-3 border-t border-[#26262a] flex justify-between items-center">
+            {/* Action Link */}
+            <div
+              className={`pt-3 border-t ${
+                isLight ? 'border-slate-100' : 'border-[#26262a]'
+              } flex justify-between items-center`}
+            >
               <button
                 type="button"
                 onClick={() => {
                   if (onNavigate) onNavigate('discover');
                 }}
-                className="text-[13px] text-[#9a9aa2] hover:text-[#ededed] hover:underline cursor-pointer bg-transparent border-0 p-0"
+                className={`text-[13px] ${
+                  isLight
+                    ? 'text-slate-500 hover:text-slate-900'
+                    : 'text-[#9a9aa2] hover:text-[#ededed]'
+                } hover:underline cursor-pointer bg-transparent border-0 p-0`}
               >
                 View full profile
               </button>

@@ -39,12 +39,15 @@ import {
   ChevronDown,
   ChevronUp
 } from "lucide-react";
-import { PlayerProfile, GameType, GameplayVideoClip, AvailabilityStatus, GameProfile } from "@/types/dashboard";
+import { PlayerProfile, GameType, GameplayVideoClip, AvailabilityStatus, GameProfile, RoleApplication } from "@/types/dashboard";
 import { VideoPlayerModal } from "../components/VideoPlayerModal";
 import { playerApi } from "@/lib/api/player";
 
 interface PlayerProfileTabProps {
   player: PlayerProfile;
+  applications?: RoleApplication[];
+  onViewApplications?: () => void;
+  onViewOpenings?: () => void;
   onEditClick: () => void;
   onSelectGame?: (game: GameType) => void;
   onShowToast: (message: string, type?: "success" | "info" | "warning") => void;
@@ -105,6 +108,9 @@ const defaultClips: GameplayVideoClip[] = [
 
 export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
   player,
+  applications,
+  onViewApplications,
+  onViewOpenings,
   onEditClick,
   onSelectGame,
   onShowToast,
@@ -1354,6 +1360,106 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Applied Applications & Roster Trials Section */}
+      <div
+        className={`rounded-[8px] border p-6 shadow-xs ${
+          isLight
+            ? "border-slate-200 bg-white"
+            : "border-[#26262a] bg-[#131315]"
+        }`}
+      >
+        <div className={`flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b gap-2 ${
+          isLight ? "border-slate-200" : "border-[#26262a]"
+        }`}>
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className={`w-4 h-4 ${isLight ? "text-slate-800" : "text-emerald-400"}`} />
+            <div>
+              <h2 className={`text-sm font-black tracking-wide ${isLight ? "text-slate-950" : "text-[#ededed]"}`}>
+                Applied Applications & Roster Trials
+              </h2>
+              <p className={`text-xs mt-0.5 ${isLight ? "text-slate-500" : "text-[#9a9aa2]"}`}>
+                Real-time tracking of active applications sent to verified esports organizations
+              </p>
+            </div>
+          </div>
+          {onViewApplications && (
+            <button
+              type="button"
+              onClick={onViewApplications}
+              className={`px-3 py-1.5 rounded-[6px] text-xs font-bold border transition-colors cursor-pointer ${
+                isLight
+                  ? "border-slate-300 bg-white hover:bg-slate-50 text-slate-800 shadow-xs"
+                  : "border-[#26262a] bg-[#1a1a1d] hover:bg-[#26262a] text-[#ededed]"
+              }`}
+            >
+              View In Applications Tab ({applications?.length || 0})
+            </button>
+          )}
+        </div>
+
+        {(!applications || applications.length === 0) ? (
+          <div className="py-8 text-center space-y-2">
+            <CheckCircle2 className={`w-8 h-8 mx-auto opacity-30 ${isLight ? "text-slate-600" : "text-[#ededed]"}`} />
+            <div className={`text-xs font-bold ${isLight ? "text-slate-700" : "text-[#ededed]"}`}>
+              No Active Applications Submitted Yet
+            </div>
+            <p className={`text-[11px] max-w-md mx-auto ${isLight ? "text-slate-500" : "text-[#9a9aa2]"}`}>
+              When you submit your dossier to active team openings, your live trial status, coach reviews, and scrim invites appear here.
+            </p>
+            {onViewOpenings && (
+              <button
+                type="button"
+                onClick={onViewOpenings}
+                className="mt-2 px-3 py-1 rounded-[6px] text-xs font-bold bg-[#bef226] text-slate-950 hover:bg-[#a6d817] transition-colors cursor-pointer"
+              >
+                Browse Open Roles
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-4">
+            {applications.map((app) => (
+              <div
+                key={app.id}
+                className={`p-3.5 rounded-[6px] border flex flex-col justify-between ${
+                  isLight ? "border-slate-200 bg-slate-50/70" : "border-[#26262a] bg-[#0b0b0c]"
+                }`}
+              >
+                <div>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[10px] font-mono font-bold text-slate-500 dark:text-[#9a9aa2] uppercase">
+                      {app.game}
+                    </span>
+                    <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ${
+                      app.status === 'Shortlisted for Trial' || app.status === 'Accepted'
+                        ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/30'
+                        : app.status === 'Under Review'
+                        ? 'bg-amber-500/10 text-amber-500 border border-amber-500/30'
+                        : 'bg-slate-500/10 text-slate-400 border border-slate-500/20'
+                    }`}>
+                      {app.status}
+                    </span>
+                  </div>
+                  <div className={`text-sm font-bold mt-1.5 ${isLight ? "text-slate-900" : "text-[#ededed]"}`}>
+                    {app.roleApplied}
+                  </div>
+                  <div className={`text-xs mt-0.5 ${isLight ? "text-slate-600" : "text-[#9a9aa2]"}`}>
+                    {app.teamName}
+                  </div>
+                </div>
+
+                <div className={`mt-3 pt-2.5 border-t flex items-center justify-between text-[11px] ${
+                  isLight ? "border-slate-200 text-slate-500" : "border-[#26262a] text-[#9a9aa2]"
+                }`}>
+                  <span className="font-mono">{app.submittedAt}</span>
+                  <span className="font-mono font-semibold">Fit: {app.fitScore}%</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Video Modal Player */}

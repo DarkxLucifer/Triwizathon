@@ -1,4 +1,4 @@
-export type TabType = "overview" | "benchmark" | "evidence" | "scouting" | "profile" | "openings" | "players";
+export type TabType = "overview" | "benchmark" | "evidence" | "scouting" | "profile" | "openings" | "players" | "applied";
 
 export type GameType = "Valorant" | "BGMI" | "Free Fire" | "Mobile Legends" | "CS2";
 

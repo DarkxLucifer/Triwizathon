@@ -132,12 +132,12 @@ export function HiddenGemsView({
   };
 
   return (
-    <div className="bg-[#0b0b0c] text-[#ededed] p-6 -m-6 min-h-[calc(100vh-3.5rem)] space-y-4 font-sans text-[14px]">
+    <div className={`p-6 -m-6 min-h-[calc(100vh-3.5rem)] space-y-4 font-sans text-[14px] ${isLight ? 'bg-[#F8FAFC] text-slate-900' : 'bg-[#0b0b0c] text-[#ededed]'}`}>
       {/* Top Toolbar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#26262a]">
+      <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b ${isLight ? 'border-slate-200' : 'border-[#26262a]'}`}>
         <div>
-          <h1 className="text-[18px] font-bold text-[#ededed] tracking-normal">Hidden gems</h1>
-          <p className="text-[12px] text-[#9a9aa2] mt-0.5">
+          <h1 className={`text-[18px] font-bold tracking-normal ${isLight ? 'text-slate-900' : 'text-[#ededed]'}`}>Hidden gems</h1>
+          <p className={`text-[12px] mt-0.5 ${isLight ? 'text-slate-500' : 'text-[#9a9aa2]'}`}>
             Under-observed players with positive trajectory and above-cohort execution.
           </p>
         </div>
@@ -147,7 +147,11 @@ export function HiddenGemsView({
             <button
               type="button"
               onClick={() => onNavigate('comparison')}
-              className="px-3 py-1.5 rounded-[6px] text-[13px] font-medium border border-[#26262a] bg-[#131315] hover:bg-[#1a1a1d] text-[#ededed] cursor-pointer transition-colors"
+              className={`px-3 py-1.5 rounded-[6px] text-[13px] font-medium border cursor-pointer transition-colors ${
+                isLight
+                  ? 'border-slate-300 bg-white hover:bg-slate-50 text-slate-900 shadow-sm'
+                  : 'border-[#26262a] bg-[#131315] hover:bg-[#1a1a1d] text-[#ededed]'
+              }`}
             >
               Compare ({comparisonPlayerIds.length})
             </button>
@@ -156,7 +160,11 @@ export function HiddenGemsView({
           <select
             value={selectedRole}
             onChange={e => setSelectedRole(e.target.value)}
-            className="bg-[#131315] border border-[#26262a] rounded-[6px] px-2.5 py-1 text-[13px] text-[#ededed] focus:outline-none cursor-pointer"
+            className={`border rounded-[6px] px-2.5 py-1 text-[13px] focus:outline-none cursor-pointer ${
+              isLight
+                ? 'bg-white border-slate-300 text-slate-900'
+                : 'bg-[#131315] border-[#26262a] text-[#ededed]'
+            }`}
           >
             <option value="all">All roles</option>
             <option value="IGL">IGL</option>
@@ -169,7 +177,11 @@ export function HiddenGemsView({
           <select
             value={selectedTier}
             onChange={e => setSelectedTier(e.target.value)}
-            className="bg-[#131315] border border-[#26262a] rounded-[6px] px-2.5 py-1 text-[13px] text-[#ededed] focus:outline-none cursor-pointer"
+            className={`border rounded-[6px] px-2.5 py-1 text-[13px] focus:outline-none cursor-pointer ${
+              isLight
+                ? 'bg-white border-slate-300 text-slate-900'
+                : 'bg-[#131315] border-[#26262a] text-[#ededed]'
+            }`}
           >
             <option value="all">All tiers</option>
             <option value="Tier 2">Tier 2</option>
@@ -180,17 +192,17 @@ export function HiddenGemsView({
       </div>
 
       {/* Sortable Table Container */}
-      <div className="border border-[#26262a] rounded-[6px] bg-[#131315] overflow-x-auto">
+      <div className={`border rounded-[6px] overflow-x-auto ${isLight ? 'border-slate-200 bg-white shadow-sm' : 'border-[#26262a] bg-[#131315]'}`}>
         <table className="w-full border-collapse text-left text-[14px]">
-          <thead className="sticky top-0 bg-[#131315] z-10 border-b border-[#26262a]">
+          <thead className={`sticky top-0 z-10 border-b ${isLight ? 'bg-slate-50/90 border-slate-200 text-slate-600' : 'bg-[#131315] border-[#26262a] text-[#9a9aa2]'}`}>
             <tr>
-              <th className="py-2.5 px-3 w-10 text-center text-[12px] font-normal text-[#9a9aa2]">
+              <th className="py-2.5 px-3 w-10 text-center text-[12px] font-normal">
                 <span className="sr-only">Compare</span>
               </th>
 
               <th
                 onClick={() => handleSort('player')}
-                className="py-2.5 px-3 text-[12px] font-normal text-[#9a9aa2] cursor-pointer select-none group"
+                className="py-2.5 px-3 text-[12px] font-normal cursor-pointer select-none group"
               >
                 <div className="flex items-center gap-1.5">
                   <span>Player</span>
@@ -200,7 +212,7 @@ export function HiddenGemsView({
 
               <th
                 onClick={() => handleSort('role')}
-                className="py-2.5 px-3 text-[12px] font-normal text-[#9a9aa2] cursor-pointer select-none group"
+                className="py-2.5 px-3 text-[12px] font-normal cursor-pointer select-none group"
               >
                 <div className="flex items-center gap-1.5">
                   <span>Role</span>
@@ -210,7 +222,7 @@ export function HiddenGemsView({
 
               <th
                 onClick={() => handleSort('tier')}
-                className="py-2.5 px-3 text-[12px] font-normal text-[#9a9aa2] cursor-pointer select-none group"
+                className="py-2.5 px-3 text-[12px] font-normal cursor-pointer select-none group"
               >
                 <div className="flex items-center gap-1.5">
                   <span>Tier</span>
@@ -220,7 +232,7 @@ export function HiddenGemsView({
 
               <th
                 onClick={() => handleSort('gemScore')}
-                className="py-2.5 px-3 text-right text-[12px] font-normal text-[#9a9aa2] cursor-pointer select-none group"
+                className="py-2.5 px-3 text-right text-[12px] font-normal cursor-pointer select-none group"
               >
                 <div className="flex items-center justify-end gap-1.5">
                   <span>Gem score</span>
@@ -230,7 +242,7 @@ export function HiddenGemsView({
 
               <th
                 onClick={() => handleSort('adr')}
-                className="py-2.5 px-3 text-right text-[12px] font-normal text-[#9a9aa2] cursor-pointer select-none group"
+                className="py-2.5 px-3 text-right text-[12px] font-normal cursor-pointer select-none group"
               >
                 <div className="flex items-center justify-end gap-1.5">
                   <span>ADR</span>
@@ -240,7 +252,7 @@ export function HiddenGemsView({
 
               <th
                 onClick={() => handleSort('visibilityGap')}
-                className="py-2.5 px-3 text-right text-[12px] font-normal text-[#9a9aa2] cursor-pointer select-none group"
+                className="py-2.5 px-3 text-right text-[12px] font-normal cursor-pointer select-none group"
               >
                 <div className="flex items-center justify-end gap-1.5">
                   <span>Visibility gap</span>
@@ -250,7 +262,7 @@ export function HiddenGemsView({
 
               <th
                 onClick={() => handleSort('matches')}
-                className="py-2.5 px-3 text-right text-[12px] font-normal text-[#9a9aa2] cursor-pointer select-none group"
+                className="py-2.5 px-3 text-right text-[12px] font-normal cursor-pointer select-none group"
               >
                 <div className="flex items-center justify-end gap-1.5">
                   <span>Matches</span>
@@ -260,7 +272,7 @@ export function HiddenGemsView({
 
               <th
                 onClick={() => handleSort('trajectory')}
-                className="py-2.5 px-3 text-right text-[12px] font-normal text-[#9a9aa2] cursor-pointer select-none group"
+                className="py-2.5 px-3 text-right text-[12px] font-normal cursor-pointer select-none group"
               >
                 <div className="flex items-center justify-end gap-1.5">
                   <span>Trajectory</span>
@@ -270,7 +282,7 @@ export function HiddenGemsView({
 
               <th
                 onClick={() => handleSort('buyout')}
-                className="py-2.5 px-3 text-right text-[12px] font-normal text-[#9a9aa2] cursor-pointer select-none group"
+                className="py-2.5 px-3 text-right text-[12px] font-normal cursor-pointer select-none group"
               >
                 <div className="flex items-center justify-end gap-1.5">
                   <span>Est. buyout</span>
@@ -278,7 +290,7 @@ export function HiddenGemsView({
                 </div>
               </th>
 
-              <th className="py-2.5 px-3 text-right text-[12px] font-normal text-[#9a9aa2]">
+              <th className="py-2.5 px-3 text-right text-[12px] font-normal">
                 Actions
               </th>
             </tr>
@@ -287,7 +299,7 @@ export function HiddenGemsView({
           <tbody>
             {sorted.length === 0 ? (
               <tr>
-                <td colSpan={11} className="py-8 text-center text-[#9a9aa2] text-[13px]">
+                <td colSpan={11} className={`py-8 text-center text-[13px] ${isLight ? 'text-slate-500' : 'text-[#9a9aa2]'}`}>
                   No candidates match the selected filters.
                 </td>
               </tr>
@@ -298,9 +310,15 @@ export function HiddenGemsView({
                 return (
                   <tr
                     key={player.id}
-                    className={`border-b border-[#26262a] transition-colors duration-[120ms] hover:bg-[#1a1a1d] ${
+                    className={`border-b transition-colors duration-[120ms] ${
+                      isLight
+                        ? 'border-slate-100 hover:bg-slate-50/80'
+                        : 'border-[#26262a] hover:bg-[#1a1a1d]'
+                    } ${
                       isSelected
-                        ? 'border-l-2 border-l-[#e8ff59] bg-[#18181b]'
+                        ? isLight
+                          ? 'border-l-2 border-l-lime-600 bg-lime-50/30'
+                          : 'border-l-2 border-l-[#e8ff59] bg-[#18181b]'
                         : 'border-l-2 border-l-transparent'
                     }`}
                   >
@@ -310,55 +328,59 @@ export function HiddenGemsView({
                         type="checkbox"
                         checked={isSelected}
                         onChange={() => onToggleCompare(player.id)}
-                        className="w-4 h-4 rounded-[3px] border border-[#26262a] bg-[#131315] accent-[#e8ff59] cursor-pointer"
+                        className={`w-4 h-4 rounded-[3px] border accent-[#e8ff59] cursor-pointer ${
+                          isLight
+                            ? 'border-slate-300 bg-white'
+                            : 'border-[#26262a] bg-[#131315]'
+                        }`}
                         aria-label={`Compare ${player.handle}`}
                       />
                     </td>
 
                     {/* Player: handle bold, real name + team + region in muted text below */}
                     <td className="py-3 px-3">
-                      <div className="font-bold text-[#ededed]">
+                      <div className={`font-bold ${isLight ? 'text-slate-900' : 'text-[#ededed]'}`}>
                         {formatPlayerName(player.handle)}
                       </div>
-                      <div className="text-[12px] text-[#9a9aa2] mt-0.5">
+                      <div className={`text-[12px] mt-0.5 ${isLight ? 'text-slate-500' : 'text-[#9a9aa2]'}`}>
                         {player.realName} · {player.currentTeamName} · {player.region}
                       </div>
                     </td>
 
                     {/* Role: plain muted text */}
-                    <td className="py-3 px-3 text-[#9a9aa2]">
+                    <td className={`py-3 px-3 ${isLight ? 'text-slate-600' : 'text-[#9a9aa2]'}`}>
                       {player.primaryRole}
                     </td>
 
                     {/* Tier: plain muted text */}
-                    <td className="py-3 px-3 text-[#9a9aa2]">
+                    <td className={`py-3 px-3 ${isLight ? 'text-slate-600' : 'text-[#9a9aa2]'}`}>
                       {player.tier}
                     </td>
 
                     {/* Gem Score: right-aligned, font-mono tabular-nums, --accent color */}
-                    <td className="py-3 px-3 text-right font-mono tabular-nums font-semibold text-[#e8ff59]">
+                    <td className={`py-3 px-3 text-right font-mono tabular-nums font-semibold ${isLight ? 'text-lime-700' : 'text-[#e8ff59]'}`}>
                       {isEligible ? gemScore : '—'}
                     </td>
 
                     {/* ADR: right-aligned, font-mono tabular-nums */}
-                    <td className="py-3 px-3 text-right font-mono tabular-nums text-[#ededed]">
+                    <td className={`py-3 px-3 text-right font-mono tabular-nums ${isLight ? 'text-slate-800' : 'text-[#ededed]'}`}>
                       {player.stats.adr.toFixed(1)}
                     </td>
 
                     {/* Visibility Gap: right-aligned, font-mono tabular-nums */}
-                    <td className="py-3 px-3 text-right font-mono tabular-nums text-[#ededed]">
+                    <td className={`py-3 px-3 text-right font-mono tabular-nums ${isLight ? 'text-slate-800' : 'text-[#ededed]'}`}>
                       {(player.visibilityGap * 100).toFixed(0)}%
                     </td>
 
                     {/* Matches: right-aligned, font-mono tabular-nums */}
-                    <td className="py-3 px-3 text-right font-mono tabular-nums text-[#ededed]">
+                    <td className={`py-3 px-3 text-right font-mono tabular-nums ${isLight ? 'text-slate-800' : 'text-[#ededed]'}`}>
                       {player.matchesPlayed}
                     </td>
 
                     {/* Trajectory: right-aligned, font-mono tabular-nums, --up / --down */}
                     <td
                       className={`py-3 px-3 text-right font-mono tabular-nums ${
-                        player.improvementTrend >= 0 ? 'text-[#4ade80]' : 'text-[#f87171]'
+                        player.improvementTrend >= 0 ? (isLight ? 'text-emerald-600' : 'text-[#4ade80]') : (isLight ? 'text-rose-600' : 'text-[#f87171]')
                       }`}
                     >
                       {player.improvementTrend >= 0 ? '+' : ''}
@@ -366,14 +388,14 @@ export function HiddenGemsView({
                     </td>
 
                     {/* Est. Buyout: right-aligned, font-mono tabular-nums, normal text color, thin 3px bar */}
-                    <td className="py-3 px-3 text-right font-mono tabular-nums text-[#ededed]">
+                    <td className={`py-3 px-3 text-right font-mono tabular-nums ${isLight ? 'text-slate-800' : 'text-[#ededed]'}`}>
                       <div>${player.buyoutUsd.toLocaleString()}</div>
                       <div
                         title="Reliability metric"
-                        className="w-12 h-[3px] bg-[#26262a] rounded-full overflow-hidden ml-auto mt-1"
+                        className={`w-12 h-[3px] rounded-full overflow-hidden ml-auto mt-1 ${isLight ? 'bg-slate-200' : 'bg-[#26262a]'}`}
                       >
                         <div
-                          className="h-full bg-[#9a9aa2]"
+                          className={`h-full ${isLight ? 'bg-slate-400' : 'bg-[#9a9aa2]'}`}
                           style={{
                             width: `${Math.min(95, Math.max(30, confidence.score))}%`,
                           }}
@@ -386,7 +408,9 @@ export function HiddenGemsView({
                       <button
                         type="button"
                         onClick={() => onNavigate('recommendations')}
-                        className="text-[13px] text-[#9a9aa2] hover:text-[#ededed] hover:underline cursor-pointer bg-transparent border-0 p-0"
+                        className={`text-[13px] hover:underline cursor-pointer bg-transparent border-0 p-0 ${
+                          isLight ? 'text-slate-600 hover:text-slate-900' : 'text-[#9a9aa2] hover:text-[#ededed]'
+                        }`}
                       >
                         Details
                       </button>
