@@ -57,11 +57,13 @@ const ALL_GAMERS: GamerItem[] = [
 
 const GAMES_LIST = [
   { id: 'All Games', label: 'All games (unified)' },
-  { id: 'BGMI', label: 'BGMI' },
-  { id: 'Valorant', label: 'Valorant' },
-  { id: 'CS2', label: 'Counter-Strike 2' },
+  { id: 'CS2', label: 'Counter-Strike 2 (Leetify & PandaScore)' },
+  { id: 'Valorant', label: 'Valorant (Riot API)' },
+  { id: 'Free Fire', label: 'Free Fire (FFWS)' },
+  { id: 'Mobile Legends', label: 'Mobile Legends (MPL)' },
   { id: 'Apex Legends', label: 'Apex Legends' },
   { id: 'Fortnite', label: 'Fortnite' },
+  { id: 'BGMI', label: 'BGMI (Krafton BGIS)' },
 ];
 
 export function Navbar({

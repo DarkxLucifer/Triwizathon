@@ -3,12 +3,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { ArrowDown, ArrowUp, ArrowUpDown, X } from 'lucide-react';
 
-export type GameKey = 'BGMI' | 'Valorant' | 'CS2';
+export type GameKey = 'CS2' | 'Valorant' | 'BGMI';
 
 export const ROLES: Record<GameKey, string[]> = {
-  BGMI: ['IGL', 'Entry Fragger', 'Assaulter', 'Support', 'Sniper', 'Flex'],
-  Valorant: ['IGL', 'Duelist', 'Initiator', 'Controller', 'Sentinel', 'Flex'],
   CS2: ['IGL', 'Entry', 'AWPer', 'Lurker', 'Support', 'Rifler'],
+  Valorant: ['IGL', 'Duelist', 'Initiator', 'Controller', 'Sentinel', 'Flex'],
+  BGMI: ['IGL', 'Entry Fragger', 'Assaulter', 'Support', 'Sniper', 'Flex'],
 };
 
 export interface LeaderboardPlayer {
@@ -661,7 +661,7 @@ export const ALL_LEADERBOARD_PLAYERS: LeaderboardPlayer[] = [
   },
 ];
 
-const GAMES: GameKey[] = ['BGMI', 'Valorant', 'CS2'];
+const GAMES: GameKey[] = ['CS2', 'Valorant', 'BGMI'];
 
 interface LeaderboardsViewProps {
   theme?: 'dark' | 'light';
@@ -671,7 +671,7 @@ interface LeaderboardsViewProps {
 export function LeaderboardsView({ onNavigate, theme = 'dark' }: LeaderboardsViewProps) {
   const isLight = theme === 'light';
   // Filter state
-  const [selectedGame, setSelectedGame] = useState<GameKey>('BGMI');
+  const [selectedGame, setSelectedGame] = useState<GameKey>('CS2');
   const [selectedRole, setSelectedRole] = useState<string>('All roles');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
