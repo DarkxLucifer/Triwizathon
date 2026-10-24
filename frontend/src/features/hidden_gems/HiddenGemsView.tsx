@@ -10,6 +10,7 @@ interface HiddenGemsViewProps {
   onToggleCompare: (playerId: string) => void;
   comparisonPlayerIds: string[];
   onNavigate: (screen: any) => void;
+  theme?: 'dark' | 'light';
 }
 
 export function formatPlayerName(name: string): string {
@@ -33,7 +34,9 @@ export function HiddenGemsView({
   onToggleCompare,
   comparisonPlayerIds,
   onNavigate,
+  theme = 'dark',
 }: HiddenGemsViewProps) {
+  const isLight = theme === 'light';
   const [selectedRole, setSelectedRole] = useState<string>('all');
   const [selectedTier, setSelectedTier] = useState<string>('all');
   const [sortKey, setSortKey] = useState<SortKey>('gemScore');
@@ -122,9 +125,9 @@ export function HiddenGemsView({
       return <ArrowUpDown className="w-4 h-4 opacity-30 group-hover:opacity-100 transition-opacity" style={{ strokeWidth: 1.5 }} />;
     }
     return sortDir === 'desc' ? (
-      <ArrowDown className="w-4 h-4 text-[#ededed]" style={{ strokeWidth: 1.5 }} />
+      <ArrowDown className={`w-4 h-4 ${isLight ? 'text-slate-900' : 'text-[#ededed]'}`} style={{ strokeWidth: 1.5 }} />
     ) : (
-      <ArrowUp className="w-4 h-4 text-[#ededed]" style={{ strokeWidth: 1.5 }} />
+      <ArrowUp className={`w-4 h-4 ${isLight ? 'text-slate-900' : 'text-[#ededed]'}`} style={{ strokeWidth: 1.5 }} />
     );
   };
 

@@ -419,6 +419,7 @@ export default function ScoutForgeApp() {
             {activeNav === 'discover' && (
 
               <PlayerDirectoryView
+                theme={theme}
 
                 players={store.players}
 
@@ -443,6 +444,7 @@ export default function ScoutForgeApp() {
             {activeNav === 'rosters' && (
 
               <RosterView
+                theme={theme}
 
                 rosters={store.rosters}
 
@@ -465,6 +467,7 @@ export default function ScoutForgeApp() {
             {activeNav === 'recruitment' && (
 
               <RecommendationsView
+                theme={theme}
 
                 brief={store.activeBrief}
 
@@ -495,6 +498,7 @@ export default function ScoutForgeApp() {
               <div className="space-y-6">
 
                 <ComparisonView
+                  theme={theme}
 
                   brief={store.activeBrief}
 
@@ -509,6 +513,7 @@ export default function ScoutForgeApp() {
                 />
 
                 <HiddenGemsView
+                  theme={theme}
 
                   players={store.players}
 
@@ -567,6 +572,7 @@ export default function ScoutForgeApp() {
             {activeNav === 'settings' && (
 
               <ScoutingBriefView
+                theme={theme}
 
                 briefs={store.briefs}
 
@@ -589,6 +595,7 @@ export default function ScoutForgeApp() {
             {activeNav === 'ingestion' && (
 
               <IngestionView
+                theme={theme}
 
                 ingestionHistory={store.ingestionHistory}
 

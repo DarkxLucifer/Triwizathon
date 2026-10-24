@@ -668,7 +668,8 @@ interface LeaderboardsViewProps {
   onNavigate?: (screen: string) => void;
 }
 
-export function LeaderboardsView({ onNavigate }: LeaderboardsViewProps) {
+export function LeaderboardsView({ onNavigate, theme = 'dark' }: LeaderboardsViewProps) {
+  const isLight = theme === 'light';
   // Filter state
   const [selectedGame, setSelectedGame] = useState<GameKey>('BGMI');
   const [selectedRole, setSelectedRole] = useState<string>('All roles');
@@ -777,9 +778,15 @@ export function LeaderboardsView({ onNavigate }: LeaderboardsViewProps) {
       );
     }
     return sortDir === 'desc' ? (
-      <ArrowDown className="w-3.5 h-3.5 text-[#ededed]" style={{ strokeWidth: 1.5 }} />
+      <ArrowDown
+        className={`w-3.5 h-3.5 ${isLight ? 'text-slate-900' : 'text-[#ededed]'}`}
+        style={{ strokeWidth: 1.5 }}
+      />
     ) : (
-      <ArrowUp className="w-3.5 h-3.5 text-[#ededed]" style={{ strokeWidth: 1.5 }} />
+      <ArrowUp
+        className={`w-3.5 h-3.5 ${isLight ? 'text-slate-900' : 'text-[#ededed]'}`}
+        style={{ strokeWidth: 1.5 }}
+      />
     );
   };
 

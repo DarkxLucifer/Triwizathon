@@ -10,6 +10,7 @@ interface ScoutingBriefViewProps {
   onSelectActiveBrief: (brief: ScoutingBrief) => void;
   onCreateBrief: (brief: Omit<ScoutingBrief, 'id' | 'createdAt' | 'organizationId'>) => void;
   onNavigate: (screen: any) => void;
+  theme?: 'dark' | 'light';
 }
 
 export function ScoutingBriefView({
@@ -18,7 +19,9 @@ export function ScoutingBriefView({
   onSelectActiveBrief,
   onCreateBrief,
   onNavigate,
+  theme = 'dark',
 }: ScoutingBriefViewProps) {
+  const isLight = theme === 'light';
   const [title, setTitle] = useState('CS2 Dedicated IGL Strategic Replacement');
   const [gameTitle, setGameTitle] = useState<GameTitle>('Counter-Strike 2');
   const [targetRole, setTargetRole] = useState<Role>('IGL');
@@ -75,13 +78,17 @@ export function ScoutingBriefView({
   };
 
   return (
-    <div className="bg-[#0b0b0c] text-[#ededed] p-6 -m-6 min-h-[calc(100vh-3.5rem)] space-y-6 font-sans text-[14px]">
+    <div
+      className={`${
+        isLight ? 'bg-[#F8FAFC] text-slate-900' : 'bg-[#0b0b0c] text-[#ededed]'
+      } p-6 -m-6 min-h-[calc(100vh-3.5rem)] space-y-6 font-sans text-[14px] transition-colors`}
+    >
       {/* Header */}
-      <div className="pb-4 border-b border-[#26262a]">
-        <h1 className="text-[18px] font-bold text-[#ededed]">
+      <div className={`pb-4 border-b ${isLight ? 'border-slate-200' : 'border-[#26262a]'}`}>
+        <h1 className={`text-[18px] font-bold ${isLight ? 'text-slate-900' : 'text-[#ededed]'}`}>
           Scouting briefs
         </h1>
-        <p className="text-[12px] text-[#9a9aa2] mt-0.5">
+        <p className={`text-[12px] ${isLight ? 'text-slate-500' : 'text-[#9a9aa2]'} mt-0.5`}>
           Role requirements, evaluation windows, financial caps, and custom scoring weights.
         </p>
       </div>
@@ -89,8 +96,8 @@ export function ScoutingBriefView({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left: Active Briefs List */}
         <div className="lg:col-span-4 space-y-3">
-          <div className="pb-1 border-b border-[#26262a]">
-            <h2 className="text-[12px] font-normal text-[#9a9aa2]">
+          <div className={`pb-1 border-b ${isLight ? 'border-slate-200' : 'border-[#26262a]'}`}>
+            <h2 className={`text-[12px] font-normal ${isLight ? 'text-slate-500' : 'text-[#9a9aa2]'}`}>
               Configured briefs ({briefs.length})
             </h2>
           </div>
@@ -102,22 +109,38 @@ export function ScoutingBriefView({
                 <div
                   key={b.id}
                   onClick={() => onSelectActiveBrief(b)}
-                  className={`p-3 rounded-[6px] border border-[#26262a] bg-[#131315] transition-colors duration-[120ms] cursor-pointer hover:bg-[#1a1a1d] ${
+                  className={`p-3 rounded-[6px] border ${
+                    isLight
+                      ? 'border-slate-200 bg-white hover:bg-slate-50 shadow-sm'
+                      : 'border-[#26262a] bg-[#131315] hover:bg-[#1a1a1d]'
+                  } transition-colors duration-[120ms] cursor-pointer ${
                     isActive
-                      ? 'border-l-2 border-l-[#e8ff59] bg-[#18181b]'
-                      : 'border-l-2 border-l-transparent'
+                      ? isLight
+                        ? 'border-l-4 border-l-slate-900'
+                        : 'border-l-2 border-l-[#e8ff59] bg-[#18181b]'
+                      : ''
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-[13px] font-bold text-[#ededed]">{b.title}</span>
-                    <span className="text-[12px] text-[#9a9aa2]">{b.targetRole}</span>
+                    <span className={`text-[13px] font-bold ${isLight ? 'text-slate-900' : 'text-[#ededed]'}`}>
+                      {b.title}
+                    </span>
+                    <span className={`text-[12px] ${isLight ? 'text-slate-500' : 'text-[#9a9aa2]'}`}>
+                      {b.targetRole}
+                    </span>
                   </div>
-                  <p className="text-[12px] text-[#9a9aa2] mt-1">
+                  <p className={`text-[12px] ${isLight ? 'text-slate-500' : 'text-[#9a9aa2]'} mt-1`}>
                     {b.gameTitle} · {b.competitionTier} · {b.evaluationWindowDays}d window
                   </p>
-                  <div className="flex items-center justify-between mt-2 pt-2 border-t border-[#26262a] text-[11px] font-mono text-[#9a9aa2]">
+                  <div
+                    className={`flex items-center justify-between mt-2 pt-2 border-t ${
+                      isLight ? 'border-slate-100 text-slate-500' : 'border-[#26262a] text-[#9a9aa2]'
+                    } text-[11px] font-mono`}
+                  >
                     <span>Formula: {b.formulaVersion}</span>
-                    <span className="text-[#ededed] font-medium">{b.decisionStatus}</span>
+                    <span className={`${isLight ? 'text-slate-900' : 'text-[#ededed]'} font-medium`}>
+                      {b.decisionStatus}
+                    </span>
                   </div>
                 </div>
               );
@@ -126,12 +149,20 @@ export function ScoutingBriefView({
         </div>
 
         {/* Right: Configure Brief Form */}
-        <div className="lg:col-span-8 border border-[#26262a] rounded-[6px] bg-[#131315] p-5 space-y-4">
-          <div className="flex items-center justify-between border-b border-[#26262a] pb-3">
-            <h2 className="text-[14px] font-bold text-[#ededed]">
+        <div
+          className={`lg:col-span-8 border ${
+            isLight ? 'border-slate-200 bg-white shadow-sm' : 'border-[#26262a] bg-[#131315]'
+          } rounded-[6px] p-5 space-y-4`}
+        >
+          <div
+            className={`flex items-center justify-between border-b ${
+              isLight ? 'border-slate-200' : 'border-[#26262a]'
+            } pb-3`}
+          >
+            <h2 className={`text-[14px] font-bold ${isLight ? 'text-slate-900' : 'text-[#ededed]'}`}>
               Configure strategic scouting brief
             </h2>
-            <span className="text-[12px] font-mono text-[#9a9aa2]">
+            <span className={`text-[12px] font-mono ${isLight ? 'text-slate-500' : 'text-[#9a9aa2]'}`}>
               Tag: {currentVersionTag}
             </span>
           </div>
@@ -140,26 +171,34 @@ export function ScoutingBriefView({
             {/* Title & Game */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-[12px] text-[#9a9aa2] mb-1">
+                <label className={`block text-[12px] ${isLight ? 'text-slate-600' : 'text-[#9a9aa2]'} mb-1`}>
                   Brief title
                 </label>
                 <input
                   type="text"
                   value={title}
                   onChange={e => setTitle(e.target.value)}
-                  className="w-full bg-[#0b0b0c] border border-[#26262a] rounded-[6px] px-3 py-1.5 text-[13px] text-[#ededed] focus:outline-none"
+                  className={`w-full ${
+                    isLight
+                      ? 'bg-white border-slate-300 text-slate-900 focus:border-slate-500'
+                      : 'bg-[#0b0b0c] border-[#26262a] text-[#ededed]'
+                  } border rounded-[6px] px-3 py-1.5 text-[13px] focus:outline-none`}
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-[12px] text-[#9a9aa2] mb-1">
+                <label className={`block text-[12px] ${isLight ? 'text-slate-600' : 'text-[#9a9aa2]'} mb-1`}>
                   Target game
                 </label>
                 <select
                   value={gameTitle}
                   onChange={e => setGameTitle(e.target.value as GameTitle)}
-                  className="w-full bg-[#0b0b0c] border border-[#26262a] rounded-[6px] px-2.5 py-1.5 text-[13px] text-[#ededed] focus:outline-none cursor-pointer"
+                  className={`w-full ${
+                    isLight
+                      ? 'bg-white border-slate-300 text-slate-900'
+                      : 'bg-[#0b0b0c] border-[#26262a] text-[#ededed]'
+                  } border rounded-[6px] px-2.5 py-1.5 text-[13px] focus:outline-none cursor-pointer`}
                 >
                   <option value="Counter-Strike 2">Counter-Strike 2</option>
                   <option value="Valorant">Valorant</option>
@@ -171,13 +210,17 @@ export function ScoutingBriefView({
             {/* Target Role & Competition Tier & Window */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
-                <label className="block text-[12px] text-[#9a9aa2] mb-1">
+                <label className={`block text-[12px] ${isLight ? 'text-slate-600' : 'text-[#9a9aa2]'} mb-1`}>
                   Target role
                 </label>
                 <select
                   value={targetRole}
                   onChange={e => setTargetRole(e.target.value as Role)}
-                  className="w-full bg-[#0b0b0c] border border-[#26262a] rounded-[6px] px-2.5 py-1.5 text-[13px] text-[#ededed] focus:outline-none cursor-pointer"
+                  className={`w-full ${
+                    isLight
+                      ? 'bg-white border-slate-300 text-slate-900'
+                      : 'bg-[#0b0b0c] border-[#26262a] text-[#ededed]'
+                  } border rounded-[6px] px-2.5 py-1.5 text-[13px] focus:outline-none cursor-pointer`}
                 >
                   <option value="IGL">IGL</option>
                   <option value="Entry">Entry</option>
@@ -188,13 +231,17 @@ export function ScoutingBriefView({
               </div>
 
               <div>
-                <label className="block text-[12px] text-[#9a9aa2] mb-1">
+                <label className={`block text-[12px] ${isLight ? 'text-slate-600' : 'text-[#9a9aa2]'} mb-1`}>
                   Evaluation window
                 </label>
                 <select
                   value={evaluationWindowDays}
                   onChange={e => setEvaluationWindowDays(Number(e.target.value))}
-                  className="w-full bg-[#0b0b0c] border border-[#26262a] rounded-[6px] px-2.5 py-1.5 text-[13px] text-[#ededed] focus:outline-none cursor-pointer"
+                  className={`w-full ${
+                    isLight
+                      ? 'bg-white border-slate-300 text-slate-900'
+                      : 'bg-[#0b0b0c] border-[#26262a] text-[#ededed]'
+                  } border rounded-[6px] px-2.5 py-1.5 text-[13px] focus:outline-none cursor-pointer`}
                 >
                   <option value={90}>Last 90 days</option>
                   <option value={180}>Last 180 days</option>
@@ -203,13 +250,17 @@ export function ScoutingBriefView({
               </div>
 
               <div>
-                <label className="block text-[12px] text-[#9a9aa2] mb-1">
+                <label className={`block text-[12px] ${isLight ? 'text-slate-600' : 'text-[#9a9aa2]'} mb-1`}>
                   Competition tier
                 </label>
                 <select
                   value={competitionTier}
                   onChange={e => setCompetitionTier(e.target.value as CompetitionTier)}
-                  className="w-full bg-[#0b0b0c] border border-[#26262a] rounded-[6px] px-2.5 py-1.5 text-[13px] text-[#ededed] focus:outline-none cursor-pointer"
+                  className={`w-full ${
+                    isLight
+                      ? 'bg-white border-slate-300 text-slate-900'
+                      : 'bg-[#0b0b0c] border-[#26262a] text-[#ededed]'
+                  } border rounded-[6px] px-2.5 py-1.5 text-[13px] focus:outline-none cursor-pointer`}
                 >
                   <option value="Tier 1">Tier 1</option>
                   <option value="Tier 2">Tier 2</option>
@@ -219,14 +270,14 @@ export function ScoutingBriefView({
             </div>
 
             {/* Hard Constraints */}
-            <div className="pt-2 border-t border-[#26262a] space-y-3">
-              <h3 className="text-[12px] font-normal text-[#9a9aa2]">
+            <div className={`pt-2 border-t ${isLight ? 'border-slate-200' : 'border-[#26262a]'} space-y-3`}>
+              <h3 className={`text-[12px] font-normal ${isLight ? 'text-slate-500' : 'text-[#9a9aa2]'}`}>
                 Hard constraints
               </h3>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-[12px] text-[#9a9aa2] mb-1">
+                  <label className={`block text-[12px] ${isLight ? 'text-slate-600' : 'text-[#9a9aa2]'} mb-1`}>
                     Max buyout ($)
                   </label>
                   <input
@@ -234,50 +285,74 @@ export function ScoutingBriefView({
                     value={maxBuyoutUsd}
                     onChange={e => setMaxBuyoutUsd(Number(e.target.value))}
                     step={10000}
-                    className="w-full bg-[#0b0b0c] border border-[#26262a] rounded-[6px] px-3 py-1.5 text-[13px] font-mono tabular-nums text-[#ededed] focus:outline-none"
+                    className={`w-full ${
+                      isLight
+                        ? 'bg-white border-slate-300 text-slate-900'
+                        : 'bg-[#0b0b0c] border-[#26262a] text-[#ededed]'
+                    } border rounded-[6px] px-3 py-1.5 text-[13px] font-mono tabular-nums focus:outline-none`}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[12px] text-[#9a9aa2] mb-1">
+                  <label className={`block text-[12px] ${isLight ? 'text-slate-600' : 'text-[#9a9aa2]'} mb-1`}>
                     Primary language
                   </label>
                   <input
                     type="text"
                     value={primaryLanguage}
                     onChange={e => setPrimaryLanguage(e.target.value)}
-                    className="w-full bg-[#0b0b0c] border border-[#26262a] rounded-[6px] px-3 py-1.5 text-[13px] text-[#ededed] focus:outline-none"
+                    className={`w-full ${
+                      isLight
+                        ? 'bg-white border-slate-300 text-slate-900'
+                        : 'bg-[#0b0b0c] border-[#26262a] text-[#ededed]'
+                    } border rounded-[6px] px-3 py-1.5 text-[13px] focus:outline-none`}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[12px] text-[#9a9aa2] mb-1">
+                  <label className={`block text-[12px] ${isLight ? 'text-slate-600' : 'text-[#9a9aa2]'} mb-1`}>
                     Min matches
                   </label>
                   <input
                     type="number"
                     value={minMatches}
                     onChange={e => setMinMatches(Number(e.target.value))}
-                    className="w-full bg-[#0b0b0c] border border-[#26262a] rounded-[6px] px-3 py-1.5 text-[13px] font-mono tabular-nums text-[#ededed] focus:outline-none"
+                    className={`w-full ${
+                      isLight
+                        ? 'bg-white border-slate-300 text-slate-900'
+                        : 'bg-[#0b0b0c] border-[#26262a] text-[#ededed]'
+                    } border rounded-[6px] px-3 py-1.5 text-[13px] font-mono tabular-nums focus:outline-none`}
                   />
                 </div>
               </div>
             </div>
 
             {/* Scoring Weights */}
-            <div className="pt-2 border-t border-[#26262a] space-y-3">
+            <div className={`pt-2 border-t ${isLight ? 'border-slate-200' : 'border-[#26262a]'} space-y-3`}>
               <div className="flex items-center justify-between">
-                <h3 className="text-[12px] font-normal text-[#9a9aa2]">
+                <h3 className={`text-[12px] font-normal ${isLight ? 'text-slate-500' : 'text-[#9a9aa2]'}`}>
                   Fit score weight breakdown
                 </h3>
-                <span className={`text-[12px] font-mono tabular-nums ${isWeightsValid ? 'text-[#4ade80]' : 'text-[#f87171]'}`}>
+                <span
+                  className={`text-[12px] font-mono tabular-nums ${
+                    isWeightsValid
+                      ? isLight ? 'text-emerald-600' : 'text-[#4ade80]'
+                      : 'text-red-500'
+                  }`}
+                >
                   Total: {(weightsSum * 100).toFixed(0)}% {isWeightsValid ? '' : '(Must equal 100%)'}
                 </span>
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-[12px] font-mono">
-                <div className="p-2.5 bg-[#0b0b0c] border border-[#26262a] rounded-[4px] space-y-1">
-                  <span className="text-[#9a9aa2] text-[11px] block font-sans">Role performance</span>
+                <div
+                  className={`p-2.5 ${
+                    isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#0b0b0c] border-[#26262a]'
+                  } border rounded-[4px] space-y-1`}
+                >
+                  <span className={`${isLight ? 'text-slate-500' : 'text-[#9a9aa2]'} text-[11px] block font-sans`}>
+                    Role performance
+                  </span>
                   <input
                     type="number"
                     step={0.05}
@@ -285,12 +360,18 @@ export function ScoutingBriefView({
                     max={1}
                     value={rolePerfWeight}
                     onChange={e => setRolePerfWeight(Number(e.target.value))}
-                    className="w-full bg-transparent text-[#ededed] font-bold focus:outline-none"
+                    className={`w-full bg-transparent ${isLight ? 'text-slate-900' : 'text-[#ededed]'} font-bold focus:outline-none`}
                   />
                 </div>
 
-                <div className="p-2.5 bg-[#0b0b0c] border border-[#26262a] rounded-[4px] space-y-1">
-                  <span className="text-[#9a9aa2] text-[11px] block font-sans">Roster need</span>
+                <div
+                  className={`p-2.5 ${
+                    isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#0b0b0c] border-[#26262a]'
+                  } border rounded-[4px] space-y-1`}
+                >
+                  <span className={`${isLight ? 'text-slate-500' : 'text-[#9a9aa2]'} text-[11px] block font-sans`}>
+                    Roster need
+                  </span>
                   <input
                     type="number"
                     step={0.05}
@@ -298,12 +379,18 @@ export function ScoutingBriefView({
                     max={1}
                     value={rosterNeedWeight}
                     onChange={e => setRosterNeedWeight(Number(e.target.value))}
-                    className="w-full bg-transparent text-[#ededed] font-bold focus:outline-none"
+                    className={`w-full bg-transparent ${isLight ? 'text-slate-900' : 'text-[#ededed]'} font-bold focus:outline-none`}
                   />
                 </div>
 
-                <div className="p-2.5 bg-[#0b0b0c] border border-[#26262a] rounded-[4px] space-y-1">
-                  <span className="text-[#9a9aa2] text-[11px] block font-sans">Synergy</span>
+                <div
+                  className={`p-2.5 ${
+                    isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#0b0b0c] border-[#26262a]'
+                  } border rounded-[4px] space-y-1`}
+                >
+                  <span className={`${isLight ? 'text-slate-500' : 'text-[#9a9aa2]'} text-[11px] block font-sans`}>
+                    Synergy
+                  </span>
                   <input
                     type="number"
                     step={0.05}
@@ -311,12 +398,18 @@ export function ScoutingBriefView({
                     max={1}
                     value={synergyWeight}
                     onChange={e => setSynergyWeight(Number(e.target.value))}
-                    className="w-full bg-transparent text-[#ededed] font-bold focus:outline-none"
+                    className={`w-full bg-transparent ${isLight ? 'text-slate-900' : 'text-[#ededed]'} font-bold focus:outline-none`}
                   />
                 </div>
 
-                <div className="p-2.5 bg-[#0b0b0c] border border-[#26262a] rounded-[4px] space-y-1">
-                  <span className="text-[#9a9aa2] text-[11px] block font-sans">Constraints</span>
+                <div
+                  className={`p-2.5 ${
+                    isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#0b0b0c] border-[#26262a]'
+                  } border rounded-[4px] space-y-1`}
+                >
+                  <span className={`${isLight ? 'text-slate-500' : 'text-[#9a9aa2]'} text-[11px] block font-sans`}>
+                    Constraints
+                  </span>
                   <input
                     type="number"
                     step={0.05}
@@ -324,18 +417,22 @@ export function ScoutingBriefView({
                     max={1}
                     value={constraintWeight}
                     onChange={e => setConstraintWeight(Number(e.target.value))}
-                    className="w-full bg-transparent text-[#ededed] font-bold focus:outline-none"
+                    className={`w-full bg-transparent ${isLight ? 'text-slate-900' : 'text-[#ededed]'} font-bold focus:outline-none`}
                   />
                 </div>
               </div>
             </div>
 
-            {/* Actions: exactly one primary button max */}
-            <div className="pt-3 border-t border-[#26262a] flex justify-end">
+            {/* Actions */}
+            <div className={`pt-3 border-t ${isLight ? 'border-slate-200' : 'border-[#26262a]'} flex justify-end`}>
               <button
                 type="submit"
                 disabled={!isWeightsValid}
-                className="px-4 py-2 rounded-[6px] border border-[#26262a] bg-[#1a1a1d] hover:bg-[#222226] disabled:opacity-50 text-[#ededed] text-[13px] font-medium transition-colors cursor-pointer"
+                className={`px-4 py-2 rounded-[6px] border ${
+                  isLight
+                    ? 'border-slate-900 bg-slate-900 hover:bg-slate-800 text-white shadow-sm'
+                    : 'border-[#26262a] bg-[#1a1a1d] hover:bg-[#222226] text-[#ededed]'
+                } disabled:opacity-50 text-[13px] font-medium transition-colors cursor-pointer`}
               >
                 Save and execute brief
               </button>

@@ -24,7 +24,10 @@ export function formatPlayerName(name: string): string {
 export function DashboardView({
   onNavigate,
   onSelectRoleToScout,
+  theme = 'dark',
 }: DashboardViewProps) {
+  const isLight = theme === 'light';
+
   const candidates = [
     {
       id: 'p-gem-vortex',
@@ -76,79 +79,159 @@ export function DashboardView({
   ];
 
   return (
-    <div className="bg-[#0b0b0c] text-[#ededed] p-6 -m-6 min-h-[calc(100vh-3.5rem)] space-y-6 font-sans text-[14px]">
+    <div
+      className={`${
+        isLight ? 'bg-[#F8FAFC] text-slate-900' : 'bg-[#0b0b0c] text-[#ededed]'
+      } p-6 -m-6 min-h-[calc(100vh-3.5rem)] space-y-6 font-sans text-[14px] transition-colors`}
+    >
       {/* 1. Greeting Header */}
-      <div className="border-b border-[#26262a] pb-4">
-        <h1 className="text-[20px] font-bold text-[#ededed] tracking-normal">
+      <div className={`border-b ${isLight ? 'border-slate-200' : 'border-[#26262a]'} pb-4`}>
+        <h1
+          className={`text-[20px] font-bold ${
+            isLight ? 'text-slate-900' : 'text-[#ededed]'
+          } tracking-normal`}
+        >
           Good afternoon, Alex.
         </h1>
-        <p className="text-[12px] text-[#9a9aa2] mt-0.5">
+        <p className={`text-[12px] ${isLight ? 'text-slate-500' : 'text-[#9a9aa2]'} mt-0.5`}>
           Active rosters, candidates, and scouting pipeline.
         </p>
       </div>
 
-      {/* 2. ONE horizontal row for 4 stat metrics: big number, small muted label, tiny +/- delta in plain text. No borders, no icons. */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 py-2 border-b border-[#26262a]">
+      {/* 2. ONE horizontal row for 4 stat metrics */}
+      <div
+        className={`grid grid-cols-2 md:grid-cols-4 gap-6 py-2 border-b ${
+          isLight ? 'border-slate-200' : 'border-[#26262a]'
+        }`}
+      >
         <div>
-          <div className="text-[28px] font-bold font-mono tabular-nums text-[#ededed] leading-none">
+          <div
+            className={`text-[28px] font-bold font-mono tabular-nums ${
+              isLight ? 'text-slate-900' : 'text-[#ededed]'
+            } leading-none`}
+          >
             128
           </div>
-          <div className="text-[12px] text-[#9a9aa2] mt-1.5">Active candidates</div>
-          <div className="text-[11px] text-[#4ade80] font-mono mt-0.5">+12% this week</div>
+          <div className={`text-[12px] ${isLight ? 'text-slate-500' : 'text-[#9a9aa2]'} mt-1.5`}>
+            Active candidates
+          </div>
+          <div
+            className={`text-[11px] ${
+              isLight ? 'text-emerald-600' : 'text-[#4ade80]'
+            } font-mono mt-0.5`}
+          >
+            +12% this week
+          </div>
         </div>
 
         <div>
-          <div className="text-[28px] font-bold font-mono tabular-nums text-[#ededed] leading-none">
+          <div
+            className={`text-[28px] font-bold font-mono tabular-nums ${
+              isLight ? 'text-slate-900' : 'text-[#ededed]'
+            } leading-none`}
+          >
             4
           </div>
-          <div className="text-[12px] text-[#9a9aa2] mt-1.5">Scouting briefs</div>
-          <div className="text-[11px] text-[#9a9aa2] font-mono mt-0.5">+1 pending</div>
+          <div className={`text-[12px] ${isLight ? 'text-slate-500' : 'text-[#9a9aa2]'} mt-1.5`}>
+            Scouting briefs
+          </div>
+          <div
+            className={`text-[11px] ${
+              isLight ? 'text-slate-500' : 'text-[#9a9aa2]'
+            } font-mono mt-0.5`}
+          >
+            +1 pending
+          </div>
         </div>
 
         <div>
-          <div className="text-[28px] font-bold font-mono tabular-nums text-[#ededed] leading-none">
+          <div
+            className={`text-[28px] font-bold font-mono tabular-nums ${
+              isLight ? 'text-slate-900' : 'text-[#ededed]'
+            } leading-none`}
+          >
             3
           </div>
-          <div className="text-[12px] text-[#9a9aa2] mt-1.5">Active rosters</div>
-          <div className="text-[11px] text-[#9a9aa2] mt-0.5">CS2, Valorant, BGMI</div>
+          <div className={`text-[12px] ${isLight ? 'text-slate-500' : 'text-[#9a9aa2]'} mt-1.5`}>
+            Active rosters
+          </div>
+          <div className={`text-[11px] ${isLight ? 'text-slate-500' : 'text-[#9a9aa2]'} mt-0.5`}>
+            CS2, Valorant, BGMI
+          </div>
         </div>
 
         <div>
-          <div className="text-[28px] font-bold font-mono tabular-nums text-[#ededed] leading-none">
+          <div
+            className={`text-[28px] font-bold font-mono tabular-nums ${
+              isLight ? 'text-slate-900' : 'text-[#ededed]'
+            } leading-none`}
+          >
             16
           </div>
-          <div className="text-[12px] text-[#9a9aa2] mt-1.5">Evaluations logged</div>
-          <div className="text-[11px] text-[#4ade80] font-mono mt-0.5">+28% this month</div>
+          <div className={`text-[12px] ${isLight ? 'text-slate-500' : 'text-[#9a9aa2]'} mt-1.5`}>
+            Evaluations logged
+          </div>
+          <div
+            className={`text-[11px] ${
+              isLight ? 'text-emerald-600' : 'text-[#4ade80]'
+            } font-mono mt-0.5`}
+          >
+            +28% this month
+          </div>
         </div>
       </div>
 
       {/* 3. Main Sections separated by 1px borders and whitespace */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Left Column (8 cols): Top Recommended Candidates (compact 3-row table) */}
+        {/* Left Column (8 cols): Top Recommended Candidates */}
         <div className="lg:col-span-8 space-y-4">
-          <div className="flex items-center justify-between pb-2 border-b border-[#26262a]">
+          <div
+            className={`flex items-center justify-between pb-2 border-b ${
+              isLight ? 'border-slate-200' : 'border-[#26262a]'
+            }`}
+          >
             <div>
-              <h2 className="text-[14px] font-bold text-[#ededed]">
+              <h2
+                className={`text-[14px] font-bold ${
+                  isLight ? 'text-slate-900' : 'text-[#ededed]'
+                }`}
+              >
                 Top recommended candidates
               </h2>
-              <p className="text-[12px] text-[#9a9aa2] mt-0.5">
+              <p
+                className={`text-[12px] ${
+                  isLight ? 'text-slate-500' : 'text-[#9a9aa2]'
+                } mt-0.5`}
+              >
                 Match score (based on roster needs)
               </p>
             </div>
             <button
               type="button"
               onClick={() => onNavigate('recruitment')}
-              className="text-[12px] text-[#9a9aa2] hover:text-[#ededed] cursor-pointer"
+              className={`text-[12px] ${
+                isLight ? 'text-slate-500 hover:text-slate-900' : 'text-[#9a9aa2] hover:text-[#ededed]'
+              } cursor-pointer`}
             >
               View all
             </button>
           </div>
 
-          {/* Compact 3-Row Table: Player, Role, Game, Match score, Est. buyout, "View" text link */}
-          <div className="border border-[#26262a] rounded-[6px] bg-[#131315] overflow-x-auto">
+          {/* Compact 3-Row Table */}
+          <div
+            className={`border ${
+              isLight ? 'border-slate-200 bg-white shadow-sm' : 'border-[#26262a] bg-[#131315]'
+            } rounded-[6px] overflow-x-auto`}
+          >
             <table className="w-full text-left text-[14px] border-collapse">
               <thead>
-                <tr className="border-b border-[#26262a] text-[12px] font-normal text-[#9a9aa2]">
+                <tr
+                  className={`border-b ${
+                    isLight
+                      ? 'border-slate-200 bg-slate-50 text-slate-500'
+                      : 'border-[#26262a] text-[#9a9aa2]'
+                  } text-[12px] font-normal`}
+                >
                   <th className="py-2.5 px-3 font-normal">Player</th>
                   <th className="py-2.5 px-3 font-normal">Role</th>
                   <th className="py-2.5 px-3 font-normal">Game</th>
@@ -161,44 +244,70 @@ export function DashboardView({
                 {candidates.map(candidate => (
                   <tr
                     key={candidate.id}
-                    className="border-b border-[#26262a] last:border-b-0 transition-colors duration-[120ms] hover:bg-[#1a1a1d]"
+                    className={`border-b ${
+                      isLight
+                        ? 'border-slate-100 hover:bg-slate-50'
+                        : 'border-[#26262a] hover:bg-[#1a1a1d]'
+                    } last:border-b-0 transition-colors duration-[120ms]`}
                   >
-                    {/* Player: handle bold, real name + team + region in muted below */}
                     <td className="py-3 px-3">
-                      <div className="font-bold text-[#ededed]">
+                      <div
+                        className={`font-bold ${
+                          isLight ? 'text-slate-900' : 'text-[#ededed]'
+                        }`}
+                      >
                         {candidate.handle}
                       </div>
-                      <div className="text-[12px] text-[#9a9aa2] mt-0.5">
+                      <div
+                        className={`text-[12px] ${
+                          isLight ? 'text-slate-500' : 'text-[#9a9aa2]'
+                        } mt-0.5`}
+                      >
                         {candidate.realName} · {candidate.team} · {candidate.region}
                       </div>
                     </td>
 
-                    {/* Role: plain muted text, NO colored pills */}
-                    <td className="py-3 px-3 text-[#9a9aa2]">
+                    <td
+                      className={`py-3 px-3 ${
+                        isLight ? 'text-slate-600' : 'text-[#9a9aa2]'
+                      }`}
+                    >
                       {candidate.role}
                     </td>
 
-                    {/* Game: plain muted text */}
-                    <td className="py-3 px-3 text-[#9a9aa2]">
+                    <td
+                      className={`py-3 px-3 ${
+                        isLight ? 'text-slate-600' : 'text-[#9a9aa2]'
+                      }`}
+                    >
                       {candidate.game}
                     </td>
 
-                    {/* Match score: lime text only, monospace, no background */}
-                    <td className="py-3 px-3 text-right font-mono tabular-nums font-semibold text-[#e8ff59]">
+                    <td
+                      className={`py-3 px-3 text-right font-mono tabular-nums font-semibold ${
+                        isLight ? 'text-emerald-600' : 'text-[#e8ff59]'
+                      }`}
+                    >
                       {candidate.matchScore}
                     </td>
 
-                    {/* Est. buyout: normal text color */}
-                    <td className="py-3 px-3 text-right font-mono tabular-nums text-[#ededed]">
+                    <td
+                      className={`py-3 px-3 text-right font-mono tabular-nums ${
+                        isLight ? 'text-slate-900' : 'text-[#ededed]'
+                      }`}
+                    >
                       ${candidate.buyout.toLocaleString()}
                     </td>
 
-                    {/* View text link */}
                     <td className="py-3 px-3 text-right">
                       <button
                         type="button"
                         onClick={() => onNavigate('discover')}
-                        className="text-[13px] text-[#9a9aa2] hover:text-[#ededed] hover:underline cursor-pointer bg-transparent border-0 p-0"
+                        className={`text-[13px] ${
+                          isLight
+                            ? 'text-slate-500 hover:text-slate-900'
+                            : 'text-[#9a9aa2] hover:text-[#ededed]'
+                        } hover:underline cursor-pointer bg-transparent border-0 p-0`}
                       >
                         View
                       </button>
@@ -210,39 +319,69 @@ export function DashboardView({
           </div>
         </div>
 
-        {/* Right Column (4 cols): Rosters and Activity separated by 1px borders */}
+        {/* Right Column (4 cols): Rosters and Activity */}
         <div className="lg:col-span-4 space-y-6">
           {/* Active Rosters Summary */}
           <div className="space-y-3">
-            <div className="flex items-center justify-between pb-2 border-b border-[#26262a]">
-              <h2 className="text-[14px] font-bold text-[#ededed]">
+            <div
+              className={`flex items-center justify-between pb-2 border-b ${
+                isLight ? 'border-slate-200' : 'border-[#26262a]'
+              }`}
+            >
+              <h2
+                className={`text-[14px] font-bold ${
+                  isLight ? 'text-slate-900' : 'text-[#ededed]'
+                }`}
+              >
                 Team rosters
               </h2>
               <button
                 type="button"
                 onClick={() => onNavigate('rosters')}
-                className="text-[12px] text-[#9a9aa2] hover:text-[#ededed] cursor-pointer"
+                className={`text-[12px] ${
+                  isLight ? 'text-slate-500 hover:text-slate-900' : 'text-[#9a9aa2] hover:text-[#ededed]'
+                } cursor-pointer`}
               >
                 Manage
               </button>
             </div>
 
-            <div className="border border-[#26262a] rounded-[6px] bg-[#131315] divide-y divide-[#26262a]">
+            <div
+              className={`border ${
+                isLight
+                  ? 'border-slate-200 bg-white divide-slate-100 shadow-sm'
+                  : 'border-[#26262a] bg-[#131315] divide-[#26262a]'
+              } rounded-[6px] divide-y`}
+            >
               {rosters.map(r => (
                 <div
                   key={r.id}
                   onClick={() => onNavigate('rosters')}
-                  className="p-3 flex items-center justify-between transition-colors duration-[120ms] hover:bg-[#1a1a1d] cursor-pointer"
+                  className={`p-3 flex items-center justify-between transition-colors duration-[120ms] ${
+                    isLight ? 'hover:bg-slate-50' : 'hover:bg-[#1a1a1d]'
+                  } cursor-pointer`}
                 >
                   <div>
-                    <div className="font-semibold text-[#ededed] text-[13px]">
+                    <div
+                      className={`font-semibold ${
+                        isLight ? 'text-slate-900' : 'text-[#ededed]'
+                      } text-[13px]`}
+                    >
                       {r.name}
                     </div>
-                    <div className="text-[12px] text-[#9a9aa2] mt-0.5">
+                    <div
+                      className={`text-[12px] ${
+                        isLight ? 'text-slate-500' : 'text-[#9a9aa2]'
+                      } mt-0.5`}
+                    >
                       {r.filled} / {r.total} players · {r.game}
                     </div>
                   </div>
-                  <span className="text-[12px] text-[#9a9aa2] font-mono">
+                  <span
+                    className={`text-[12px] ${
+                      isLight ? 'text-slate-500' : 'text-[#9a9aa2]'
+                    } font-mono`}
+                  >
                     {r.status}
                   </span>
                 </div>
@@ -252,25 +391,37 @@ export function DashboardView({
 
           {/* Activity Trajectory */}
           <div className="space-y-3">
-            <div className="pb-2 border-b border-[#26262a]">
-              <h2 className="text-[14px] font-bold text-[#ededed]">
+            <div
+              className={`pb-2 border-b ${
+                isLight ? 'border-slate-200' : 'border-[#26262a]'
+              }`}
+            >
+              <h2
+                className={`text-[14px] font-bold ${
+                  isLight ? 'text-slate-900' : 'text-[#ededed]'
+                }`}
+              >
                 Profiles reviewed (30d)
               </h2>
             </div>
 
-            <div className="border border-[#26262a] rounded-[6px] bg-[#131315] p-3">
+            <div
+              className={`border ${
+                isLight ? 'border-slate-200 bg-white shadow-sm' : 'border-[#26262a] bg-[#131315]'
+              } rounded-[6px] p-3`}
+            >
               <div className="h-28 w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={activityData}>
                     <XAxis
                       dataKey="date"
-                      stroke="#9a9aa2"
+                      stroke={isLight ? '#64748b' : '#9a9aa2'}
                       fontSize={11}
                       tickLine={false}
-                      axisLine={{ stroke: '#26262a' }}
+                      axisLine={{ stroke: isLight ? '#cbd5e1' : '#26262a' }}
                     />
                     <YAxis
-                      stroke="#9a9aa2"
+                      stroke={isLight ? '#64748b' : '#9a9aa2'}
                       fontSize={10}
                       tickLine={false}
                       axisLine={false}
@@ -278,17 +429,20 @@ export function DashboardView({
                     />
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: '#131315',
-                        borderColor: '#26262a',
+                        backgroundColor: isLight ? '#ffffff' : '#131315',
+                        borderColor: isLight ? '#cbd5e1' : '#26262a',
                         borderRadius: '6px',
                         fontSize: '12px',
-                        color: '#ededed',
+                        color: isLight ? '#0f172a' : '#ededed',
+                        boxShadow: isLight
+                          ? '0 4px 6px -1px rgb(0 0 0 / 0.1)'
+                          : undefined,
                       }}
                     />
                     <Line
                       type="monotone"
                       dataKey="profiles"
-                      stroke="#ededed"
+                      stroke={isLight ? '#0f172a' : '#ededed'}
                       strokeWidth={1.5}
                       dot={false}
                     />
