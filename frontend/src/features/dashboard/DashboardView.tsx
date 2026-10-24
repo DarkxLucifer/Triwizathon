@@ -1,6 +1,7 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { apiFetch } from '@/lib/api/client';
 import {
   LineChart,
   Line,
@@ -28,49 +29,96 @@ export function DashboardView({
 }: DashboardViewProps) {
   const isLight = theme === 'light';
 
-  const candidates = [
+  const [candidates, setCandidates] = useState([
     {
-      id: 'p-gem-vortex',
-      handle: 'Riven',
-      realName: 'Dmitry Morozov',
-      team: 'Vortex Rising',
-      region: 'CIS',
-      role: 'Entry',
+      id: '146',
+      handle: 'Vortex',
+      realName: 'Sam Sharma',
+      team: 'Free Agent',
+      region: 'India & APAC',
+      role: 'Entry / IGL',
       game: 'CS2',
       matchScore: 92,
       buyout: 45000,
     },
     {
-      id: 'p-broky',
-      handle: 'Kairo',
-      realName: 'Helvijs Saukants',
-      team: 'Apex Esports',
+      id: '116',
+      handle: 's1mple',
+      realName: 'Oleksandr Kostyliev',
+      team: 'Natus Vincere',
       region: 'EU',
       role: 'AWPer',
       game: 'CS2',
-      matchScore: 88,
-      buyout: 500000,
+      matchScore: 96,
+      buyout: 750000,
     },
     {
-      id: 'p-rookie',
-      handle: 'Nexon',
-      realName: 'Kevin Zhang',
-      team: 'Nexus Gaming',
-      region: 'Americas',
-      role: 'IGL',
+      id: '126',
+      handle: 'NiKo',
+      realName: 'Nikola Kovac',
+      team: 'G2 Esports',
+      region: 'EU',
+      role: 'Entry',
       game: 'CS2',
-      matchScore: 85,
-      buyout: 30000,
+      matchScore: 94,
+      buyout: 650000,
     },
-  ];
+  ]);
 
-  const activityData = [
-    { date: 'Oct 1', profiles: 58 },
-    { date: 'Oct 7', profiles: 72 },
-    { date: 'Oct 14', profiles: 68 },
-    { date: 'Oct 21', profiles: 96 },
-    { date: 'Oct 28', profiles: 118 },
-  ];
+  const [activityData, setActivityData] = useState([
+    { date: 'Oct 1', profiles: 18 },
+    { date: 'Oct 7', profiles: 24 },
+    { date: 'Oct 14', profiles: 35 },
+    { date: 'Oct 21', profiles: 48 },
+    { date: 'Oct 24', profiles: 62 },
+  ]);
+
+  const [kpis, setKpis] = useState({
+    active_candidates: 147,
+    scouting_briefs: 2,
+    active_rosters: 2,
+    evaluations_logged: 3,
+  });
+
+  useEffect(() => {
+    async function loadDashboardData() {
+      try {
+        const token = localStorage.getItem('scoutforge_access_token') || undefined;
+        
+        // 1. Live KPIs
+        const kpiRes = await apiFetch<{
+          active_candidates: number;
+          scouting_briefs: number;
+          active_rosters: number;
+          evaluations_logged: number;
+        }>('/org/dashboard/kpis', { token });
+        if (kpiRes) setKpis(kpiRes);
+
+        // 2. Live Chart up to today
+        const chartRes = await apiFetch<{ date: string; profiles: number }[]>('/org/dashboard/chart', { token });
+        if (chartRes && chartRes.length > 0) setActivityData(chartRes);
+
+        // 3. Live real top candidates
+        const playerRes = await apiFetch<{ items: any[] }>('/players?limit=3', { token });
+        if (playerRes?.items && playerRes.items.length > 0) {
+          setCandidates(playerRes.items.map(p => ({
+            id: String(p.id),
+            handle: p.handle,
+            realName: p.name,
+            team: p.team_name || 'Free Agent',
+            region: p.region,
+            role: p.role,
+            game: 'CS2',
+            matchScore: Math.round((p.confidence || 0.85) * 100),
+            buyout: p.tier === 'Tier 1' ? 350000 : 45000,
+          })));
+        }
+      } catch (err) {
+        console.warn('Dashboard live API notice:', err);
+      }
+    }
+    loadDashboardData();
+  }, []);
 
   const rosters = [
     { id: 'cs2', name: 'CS2 Main Lineup', game: 'CS2', filled: 4, total: 5, status: 'Open slot' },
@@ -110,7 +158,7 @@ export function DashboardView({
               isLight ? 'text-slate-900' : 'text-[#ededed]'
             } leading-none`}
           >
-            128
+            {kpis.active_candidates}
           </div>
           <div className={`text-[12px] ${isLight ? 'text-slate-500' : 'text-[#9a9aa2]'} mt-1.5`}>
             Active candidates
@@ -130,7 +178,7 @@ export function DashboardView({
               isLight ? 'text-slate-900' : 'text-[#ededed]'
             } leading-none`}
           >
-            4
+            {kpis.scouting_briefs}
           </div>
           <div className={`text-[12px] ${isLight ? 'text-slate-500' : 'text-[#9a9aa2]'} mt-1.5`}>
             Scouting briefs
@@ -150,7 +198,7 @@ export function DashboardView({
               isLight ? 'text-slate-900' : 'text-[#ededed]'
             } leading-none`}
           >
-            3
+            {kpis.active_rosters}
           </div>
           <div className={`text-[12px] ${isLight ? 'text-slate-500' : 'text-[#9a9aa2]'} mt-1.5`}>
             Active rosters
@@ -166,7 +214,7 @@ export function DashboardView({
               isLight ? 'text-slate-900' : 'text-[#ededed]'
             } leading-none`}
           >
-            16
+            {kpis.evaluations_logged}
           </div>
           <div className={`text-[12px] ${isLight ? 'text-slate-500' : 'text-[#9a9aa2]'} mt-1.5`}>
             Evaluations logged

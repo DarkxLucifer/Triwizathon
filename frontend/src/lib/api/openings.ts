@@ -64,4 +64,27 @@ export const openingsApi = {
       body: JSON.stringify({ cover_note: coverNote || '' }),
     });
   },
+
+  async getOpeningApplications(openingId: number, token?: string): Promise<ApplicationItem[]> {
+    return apiFetch<ApplicationItem[]>(`/openings/${openingId}/applications`, {
+      method: 'GET',
+      token,
+    });
+  },
+
+  async updateApplicationStatus(
+    applicationId: number,
+    status: string,
+    reviewerNotes?: string,
+    token?: string
+  ): Promise<ApplicationItem> {
+    return apiFetch<ApplicationItem>(`/openings/applications/${applicationId}/status`, {
+      method: 'PUT',
+      token,
+      body: JSON.stringify({
+        status,
+        reviewer_notes: reviewerNotes || '',
+      }),
+    });
+  },
 };

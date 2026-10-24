@@ -39,7 +39,7 @@ import {
   ChevronDown,
   ChevronUp
 } from "lucide-react";
-import { PlayerProfile, GameType, GameplayVideoClip, AvailabilityStatus, GameProfile, RoleApplication } from "@/types/dashboard";
+import { PlayerProfile, GameType, GameplayVideoClip, AvailabilityStatus, GameProfile, RoleApplication, normalizeGameType } from "@/types/dashboard";
 import { VideoPlayerModal } from "../components/VideoPlayerModal";
 import { playerApi } from "@/lib/api/player";
 
@@ -142,7 +142,7 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
   });
 
   // Selected game for details & editing
-  const [activeGameView, setActiveGameView] = useState<GameType>(player.activeGame || "BGMI");
+  const [activeGameView, setActiveGameView] = useState<GameType>(normalizeGameType(player.activeGame));
 
   // Per-game editable credentials & stats
   const [perGameDetails, setPerGameDetails] = useState<Record<GameType, {
@@ -377,7 +377,16 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
     ? mediaClips.filter(c => c.game === activeGameView)
     : mediaClips;
 
-  const currentDetails = perGameDetails[activeGameView];
+  const safeGame = normalizeGameType(activeGameView);
+  const currentDetails = perGameDetails[safeGame] || perGameDetails.BGMI || {
+    ign: 'Vortex',
+    gameId: '5128940192',
+    rank: 'Conqueror Top 100',
+    role: 'Assaulter / IGL',
+    tier: 'BGIS Verified',
+    primaryStat: '842.0 Avg Dmg',
+    winRate: '72%',
+  };
 
   return (
     <div className="space-y-6 animate-in fade-in duration-150">
@@ -850,7 +859,7 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
             </div>
           </div>
           <span className="text-xs font-mono font-bold px-2 py-0.5 rounded border border-[#e8ff59]/30 bg-[#e8ff59]/10 text-[#e8ff59]">
-            {currentDetails.tier}
+            {currentDetails?.tier || "Verified Candidate"}
           </span>
         </div>
 
@@ -864,7 +873,7 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
               </label>
               <input
                 type="text"
-                value={currentDetails.ign}
+                value={currentDetails?.ign || ""}
                 onChange={(e) => setPerGameDetails({
                   ...perGameDetails,
                   [activeGameView]: { ...currentDetails, ign: e.target.value }
@@ -887,7 +896,7 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
               </label>
               <input
                 type="text"
-                value={currentDetails.gameId}
+                value={currentDetails?.gameId || ""}
                 onChange={(e) => setPerGameDetails({
                   ...perGameDetails,
                   [activeGameView]: { ...currentDetails, gameId: e.target.value }
@@ -912,7 +921,7 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
               </label>
               <input
                 type="text"
-                value={currentDetails.rank}
+                value={currentDetails?.rank || ""}
                 onChange={(e) => setPerGameDetails({
                   ...perGameDetails,
                   [activeGameView]: { ...currentDetails, rank: e.target.value }
@@ -931,7 +940,7 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
               </label>
               <input
                 type="text"
-                value={currentDetails.role}
+                value={currentDetails?.role || ""}
                 onChange={(e) => setPerGameDetails({
                   ...perGameDetails,
                   [activeGameView]: { ...currentDetails, role: e.target.value }
@@ -950,7 +959,7 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
               </label>
               <input
                 type="text"
-                value={currentDetails.primaryStat}
+                value={currentDetails?.primaryStat || ""}
                 onChange={(e) => setPerGameDetails({
                   ...perGameDetails,
                   [activeGameView]: { ...currentDetails, primaryStat: e.target.value }
@@ -969,7 +978,7 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
               </label>
               <input
                 type="text"
-                value={currentDetails.winRate}
+                value={currentDetails?.winRate || ""}
                 onChange={(e) => setPerGameDetails({
                   ...perGameDetails,
                   [activeGameView]: { ...currentDetails, winRate: e.target.value }

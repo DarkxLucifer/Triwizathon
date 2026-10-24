@@ -2,6 +2,17 @@ export type TabType = "overview" | "benchmark" | "evidence" | "scouting" | "prof
 
 export type GameType = "Valorant" | "BGMI" | "Free Fire" | "Mobile Legends" | "CS2";
 
+export function normalizeGameType(game?: string): GameType {
+  if (!game) return "BGMI";
+  const lower = game.toLowerCase().trim();
+  if (lower.includes("battlegrounds") || lower.includes("bgmi")) return "BGMI";
+  if (lower.includes("counter-strike") || lower.includes("cs2") || lower.includes("cs:go") || lower.includes("counterstrike")) return "CS2";
+  if (lower.includes("valorant")) return "Valorant";
+  if (lower.includes("free fire") || lower.includes("freefire")) return "Free Fire";
+  if (lower.includes("mobile legends") || lower.includes("mlbb")) return "Mobile Legends";
+  return "BGMI";
+}
+
 export interface GameProfile {
   id: GameType;
   name: string;

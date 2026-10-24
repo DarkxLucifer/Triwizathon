@@ -21,6 +21,7 @@ import {
   INITIAL_DECISIONS,
 } from '@/lib/mock/initialData';
 import { rankCandidatesForBrief } from '@/lib/scoring/engine';
+import { apiFetch } from '@/lib/api/client';
 
 export interface AppState {
   currentOrgId: string;
@@ -89,6 +90,64 @@ export function useScoutForgeStore() {
     },
   ]);
 
+  // Sync real players from FastAPI backend
+  useEffect(() => {
+    async function syncRealPlayers() {
+      try {
+        const token = typeof window !== 'undefined' ? localStorage.getItem('scoutforge_access_token') || undefined : undefined;
+        const res = await apiFetch<{ items: any[] }>('/players?limit=100', { token });
+        if (res?.items && res.items.length > 0) {
+          const mapped: Player[] = res.items.map((p, idx) => ({
+            id: String(p.id),
+            handle: p.handle,
+            realName: p.name || p.handle,
+            currentTeamId: 't-1',
+            currentTeamName: p.team_name || 'Free Agent',
+            gameTitle: 'Counter-Strike 2',
+            primaryRole: p.role,
+            region: p.region || 'EU',
+            tier: p.tier || 'Tier 2',
+            matchesPlayed: p.matches_count || 12,
+            roundsPlayed: (p.matches_count || 12) * 24,
+            lastMatchDate: '2026-10-24',
+            stats: {
+              rating: 1.15,
+              kdRatio: p.kd || 1.10,
+              adr: p.adr || 78.5,
+              kpr: p.kpr || 0.72,
+              openingImpact: 0.65,
+              tradeability: 0.72,
+              utilityValue: 0.60,
+              tradeStructure: 0.70,
+              lateRoundImpact: 0.62,
+              survivalValue: 0.58,
+              openingDuelWinRate: 0.52,
+              clutchValue: 0.68,
+              commandRatio: 1.25,
+              callsPerRound: 3.4,
+              clarity: 0.88,
+              winAfterCall: 0.62,
+              adaptation: 0.78,
+            },
+            visibilityGap: Math.round((1 - (p.confidence || 0.75)) * 100) / 100,
+            improvementTrend: 0.08,
+            buyoutUsd: p.tier === 'Tier 1' ? 350000 : 45000,
+            contractUntil: '2026-12-31',
+            availability: (p.is_available ? 'Available' : 'Under Contract') as any,
+            primaryLanguage: 'English',
+            isSimulated: p.source === 'simulated',
+            provenanceSource: p.source || 'simulated',
+            hasConsentedAudio: true,
+          }));
+          setPlayers(mapped);
+        }
+      } catch (err) {
+        console.warn('Real players live sync notice:', err);
+      }
+    }
+    syncRealPlayers();
+  }, []);
+
   // Compute recommendations for the active brief
   const activeRecommendations = activeBrief
     ? rankCandidatesForBrief(activeBrief, players)
@@ -101,7 +160,7 @@ export function useScoutForgeStore() {
   const scopedAudioJobs = audioJobs.filter(a => a.organizationId === currentOrgId);
 
   // Actions
-  const addDecision = (decision: Omit<DecisionLog, 'id' | 'timestamp' | 'organizationId'>) => {
+  const addDecision = async (decision: Omit<DecisionLog, 'id' | 'timestamp' | 'organizationId'>) => {
     const newDecision: DecisionLog = {
       ...decision,
       id: `dec-${Date.now()}`,
@@ -109,6 +168,25 @@ export function useScoutForgeStore() {
       timestamp: new Date().toISOString(),
     };
     setDecisions(prev => [newDecision, ...prev]);
+
+    try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('scoutforge_access_token') || undefined : undefined;
+      const pIdNum = parseInt(decision.playerId, 10);
+      if (!isNaN(pIdNum)) {
+        await apiFetch('/decisions', {
+          method: 'POST',
+          token,
+          body: JSON.stringify({
+            player_id: pIdNum,
+            action: decision.action,
+            rationale: decision.rationale,
+            outcome_label: 'pending_trial',
+          }),
+        });
+      }
+    } catch (e) {
+      console.warn('Backend decision sync notice:', e);
+    }
   };
 
   const updateDecisionOutcome = (decisionId: string, outcomeFeedback: string) => {

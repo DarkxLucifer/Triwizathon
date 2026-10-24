@@ -92,6 +92,7 @@ import {
 
 
 
+  normalizeGameType,
 } from '@/types/dashboard';
 
 
@@ -2500,7 +2501,7 @@ export function PlayerDashboardView({
             email: dossier.contact_email || prev.email,
             phone: dossier.contact_phone || prev.phone,
             region: dossier.region || prev.region,
-            activeGame: (dossier.primary_game as GameType) || prev.activeGame,
+            activeGame: normalizeGameType(dossier.primary_game) || prev.activeGame,
             availabilityStatus: (dossier.availability_status as AvailabilityStatus) || prev.availabilityStatus,
             currentGrind: `${dossier.hours_per_week || 38} hrs / week`,
             scrimWindow: `${dossier.scrim_window_start || '18:00'} – ${dossier.scrim_window_end || '23:30'} ${dossier.scrim_timezone || 'IST'}`,
@@ -2518,7 +2519,7 @@ export function PlayerDashboardView({
             videoClips: (dossier.clips || []).map(c => ({
               id: `vod-${c.id}`,
               title: c.title,
-              game: (dossier.primary_game as GameType) || 'BGMI',
+              game: normalizeGameType(dossier.primary_game) || 'BGMI',
               videoUrl: c.file_path,
               duration: `${Math.round(c.duration_seconds || 45)}s`,
               resolution: '1080p 60fps HD',
@@ -2772,179 +2773,63 @@ export function PlayerDashboardView({
 
 
 
-  const handleApplyToOpening = (
-
-
-
+  const handleApplyToOpening = async (
     opening: RosterOpening,
-
-
-
     appData: {
-
-
-
       gameUid: string;
-
-
-
       experienceYears: number;
-
-
-
       experienceMonths: number;
-
-
-
       currentRank: string;
-
-
-
       primaryAgentOrWeapon: string;
-
-
-
       playerAge: string;
-
-
-
       locationCity: string;
-
-
-
       discordContact: string;
-
-
-
       phoneContact: string;
-
-
-
       scrimAvailability: string;
-
-
-
       hardwareSetup: string;
-
-
-
       pastTournaments: string;
-
-
-
       bootcampReady: boolean;
-
-
-
       message: string;
-
-
-
     }
-
-
-
   ) => {
-
-
-
     setOpenings(prev =>
-
-
-
       prev.map(op => (op.id === opening.id ? { ...op, applied: true } : op))
-
-
-
     );
 
-
-
-
-
-
-
     const newApp: RoleApplication = {
-
-
-
       id: `app-${Date.now()}`,
-
-
-
       openingId: opening.id,
-
-
-
       teamName: opening.teamName,
-
-
-
       game: opening.game,
-
-
-
       roleApplied: opening.roleNeeded,
-
-
-
       submittedAt: 'Just now',
-
-
-
       status: 'Under Review',
-
-
-
       coachNote:
-
-
-
         'Application received with verified Game UID and competitive experience dossier. Coaching staff notified.',
-
-
-
       applicantIgn: player.name,
-
-
-
       fitScore: player.fitScore,
-
-
-
       ...appData,
-
-
-
     };
-
-
-
-
-
-
 
     setApplications(prev => [newApp, ...prev]);
 
-
+    try {
+      const token = localStorage.getItem('scoutforge_access_token') || undefined;
+      const opIdNum = parseInt(opening.id, 10);
+      if (!isNaN(opIdNum)) {
+        const coverNote = `Game UID: ${appData.gameUid} | Exp: ${appData.experienceYears}y ${appData.experienceMonths}m | Rank: ${appData.currentRank} | Hardware: ${appData.hardwareSetup} | Note: ${appData.message || 'Ready for trial'}`;
+        await openingsApi.applyToOpening(opIdNum, coverNote, token);
+      }
+    } catch (err: any) {
+      console.warn('Backend opening application notice:', err?.message || err);
+    }
 
     addToast(
-
-
-
       `Application sent to ${opening.teamName}! Your Game UID (${appData.gameUid}) and ${appData.experienceYears}y ${appData.experienceMonths}m experience were submitted.`,
-
-
-
       'success'
-
-
-
     );
-
-
-
   };
+
 
 
 
