@@ -1053,13 +1053,60 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
           )}
         </div>
 
+        {/* Game-Specific API Data Requirement Notice */}
+        <div className={`p-3 rounded-[6px] border text-xs flex items-start gap-2.5 ${
+          activeGameView === 'CS2'
+            ? isLight
+              ? "bg-emerald-50/80 border-emerald-200 text-emerald-900"
+              : "bg-emerald-950/20 border-emerald-500/30 text-emerald-300"
+            : isLight
+            ? "bg-slate-100/80 border-slate-200 text-slate-700"
+            : "bg-[#18181b] border-[#26262a] text-[#9a9aa2]"
+        }`}>
+          <Info className="w-4 h-4 shrink-0 mt-0.5" />
+          <div className="space-y-0.5">
+            <div className="font-bold text-[11px] uppercase tracking-wider">
+              {activeGameView === 'CS2' ? 'Official API Telemetry Ready (Leetify & PandaScore)' : `${activeGameView} Official Verification Requirements`}
+            </div>
+            <div className="text-[11px] leading-relaxed">
+              {activeGameView === 'CS2' ? (
+                <span>
+                  <strong>Steam64 ID (17 digits)</strong> is the strict identifier required by Leetify & PandaScore to pull authentic match ADR, K/D, clutch conversion, trade structure, and flash utility. Enter your Steam ID below to verify your dossier.
+                </span>
+              ) : activeGameView === 'Valorant' ? (
+                <span>
+                  <strong>Riot ID (Name#TAG)</strong> is required for Valorant ranked ladder ELO and ACS ingestion. Enter your official Riot identifier below.
+                </span>
+              ) : activeGameView === 'BGMI' ? (
+                <span>
+                  <strong>Krafton Character UID (10 Digits)</strong> is required for official BGIS / BMPS tournament roster verification and scrim registrations. Enter your UID and average damage below.
+                </span>
+              ) : activeGameView === 'Free Fire' ? (
+                <span>
+                  <strong>Garena Character UID (8–10 Digits)</strong> is required for official FFWS roster locks. Enter your UID and headshot % below.
+                </span>
+              ) : (
+                <span>
+                  <strong>MLBB User ID & 4-digit Zone ID</strong> is required for official MPL contender check-in. Enter your ID and GPM below.
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+
         {/* Form Fields for the Selected Game */}
         <form onSubmit={handleSaveGameCredentials} className="mt-4 space-y-4 text-xs">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {/* IGN */}
             <div>
               <label className="block text-[10px] font-mono font-bold text-slate-500 dark:text-[#9a9aa2] mb-1">
-                IN-GAME NAME (IGN) FOR {activeGameView.toUpperCase()}
+                {activeGameView === 'CS2' 
+                  ? 'IN-GAME NICKNAME (IGN)' 
+                  : activeGameView === 'Valorant' 
+                  ? 'VALORANT IN-GAME NAME' 
+                  : activeGameView === 'BGMI' 
+                  ? 'BGMI IN-GAME NAME (IGN)' 
+                  : `${activeGameView.toUpperCase()} IN-GAME NAME`}
               </label>
               <input
                 type="text"
@@ -1068,7 +1115,12 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
                   ...perGameDetails,
                   [activeGameView]: { ...currentDetails, ign: e.target.value }
                 })}
-                placeholder="e.g. Vortex"
+                placeholder={
+                  activeGameView === 'CS2' ? 'e.g. Vortex' :
+                  activeGameView === 'Valorant' ? 'e.g. Vortex' :
+                  activeGameView === 'BGMI' ? 'e.g. 5128940192 (Vortex)' :
+                  activeGameView === 'Free Fire' ? 'e.g. Vortex_FF#77' : 'e.g. VortexMLBB'
+                }
                 className={`w-full p-2 rounded-[6px] border text-xs font-bold outline-hidden ${
                   isLight ? "bg-white border-slate-300 text-slate-900" : "bg-[#0b0b0c] border-[#26262a] text-[#ededed]"
                 }`}
@@ -1079,10 +1131,14 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
             <div>
               <label className="block text-[10px] font-mono font-bold text-slate-500 dark:text-[#9a9aa2] mb-1">
                 {activeGameView === 'CS2' 
-                  ? 'STEAM64 ID / ACCOUNT ID' 
+                  ? 'STEAM64 ID / ACCOUNT ID (REQUIRED FOR CS2)' 
                   : activeGameView === 'Valorant' 
-                  ? 'RIOT ID (NAME#TAG)' 
-                  : 'CHARACTER UID / PLAYER ID'}
+                  ? 'RIOT ID (NAME#TAG - REQUIRED FOR VALORANT)' 
+                  : activeGameView === 'BGMI'
+                  ? 'KRAFTON CHARACTER UID (10 DIGITS - REQUIRED)'
+                  : activeGameView === 'Free Fire'
+                  ? 'FREE FIRE CHARACTER UID (REQUIRED)'
+                  : 'MLBB USER ID & ZONE ID (REQUIRED)'}
               </label>
               <input
                 type="text"
@@ -1095,8 +1151,12 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
                   activeGameView === 'CS2' 
                     ? '76561198012345678' 
                     : activeGameView === 'Valorant' 
-                    ? 'Vortex#VAL' 
-                    : '5128940192'
+                    ? 'Vortex#VAL or Player#1234' 
+                    : activeGameView === 'BGMI'
+                    ? '5128940192'
+                    : activeGameView === 'Free Fire'
+                    ? '88194012'
+                    : '98124801 (4012)'
                 }
                 className={`w-full p-2 rounded-[6px] border text-xs font-mono font-bold outline-hidden ${
                   isLight ? "bg-white border-slate-300 text-slate-900" : "bg-[#0b0b0c] border-[#26262a] text-[#ededed]"
@@ -1107,7 +1167,15 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
             {/* Rank & Tier */}
             <div>
               <label className="block text-[10px] font-mono font-bold text-slate-500 dark:text-[#9a9aa2] mb-1">
-                COMPETITIVE RANK / ELO
+                {activeGameView === 'CS2' 
+                  ? 'COMPETITIVE RANK / FACEIT ELO' 
+                  : activeGameView === 'Valorant' 
+                  ? 'COMPETITIVE RANK (RADIANT / IMMORTAL)' 
+                  : activeGameView === 'BGMI'
+                  ? 'BGMI RANK (CONQUEROR / ACE)'
+                  : activeGameView === 'Free Fire'
+                  ? 'RANK (GRANDMASTER / HEROIC)'
+                  : 'RANK (MYTHICAL GLORY / IMMORTAL)'}
               </label>
               <input
                 type="text"
@@ -1116,7 +1184,12 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
                   ...perGameDetails,
                   [activeGameView]: { ...currentDetails, rank: e.target.value }
                 })}
-                placeholder="e.g. Conqueror Top 100 / FACEIT Lvl 10"
+                placeholder={
+                  activeGameView === 'CS2' ? 'FACEIT Level 10 (2,480 ELO)' :
+                  activeGameView === 'Valorant' ? 'Radiant #412' :
+                  activeGameView === 'BGMI' ? 'Conqueror Top 100' :
+                  activeGameView === 'Free Fire' ? 'Grandmaster V' : 'Mythical Glory 1,240★'
+                }
                 className={`w-full p-2 rounded-[6px] border text-xs font-bold outline-hidden ${
                   isLight ? "bg-white border-slate-300 text-slate-900" : "bg-[#0b0b0c] border-[#26262a] text-[#ededed]"
                 }`}
@@ -1126,7 +1199,15 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
             {/* Primary Role */}
             <div>
               <label className="block text-[10px] font-mono font-bold text-slate-500 dark:text-[#9a9aa2] mb-1">
-                PRIMARY ROLE MASTERY
+                {activeGameView === 'CS2' 
+                  ? 'CS2 TACTICAL COMBAT ROLE' 
+                  : activeGameView === 'Valorant' 
+                  ? 'PRIMARY AGENT / COMBAT ROLE' 
+                  : activeGameView === 'BGMI'
+                  ? 'SQUAD COMBAT ROLE'
+                  : activeGameView === 'Free Fire'
+                  ? 'TACTICAL RUSHER / FLANK ROLE'
+                  : 'LANE & HERO SPECIALIZATION'}
               </label>
               <input
                 type="text"
@@ -1135,7 +1216,12 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
                   ...perGameDetails,
                   [activeGameView]: { ...currentDetails, role: e.target.value }
                 })}
-                placeholder="e.g. Frontline Assaulter / Dedicated AWPer"
+                placeholder={
+                  activeGameView === 'CS2' ? 'Dedicated AWPer / Entry' :
+                  activeGameView === 'Valorant' ? 'Duelist (Jett/Reyna) / Initiator' :
+                  activeGameView === 'BGMI' ? 'Frontline Assaulter / IGL' :
+                  activeGameView === 'Free Fire' ? 'Flank Rusher' : 'Jungle Carry (Assassin)'
+                }
                 className={`w-full p-2 rounded-[6px] border text-xs outline-hidden ${
                   isLight ? "bg-white border-slate-300 text-slate-900" : "bg-[#0b0b0c] border-[#26262a] text-[#ededed]"
                 }`}
@@ -1145,7 +1231,15 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
             {/* Primary Stat */}
             <div>
               <label className="block text-[10px] font-mono font-bold text-slate-500 dark:text-[#9a9aa2] mb-1">
-                COMBAT PERFORMANCE METRIC
+                {activeGameView === 'CS2' 
+                  ? 'AVERAGE DAMAGE PER ROUND (ADR)' 
+                  : activeGameView === 'Valorant' 
+                  ? 'AVERAGE COMBAT SCORE (ACS)' 
+                  : activeGameView === 'BGMI'
+                  ? 'AVERAGE DAMAGE / FINISH-TO-DEATH'
+                  : activeGameView === 'Free Fire'
+                  ? 'HEADSHOT % / K/D RATIO'
+                  : 'GOLD PER MINUTE (GPM) / KDA'}
               </label>
               <input
                 type="text"
@@ -1154,7 +1248,12 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
                   ...perGameDetails,
                   [activeGameView]: { ...currentDetails, primaryStat: e.target.value }
                 })}
-                placeholder="e.g. 842.0 Avg Dmg / 284.5 ACS"
+                placeholder={
+                  activeGameView === 'CS2' ? '87.4 ADR' :
+                  activeGameView === 'Valorant' ? '284.5 ACS' :
+                  activeGameView === 'BGMI' ? '842.0 Avg Dmg (F/D: 4.8)' :
+                  activeGameView === 'Free Fire' ? '68.4% HS Rate' : '740 GPM (4.8 KDA)'
+                }
                 className={`w-full p-2 rounded-[6px] border text-xs font-mono outline-hidden ${
                   isLight ? "bg-white border-slate-300 text-slate-900" : "bg-[#0b0b0c] border-[#26262a] text-[#ededed]"
                 }`}
@@ -1164,7 +1263,15 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
             {/* Win Rate */}
             <div>
               <label className="block text-[10px] font-mono font-bold text-slate-500 dark:text-[#9a9aa2] mb-1">
-                SCRIM / TOURNAMENT WIN RATE
+                {activeGameView === 'CS2' 
+                  ? 'CS2 SCRIM / MATCH WIN RATE' 
+                  : activeGameView === 'Valorant' 
+                  ? 'VALORANT RANKED WIN RATE' 
+                  : activeGameView === 'BGMI'
+                  ? 'BGMI SCRIM / TOURNAMENT WIN RATE'
+                  : activeGameView === 'Free Fire'
+                  ? 'BR / CLASH SQUAD WIN RATE'
+                  : 'MLBB RANKED WIN RATE'}
               </label>
               <input
                 type="text"
@@ -1577,106 +1684,6 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Applied Applications & Roster Trials Section */}
-      <div
-        className={`rounded-[8px] border p-6 shadow-xs ${
-          isLight
-            ? "border-slate-200 bg-white"
-            : "border-[#26262a] bg-[#131315]"
-        }`}
-      >
-        <div className={`flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b gap-2 ${
-          isLight ? "border-slate-200" : "border-[#26262a]"
-        }`}>
-          <div className="flex items-center gap-2">
-            <CheckCircle2 className={`w-4 h-4 ${isLight ? "text-slate-800" : "text-emerald-400"}`} />
-            <div>
-              <h2 className={`text-sm font-black tracking-wide ${isLight ? "text-slate-950" : "text-[#ededed]"}`}>
-                Applied Applications & Roster Trials
-              </h2>
-              <p className={`text-xs mt-0.5 ${isLight ? "text-slate-500" : "text-[#9a9aa2]"}`}>
-                Real-time tracking of active applications sent to verified esports organizations
-              </p>
-            </div>
-          </div>
-          {onViewApplications && (
-            <button
-              type="button"
-              onClick={onViewApplications}
-              className={`px-3 py-1.5 rounded-[6px] text-xs font-bold border transition-colors cursor-pointer ${
-                isLight
-                  ? "border-slate-300 bg-white hover:bg-slate-50 text-slate-800 shadow-xs"
-                  : "border-[#26262a] bg-[#1a1a1d] hover:bg-[#26262a] text-[#ededed]"
-              }`}
-            >
-              View In Applications Tab ({applications?.length || 0})
-            </button>
-          )}
-        </div>
-
-        {(!applications || applications.length === 0) ? (
-          <div className="py-8 text-center space-y-2">
-            <CheckCircle2 className={`w-8 h-8 mx-auto opacity-30 ${isLight ? "text-slate-600" : "text-[#ededed]"}`} />
-            <div className={`text-xs font-bold ${isLight ? "text-slate-700" : "text-[#ededed]"}`}>
-              No Active Applications Submitted Yet
-            </div>
-            <p className={`text-[11px] max-w-md mx-auto ${isLight ? "text-slate-500" : "text-[#9a9aa2]"}`}>
-              When you submit your dossier to active team openings, your live trial status, coach reviews, and scrim invites appear here.
-            </p>
-            {onViewOpenings && (
-              <button
-                type="button"
-                onClick={onViewOpenings}
-                className="mt-2 px-3 py-1 rounded-[6px] text-xs font-bold bg-[#bef226] text-slate-950 hover:bg-[#a6d817] transition-colors cursor-pointer"
-              >
-                Browse Open Roles
-              </button>
-            )}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-4">
-            {applications.map((app) => (
-              <div
-                key={app.id}
-                className={`p-3.5 rounded-[6px] border flex flex-col justify-between ${
-                  isLight ? "border-slate-200 bg-slate-50/70" : "border-[#26262a] bg-[#0b0b0c]"
-                }`}
-              >
-                <div>
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-[10px] font-mono font-bold text-slate-500 dark:text-[#9a9aa2] uppercase">
-                      {app.game}
-                    </span>
-                    <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ${
-                      app.status === 'Shortlisted for Trial' || app.status === 'Accepted'
-                        ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/30'
-                        : app.status === 'Under Review'
-                        ? 'bg-amber-500/10 text-amber-500 border border-amber-500/30'
-                        : 'bg-slate-500/10 text-slate-400 border border-slate-500/20'
-                    }`}>
-                      {app.status}
-                    </span>
-                  </div>
-                  <div className={`text-sm font-bold mt-1.5 ${isLight ? "text-slate-900" : "text-[#ededed]"}`}>
-                    {app.roleApplied}
-                  </div>
-                  <div className={`text-xs mt-0.5 ${isLight ? "text-slate-600" : "text-[#9a9aa2]"}`}>
-                    {app.teamName}
-                  </div>
-                </div>
-
-                <div className={`mt-3 pt-2.5 border-t flex items-center justify-between text-[11px] ${
-                  isLight ? "border-slate-200 text-slate-500" : "border-[#26262a] text-[#9a9aa2]"
-                }`}>
-                  <span className="font-mono">{app.submittedAt}</span>
-                  <span className="font-mono font-semibold">Fit: {app.fitScore}%</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
 
       {/* Video Modal Player */}
