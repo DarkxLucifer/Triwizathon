@@ -62,6 +62,7 @@ class Player(Base):
     __tablename__ = "players"
 
     id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     external_id = Column(String(100), unique=True, index=True, nullable=True)
     name = Column(String(100), nullable=False)
     handle = Column(String(50), index=True, nullable=False)
@@ -73,13 +74,38 @@ class Player(Base):
     is_available = Column(Boolean, default=True, nullable=False)
     avatar_url = Column(String(255), nullable=True)
     playstyle = Column(String(50), default="Balanced", nullable=False)
+    
+    # Dossier fields
+    contact_email = Column(String(255), nullable=True)
+    contact_phone = Column(String(50), nullable=True)
+    hours_per_week = Column(Integer, default=30, nullable=False)
+    scrim_window_start = Column(String(20), default="18:00", nullable=False)
+    scrim_window_end = Column(String(20), default="23:30", nullable=False)
+    scrim_timezone = Column(String(20), default="UTC", nullable=False)
+    playstyle_description = Column(Text, nullable=True)
+    primary_game = Column(String(50), default="Counter-Strike 2", nullable=False)
+    availability_status = Column(String(50), default="Open to Offers", nullable=False)
+    hardware_specs_json = Column(JSON, nullable=True)
+    map_pool_json = Column(JSON, nullable=True)
+    past_experience_json = Column(JSON, nullable=True)
+    expected_compensation = Column(String(100), nullable=True)
+    visibility_settings_json = Column(JSON, nullable=True)
+
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
 
+    user = relationship("User", foreign_keys=[user_id])
     role = relationship("Role", back_populates="players")
     team = relationship("Team", back_populates="players")
     match_stats = relationship("PlayerMatchStat", back_populates="player", cascade="all, delete-orphan")
     recommendations = relationship("Recommendation", back_populates="player")
     audio_jobs = relationship("AudioJob", back_populates="player")
+    titles = relationship("PlayerTitle", back_populates="player", cascade="all, delete-orphan")
+    score_history = relationship("PlayerScoreHistory", back_populates="player", cascade="all, delete-orphan")
+    clips = relationship("PlayerClip", back_populates="player", cascade="all, delete-orphan")
+    contact_grants = relationship("ContactAccessGrant", back_populates="player", cascade="all, delete-orphan")
+    applications = relationship("Application", back_populates="player", cascade="all, delete-orphan")
+    watchlists = relationship("PlayerWatchlist", back_populates="player", cascade="all, delete-orphan")
+    activity_events = relationship("ActivityEvent", back_populates="player", cascade="all, delete-orphan")
 
 
 class Match(Base):

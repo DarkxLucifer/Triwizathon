@@ -1,0 +1,378 @@
+from typing import List, Optional
+from datetime import datetime, timezone
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy.orm import Session
+from sqlalchemy import func
+
+from app.core.database import get_db
+from app.api.deps import get_current_user, require_organiser, require_player, enforce_org_isolation
+from app.models.user import User
+from app.models.esports import Player, Role, Title
+from app.models.portal import (
+    RosterOpening,
+    Application,
+    ActivityEvent,
+    Notification,
+    ContactAccessGrant,
+    PlayerScoreHistory,
+)
+from app.schemas.portal import (
+    RosterOpeningOut,
+    RosterOpeningCreate,
+    ApplicationOut,
+    ApplicationCreate,
+    ApplicationStatusUpdate,
+)
+
+router = APIRouter(prefix="/openings", tags=["Roster Openings & Recruitment"])
+
+
+@router.get("", response_model=List[RosterOpeningOut])
+def list_openings(
+    role: Optional[str] = Query(None, description="Filter by role name"),
+    status: Optional[str] = Query("open", description="Filter by status: open, closed, all"),
+    org_id: Optional[int] = Query(None, description="Filter by organisation ID"),
+    limit: int = Query(50, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    query = db.query(RosterOpening)
+    if status and status != "all":
+        query = query.filter(RosterOpening.status == status)
+    if org_id:
+        query = query.filter(RosterOpening.org_id == org_id)
+    if role:
+        query = query.filter(RosterOpening.role_name.ilike(f"%{role}%"))
+
+    openings = query.order_by(RosterOpening.created_at.desc()).offset(offset).limit(limit).all()
+
+    out = []
+    for op in openings:
+        app_count = db.query(Application).filter(Application.opening_id == op.id).count()
+        org_name = op.organization.name if op.organization else "Pro Team"
+        roster_name = op.roster.name if op.roster else None
+        title_name = "Counter-Strike 2"
+
+        out.append(RosterOpeningOut(
+            id=op.id,
+            org_id=op.org_id,
+            org_name=org_name,
+            roster_id=op.roster_id,
+            roster_name=roster_name,
+            title_id=op.title_id,
+            title_name=title_name,
+            role_id=op.role_id,
+            role_name=op.role_name,
+            title=op.title,
+            description=op.description,
+            min_rank_text=op.min_rank_text,
+            scrim_window=op.scrim_window,
+            package_text=op.package_text,
+            urgency=op.urgency,
+            status=op.status,
+            applicants_count=app_count,
+            created_at=op.created_at,
+            updated_at=op.updated_at,
+        ))
+    return out
+
+
+@router.post("", response_model=RosterOpeningOut)
+def create_opening(
+    opening_in: RosterOpeningCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_organiser),
+):
+    opening = RosterOpening(
+        org_id=current_user.org_id,
+        roster_id=opening_in.roster_id,
+        title_id=opening_in.title_id or 1,
+        role_id=opening_in.role_id,
+        title=opening_in.title,
+        role_name=opening_in.role_name,
+        description=opening_in.description,
+        min_rank_text=opening_in.min_rank_text,
+        scrim_window=opening_in.scrim_window,
+        package_text=opening_in.package_text,
+        urgency=opening_in.urgency or "Medium",
+        status=opening_in.status or "open",
+    )
+    db.add(opening)
+    db.commit()
+    db.refresh(opening)
+
+    org_name = current_user.organization.name if current_user.organization else "Pro Team"
+    return RosterOpeningOut(
+        id=opening.id,
+        org_id=opening.org_id,
+        org_name=org_name,
+        roster_id=opening.roster_id,
+        roster_name=opening.roster.name if opening.roster else None,
+        title_id=opening.title_id,
+        title_name="Counter-Strike 2",
+        role_id=opening.role_id,
+        role_name=opening.role_name,
+        title=opening.title,
+        description=opening.description,
+        min_rank_text=opening.min_rank_text,
+        scrim_window=opening.scrim_window,
+        package_text=opening.package_text,
+        urgency=opening.urgency,
+        status=opening.status,
+        applicants_count=0,
+        created_at=opening.created_at,
+        updated_at=opening.updated_at,
+    )
+
+
+@router.get("/{opening_id}", response_model=RosterOpeningOut)
+def get_opening(
+    opening_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    op = db.query(RosterOpening).filter(RosterOpening.id == opening_id).first()
+    if not op:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Opening {opening_id} not found.")
+
+    app_count = db.query(Application).filter(Application.opening_id == op.id).count()
+    org_name = op.organization.name if op.organization else "Pro Team"
+    roster_name = op.roster.name if op.roster else None
+
+    return RosterOpeningOut(
+        id=op.id,
+        org_id=op.org_id,
+        org_name=org_name,
+        roster_id=op.roster_id,
+        roster_name=roster_name,
+        title_id=op.title_id,
+        title_name="Counter-Strike 2",
+        role_id=op.role_id,
+        role_name=op.role_name,
+        title=op.title,
+        description=op.description,
+        min_rank_text=op.min_rank_text,
+        scrim_window=op.scrim_window,
+        package_text=op.package_text,
+        urgency=op.urgency,
+        status=op.status,
+        applicants_count=app_count,
+        created_at=op.created_at,
+        updated_at=op.updated_at,
+    )
+
+
+@router.post("/{opening_id}/apply", response_model=ApplicationOut)
+def apply_to_opening(
+    opening_id: int,
+    app_in: ApplicationCreate,
+    player: Player = Depends(require_player),
+    db: Session = Depends(get_db),
+):
+    opening = db.query(RosterOpening).filter(RosterOpening.id == opening_id).first()
+    if not opening:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Opening {opening_id} not found.")
+
+    if opening.status != "open":
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="This role opening is no longer open for applications.")
+
+    # Check for existing application
+    existing = db.query(Application).filter(
+        Application.opening_id == opening.id,
+        Application.player_id == player.id
+    ).first()
+    if existing:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="You have already applied to this opening."
+        )
+
+    # Create application
+    application = Application(
+        opening_id=opening.id,
+        player_id=player.id,
+        status="applied",
+        source="player_applied",
+        cover_note=app_in.cover_note,
+    )
+    db.add(application)
+
+    # Automatically grant contact access to the hiring org
+    grant = db.query(ContactAccessGrant).filter(
+        ContactAccessGrant.player_id == player.id,
+        ContactAccessGrant.org_id == opening.org_id,
+    ).first()
+    if not grant:
+        db.add(ContactAccessGrant(
+            player_id=player.id,
+            org_id=opening.org_id,
+            status="approved",
+            granted_via="application",
+        ))
+
+    # Log activity event visible to player
+    org_name = opening.organization.name if opening.organization else "Pro Team"
+    db.add(ActivityEvent(
+        actor_user_id=player.user_id,
+        org_id=opening.org_id,
+        subject_player_id=player.id,
+        type="application_submitted",
+        entity_type="application",
+        entity_id=str(application.id),
+        payload_json={"opening_title": opening.title, "role": opening.role_name, "org_name": org_name},
+        visible_to_player=True,
+    ))
+
+    # Notify org users
+    org_users = db.query(User).filter(User.org_id == opening.org_id).all()
+    for u in org_users:
+        db.add(Notification(
+            user_id=u.id,
+            type="new_application",
+            title=f"New Applicant for {opening.title}",
+            message=f"{player.name} ({player.handle}) has applied for {opening.role_name}.",
+            payload_json={"opening_id": opening.id, "player_id": player.id},
+        ))
+
+    db.commit()
+    db.refresh(application)
+
+    return ApplicationOut(
+        id=application.id,
+        opening_id=opening.id,
+        opening_title=opening.title,
+        org_id=opening.org_id,
+        org_name=org_name,
+        player_id=player.id,
+        player_handle=player.handle,
+        player_name=player.name,
+        role_name=opening.role_name,
+        status=application.status,
+        source=application.source,
+        cover_note=application.cover_note,
+        reviewer_notes=application.reviewer_notes,
+        created_at=application.created_at,
+        updated_at=application.updated_at,
+    )
+
+
+@router.get("/{opening_id}/applications", response_model=List[ApplicationOut])
+def list_opening_applications(
+    opening_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_organiser),
+):
+    opening = db.query(RosterOpening).filter(RosterOpening.id == opening_id).first()
+    if not opening:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Opening {opening_id} not found.")
+
+    # Multi-tenant cross-org enforcement
+    enforce_org_isolation(opening.org_id, current_user)
+
+    apps = db.query(Application).filter(Application.opening_id == opening.id).order_by(Application.created_at.desc()).all()
+    org_name = opening.organization.name if opening.organization else "Pro Team"
+
+    out = []
+    for a in apps:
+        p = a.player
+        # Get latest score snapshot
+        score_snap = db.query(PlayerScoreHistory).filter(PlayerScoreHistory.player_id == p.id).order_by(PlayerScoreHistory.recorded_at.desc()).first()
+        combat_s = score_snap.combat_score if score_snap else 55.0
+        tactical_s = score_snap.tactical_score if score_snap else 24.0
+        overall_s = score_snap.overall_score if score_snap else round(combat_s + tactical_s, 1)
+
+        out.append(ApplicationOut(
+            id=a.id,
+            opening_id=opening.id,
+            opening_title=opening.title,
+            org_id=opening.org_id,
+            org_name=org_name,
+            player_id=p.id,
+            player_handle=p.handle,
+            player_name=p.name,
+            role_name=opening.role_name,
+            status=a.status,
+            source=a.source,
+            cover_note=a.cover_note,
+            reviewer_notes=a.reviewer_notes,
+            combat_score=combat_s,
+            tactical_score=tactical_s,
+            overall_score=overall_s,
+            created_at=a.created_at,
+            updated_at=a.updated_at,
+        ))
+    return out
+
+
+@router.put("/applications/{application_id}/status", response_model=ApplicationOut)
+def update_application_status(
+    application_id: int,
+    status_update: ApplicationStatusUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_organiser),
+):
+    app = db.query(Application).filter(Application.id == application_id).first()
+    if not app:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Application {application_id} not found.")
+
+    opening = app.opening
+    enforce_org_isolation(opening.org_id, current_user)
+
+    old_status = app.status
+    app.status = status_update.status
+    if status_update.reviewer_notes:
+        app.reviewer_notes = status_update.reviewer_notes
+    app.updated_at = datetime.now(timezone.utc)
+
+    org_name = opening.organization.name if opening.organization else "Pro Team"
+    p = app.player
+
+    # Write timeline event visible to player
+    db.add(ActivityEvent(
+        actor_user_id=current_user.id,
+        org_id=opening.org_id,
+        subject_player_id=p.id,
+        type="application_status_changed",
+        entity_type="application",
+        entity_id=str(app.id),
+        payload_json={
+            "old_status": old_status,
+            "new_status": app.status,
+            "org_name": org_name,
+            "opening_title": opening.title,
+            "note": status_update.reviewer_notes or f"Application status updated to {app.status}."
+        },
+        visible_to_player=True,
+    ))
+
+    # Notify player if registered
+    if p.user_id:
+        db.add(Notification(
+            user_id=p.user_id,
+            type="application_update",
+            title=f"Application Update: {opening.title}",
+            message=f"{org_name} has moved your application to '{app.status}'.",
+            payload_json={"application_id": app.id, "status": app.status},
+        ))
+
+    db.commit()
+    db.refresh(app)
+
+    return ApplicationOut(
+        id=app.id,
+        opening_id=opening.id,
+        opening_title=opening.title,
+        org_id=opening.org_id,
+        org_name=org_name,
+        player_id=p.id,
+        player_handle=p.handle,
+        player_name=p.name,
+        role_name=opening.role_name,
+        status=app.status,
+        source=app.source,
+        cover_note=app.cover_note,
+        reviewer_notes=app.reviewer_notes,
+        created_at=app.created_at,
+        updated_at=app.updated_at,
+    )

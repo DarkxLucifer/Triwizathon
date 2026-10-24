@@ -68,3 +68,20 @@ class PlayerProfileResponse(BaseModel):
     metrics: Dict[str, float]
     role_scores: Dict[str, float]
     recent_matches: List[MatchStatItem]
+    
+    # Dossier & Privacy additions
+    contact_email: Optional[str] = None
+    contact_phone: Optional[str] = None
+    contact_unlocked: bool = False
+    hours_per_week: Optional[int] = 30
+    scrim_window_start: Optional[str] = "18:00"
+    scrim_window_end: Optional[str] = "23:30"
+    scrim_timezone: Optional[str] = "UTC"
+    playstyle_description: Optional[str] = None
+    primary_game: Optional[str] = "Counter-Strike 2"
+    availability_status: Optional[str] = "Open to Offers"
+    hardware_specs_json: Optional[Dict[str, Any]] = None
+    map_pool_json: Optional[List[str]] = None
+    past_experience_json: Optional[List[Dict[str, Any]]] = None
+    expected_compensation: Optional[str] = None
+    verification_status: str = "linked"

@@ -1,0 +1,41 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: scoutforge-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - PROJECT_NAME=ScoutForge
+      - SECRET_KEY=scoutforge-dev-secret-key-change-for-production
+      - ALGORITHM=HS256
+      - ACCESS_TOKEN_EXPIRE_MINUTES=1440
+      - DATABASE_URL=sqlite:///./scoutforge.db
+      - PANDASCORE_API_KEY=C7-JS9mtsSnbxSYr7ycz4I8ZO_S9TyPUaO_LVD9wNY-o13FD5P8
+      - WHISPER_MODEL_SIZE=small
+      - UPLOAD_DIR=/app/uploads
+      - CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+    volumes:
+      - backend-data:/app/uploads
+      - backend-db:/app/data
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: scoutforge-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000/api
+    depends_on:
+      - backend
+
+volumes:
+  backend-data:
+  backend-db:

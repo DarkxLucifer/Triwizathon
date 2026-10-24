@@ -25,6 +25,7 @@ interface NavbarProps {
   theme?: 'dark' | 'light';
   onToggleTheme?: () => void;
   authRole?: UserRole;
+  canSwitchRole?: boolean;
   onSwitchRole?: (role: UserRole) => void;
   onLogout?: () => void;
 }
@@ -72,6 +73,7 @@ export function Navbar({
   theme = 'dark',
   onToggleTheme,
   authRole = 'organiser',
+  canSwitchRole = false,
   onSwitchRole,
   onLogout,
 }: NavbarProps) {
@@ -321,7 +323,7 @@ export function Navbar({
           </span>
 
           {/* Quick Switch Role Button */}
-          {onSwitchRole && (
+          {canSwitchRole && onSwitchRole && (
             <button
               type="button"
               onClick={() => onSwitchRole(authRole === 'player' ? 'organiser' : 'player')}

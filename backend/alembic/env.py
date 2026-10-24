@@ -16,8 +16,9 @@ from app.core.config import settings
 # access to the values within the .ini file in use.
 config = context.config
 
-# Set sqlalchemy.url from app settings
-config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+# Set sqlalchemy.url: allow override via DATABASE_URL environment variable, or fallback to settings.DATABASE_URL
+db_url = os.environ.get("DATABASE_URL") or settings.DATABASE_URL
+config.set_main_option("sqlalchemy.url", db_url)
 
 # Interpret the config file for Python logging.
 if config.config_file_name is not None:
@@ -70,7 +71,7 @@ def run_migrations_online() -> None:
 
     with connectable.connect() as connection:
         context.configure(
-            connection=connection, target_metadata=target_metadata
+            connection=connection, target_metadata=target_metadata, render_as_batch=True
         )
 
         with context.begin_transaction():

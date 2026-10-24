@@ -1,16 +1,39 @@
-from app.schemas.auth import UserRegister, UserLogin, UserOut, TokenResponse
+from app.schemas.auth import UserRegister, UserLogin, UserOut, TokenResponse, ContextSwitchRequest, UserMeResponse
 from app.schemas.player import PlayerSummary, PlayerListResponse, PlayerProfileResponse, MatchStatItem
 from app.schemas.roster import RosterSlotOut, RosterSummary, RosterHealthResponse, RosterAlert
 from app.schemas.brief import BriefCreate, BriefRecommendationsResponse, RecommendationItem, RecommendationBreakdown
 from app.schemas.decision import DecisionCreate, DecisionOut
 from app.schemas.audio import AudioUploadResponse, AudioJobOut, AudioEvidenceOut
 from app.schemas.ingestion import IngestionReportOut
+from app.schemas.portal import (
+    PlayerTitleIn,
+    PlayerTitleOut,
+    TrajectoryPoint,
+    PlayerClipOut,
+    ContactAccessGrantOut,
+    ContactAccessResponse,
+    RosterOpeningOut,
+    RosterOpeningCreate,
+    ApplicationOut,
+    ApplicationCreate,
+    ApplicationStatusUpdate,
+    ActivityEventOut,
+    NotificationOut,
+    PlayerDossierOut,
+    PlayerDossierUpdate,
+    OrgKpiOut,
+    ReviewChartPoint,
+    LeaderboardItem,
+    LeaderboardResponse,
+)
 
 __all__ = [
     "UserRegister",
     "UserLogin",
     "UserOut",
     "TokenResponse",
+    "ContextSwitchRequest",
+    "UserMeResponse",
     "PlayerSummary",
     "PlayerListResponse",
     "PlayerProfileResponse",
@@ -29,4 +52,23 @@ __all__ = [
     "AudioJobOut",
     "AudioEvidenceOut",
     "IngestionReportOut",
+    "PlayerTitleIn",
+    "PlayerTitleOut",
+    "TrajectoryPoint",
+    "PlayerClipOut",
+    "ContactAccessGrantOut",
+    "ContactAccessResponse",
+    "RosterOpeningOut",
+    "RosterOpeningCreate",
+    "ApplicationOut",
+    "ApplicationCreate",
+    "ApplicationStatusUpdate",
+    "ActivityEventOut",
+    "NotificationOut",
+    "PlayerDossierOut",
+    "PlayerDossierUpdate",
+    "OrgKpiOut",
+    "ReviewChartPoint",
+    "LeaderboardItem",
+    "LeaderboardResponse",
 ]

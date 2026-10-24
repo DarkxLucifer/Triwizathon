@@ -1,12 +1,22 @@
 from typing import Optional, List, Dict
+from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from app.core.database import get_db
-from app.api.deps import get_current_user
+from app.api.deps import get_current_user, require_organiser
 from app.models.user import User
 from app.models.esports import Player, Role, Team, PlayerMatchStat, Match, FormulaVersion
+from app.models.portal import (
+    ContactAccessGrant,
+    Application,
+    RosterOpening,
+    ActivityEvent,
+    Notification,
+    PlayerWatchlist,
+)
 from app.schemas.player import PlayerSummary, PlayerListResponse, PlayerProfileResponse, MatchStatItem
+from app.schemas.portal import ContactAccessGrantOut
 from app.services.scoring import (
     calculate_confidence,
     calculate_role_performance,
@@ -17,6 +27,53 @@ from app.services.scoring import (
 from app.config.formulas import CURRENT_FORMULA_VERSION
 
 router = APIRouter(prefix="/players", tags=["Players"])
+
+
+def check_and_mask_contact(player: Player, current_user: User, db: Session):
+    """Enforces contact privacy rules: masks email/phone unless caller has permission."""
+    # Player viewing themselves
+    if current_user.player_id == player.id or current_user.id == player.user_id:
+        return player.contact_email, player.contact_phone, True
+
+    # Admin access
+    if current_user.role == "admin":
+        return player.contact_email, player.contact_phone, True
+
+    # Organiser check
+    if current_user.org_id:
+        # 1. Approved contact request
+        grant = db.query(ContactAccessGrant).filter(
+            ContactAccessGrant.player_id == player.id,
+            ContactAccessGrant.org_id == current_user.org_id,
+            ContactAccessGrant.status == "approved"
+        ).first()
+        if grant:
+            return player.contact_email, player.contact_phone, True
+
+        # 2. Player has active application to any opening in this org
+        app = db.query(Application).join(RosterOpening).filter(
+            Application.player_id == player.id,
+            RosterOpening.org_id == current_user.org_id
+        ).first()
+        if app:
+            return player.contact_email, player.contact_phone, True
+
+    # Mask contact info
+    masked_email = None
+    if player.contact_email:
+        parts = player.contact_email.split("@")
+        if len(parts) == 2:
+            u, d = parts
+            masked_email = f"{u[:2]}***@{d[:1]}***.{d.split('.')[-1]}"
+        else:
+            masked_email = "c***@***.com"
+
+    masked_phone = None
+    if player.contact_phone:
+        p = player.contact_phone
+        masked_phone = f"{p[:3]} ***** ***{p[-2:]}" if len(p) > 5 else "*****"
+
+    return masked_email, masked_phone, False
 
 
 @router.get("", response_model=PlayerListResponse)
@@ -58,7 +115,7 @@ def list_players(
             (Player.source == "pandascore", 2),
             else_=3
         ),
-        Player.id.asc()
+        Player.name.asc()
     )
 
     total = query.count()
@@ -66,7 +123,6 @@ def list_players(
 
     items = []
     for p in players:
-        # Aggregate match statistics for summary
         stats = db.query(
             func.count(PlayerMatchStat.id).label("matches"),
             func.sum(PlayerMatchStat.kills).label("kills"),
@@ -75,14 +131,14 @@ def list_players(
             func.avg(PlayerMatchStat.adr).label("adr"),
         ).filter(PlayerMatchStat.player_id == p.id).first()
 
-        match_count = stats.matches or 0
-        total_kills = stats.kills or 0
-        total_deaths = stats.deaths or 1
-        total_rounds = stats.rounds or 1
-        avg_adr = float(stats.adr or 0.0)
+        match_count = stats.matches if stats and stats.matches else 0
+        total_kills = stats.kills if stats and stats.kills else 0
+        total_deaths = stats.deaths if stats and stats.deaths else 0
+        total_rounds = stats.rounds if stats and stats.rounds else 0
+        avg_adr = stats.adr if stats and stats.adr else 0.0
+
         kd = round(total_kills / max(1, total_deaths), 2)
         kpr = round(total_kills / max(1, total_rounds), 2)
-
         conf, _ = calculate_confidence(data_coverage=1.0, match_count=match_count)
 
         items.append(PlayerSummary(
@@ -107,27 +163,35 @@ def list_players(
 
 
 @router.get("/{player_id}", response_model=PlayerProfileResponse)
-def get_player_profile(
+def get_player(
     player_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
     player = db.query(Player).filter(Player.id == player_id).first()
     if not player:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Player not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Player with ID {player_id} not found."
+        )
 
-    # Fetch all match stats with joined match info
-    match_rows = (
-        db.query(PlayerMatchStat, Match, Team)
-        .join(Match, PlayerMatchStat.match_id == Match.id)
-        .outerjoin(Team, Match.team_b_id == Team.id)
-        .filter(PlayerMatchStat.player_id == player_id)
-        .order_by(Match.match_date.desc())
-        .all()
-    )
+    # Activity Event logging: organiser viewed player profile
+    if current_user.org_id and current_user.player_id != player.id:
+        db.add(ActivityEvent(
+            actor_user_id=current_user.id,
+            org_id=current_user.org_id,
+            subject_player_id=player.id,
+            type="profile_viewed",
+            entity_type="player",
+            entity_id=str(player.id),
+            payload_json={"org_name": current_user.organization.name if current_user.organization else "Pro Team"},
+            visible_to_player=True,
+        ))
+        db.commit()
 
-    match_count = len(match_rows)
-    recent_matches_out: List[MatchStatItem] = []
+    # Query all matches and aggregate metrics
+    stats = db.query(PlayerMatchStat).filter(PlayerMatchStat.player_id == player.id).all()
+    match_count = len(stats)
 
     total_kills = 0
     total_deaths = 0
@@ -142,7 +206,17 @@ def get_player_profile(
     total_calls_conv = 0
     total_adaptation = 0.0
 
-    for stat, match, opp_team in match_rows:
+    recent_matches_out = []
+
+    for stat in stats:
+        match = stat.match
+        opp_team = None
+        if match:
+            if match.team_a_id and match.team_a_id != player.team_id:
+                opp_team = match.team_a
+            elif match.team_b_id and match.team_b_id != player.team_id:
+                opp_team = match.team_b
+
         total_kills += stat.kills
         total_deaths += stat.deaths
         total_rounds += stat.rounds
@@ -156,7 +230,7 @@ def get_player_profile(
         total_calls_conv += stat.calls_converted
         total_adaptation += stat.halftime_rating_diff
 
-        if len(recent_matches_out) < 15:
+        if len(recent_matches_out) < 15 and match:
             recent_matches_out.append(MatchStatItem(
                 match_id=stat.match_id,
                 match_date=match.match_date,
@@ -199,7 +273,6 @@ def get_player_profile(
         "adaptation": adaptation,
     }
 
-    # Normalized metrics for role scoring (mapped 0.0 to 1.0)
     norm_metrics = {
         "kd": min(1.0, max(0.0, (kd - 0.5) / 1.0)),
         "adr": min(1.0, max(0.0, (avg_adr - 40.0) / 60.0)),
@@ -225,6 +298,9 @@ def get_player_profile(
     conf, warning = calculate_confidence(data_coverage=1.0, match_count=match_count)
     label = classify_evaluation_label(role_scores.get(player.role.name if player.role else "Entry", 70.0), conf)
 
+    # Privacy and contact masking check
+    contact_email, contact_phone, contact_unlocked = check_and_mask_contact(player, current_user, db)
+
     return PlayerProfileResponse(
         id=player.id,
         name=player.name,
@@ -246,4 +322,125 @@ def get_player_profile(
         metrics=metrics,
         role_scores=role_scores,
         recent_matches=recent_matches_out,
+        # Dossier fields
+        contact_email=contact_email,
+        contact_phone=contact_phone,
+        contact_unlocked=contact_unlocked,
+        hours_per_week=player.hours_per_week,
+        scrim_window_start=player.scrim_window_start,
+        scrim_window_end=player.scrim_window_end,
+        scrim_timezone=player.scrim_timezone,
+        playstyle_description=player.playstyle_description,
+        primary_game=player.primary_game,
+        availability_status=player.availability_status,
+        hardware_specs_json=player.hardware_specs_json,
+        map_pool_json=player.map_pool_json,
+        past_experience_json=player.past_experience_json,
+        expected_compensation=player.expected_compensation,
+        verification_status="linked" if player.source in ["leetify", "pandascore"] else "self_reported",
     )
+
+
+@router.post("/{player_id}/request-contact", response_model=ContactAccessGrantOut)
+def request_contact(
+    player_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_organiser),
+):
+    player = db.query(Player).filter(Player.id == player_id).first()
+    if not player:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Player with ID {player_id} not found."
+        )
+
+    # Check if a grant already exists
+    existing = db.query(ContactAccessGrant).filter(
+        ContactAccessGrant.player_id == player.id,
+        ContactAccessGrant.org_id == current_user.org_id,
+    ).first()
+
+    if existing:
+        return existing
+
+    grant = ContactAccessGrant(
+        player_id=player.id,
+        org_id=current_user.org_id,
+        status="pending",
+        granted_via="request",
+    )
+    db.add(grant)
+
+    # Log activity event visible to player
+    org_name = current_user.organization.name if current_user.organization else "An Organisation"
+    db.add(ActivityEvent(
+        actor_user_id=current_user.id,
+        org_id=current_user.org_id,
+        subject_player_id=player.id,
+        type="contact_requested",
+        entity_type="contact_grant",
+        entity_id=str(grant.id),
+        payload_json={"org_name": org_name},
+        visible_to_player=True,
+    ))
+
+    # Send notification if player has an associated user account
+    if player.user_id:
+        db.add(Notification(
+            user_id=player.user_id,
+            type="contact_request",
+            title="Contact Details Requested",
+            message=f"{org_name} has requested access to your contact information.",
+            payload_json={"org_id": current_user.org_id, "grant_id": grant.id},
+        ))
+
+    db.commit()
+    db.refresh(grant)
+    grant.org_name = org_name
+    return grant
+
+
+@router.post("/{player_id}/watchlist")
+def toggle_watchlist(
+    player_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_organiser),
+):
+    player = db.query(Player).filter(Player.id == player_id).first()
+    if not player:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Player with ID {player_id} not found."
+        )
+
+    existing = db.query(PlayerWatchlist).filter(
+        PlayerWatchlist.player_id == player.id,
+        PlayerWatchlist.org_id == current_user.org_id,
+    ).first()
+
+    org_name = current_user.organization.name if current_user.organization else "An Organisation"
+
+    if existing:
+        db.delete(existing)
+        db.commit()
+        return {"status": "removed", "player_id": player.id}
+
+    watchlist_item = PlayerWatchlist(
+        player_id=player.id,
+        org_id=current_user.org_id,
+    )
+    db.add(watchlist_item)
+
+    # Write activity event to timeline
+    db.add(ActivityEvent(
+        actor_user_id=current_user.id,
+        org_id=current_user.org_id,
+        subject_player_id=player.id,
+        type="shortlisted",
+        entity_type="watchlist",
+        entity_id=str(player.id),
+        payload_json={"org_name": org_name},
+        visible_to_player=True,
+    ))
+    db.commit()
+    return {"status": "added", "player_id": player.id}

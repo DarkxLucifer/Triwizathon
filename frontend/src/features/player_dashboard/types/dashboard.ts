@@ -29,6 +29,21 @@ export interface SignatureMap {
 
 export type AvailabilityStatus = "Available for Trial" | "Open to Offers" | "In Active Scrims" | "Restricted";
 
+export interface GameplayVideoClip {
+  id: string;
+  title: string;
+  game: GameType;
+  videoUrl?: string;
+  thumbnail?: string;
+  duration: string;
+  resolution: string;
+  tag: string;
+  uploadedAt: string;
+  fileSize?: string;
+  tacticalVerdict?: string;
+  aiScore?: number;
+}
+
 export interface PlayerProfile {
   name: string;
   fullName: string;
@@ -62,6 +77,21 @@ export interface PlayerProfile {
   faceitElo: string;
   location: string;
   languages: string;
+
+  // Extended Dossier Credentials
+  gameUid?: string;
+  steamId?: string; // For Leetify CS2 match telemetry
+  pandascoreId?: string; // For PandaScore official pro verification
+  riotId?: string; // For Valorant API verification
+  mobileUid?: string; // For BGMI / Free Fire tournament UID
+  deviceSetup?: string;
+  controlStyle?: string;
+  primaryWeaponCombo?: string;
+  peakTier?: string;
+  tournamentExperience?: string;
+  expectedContract?: string;
+  videoHighlightUrl?: string;
+  videoClips?: GameplayVideoClip[];
 
   // Playtime & Logistics
   totalHours: string;
@@ -117,11 +147,12 @@ export interface TranscriptSnippet {
 export interface EvidenceItem {
   id: string;
   filename: string;
-  type: "Match Log" | "Comms Audio";
+  type: "Match Log" | "Comms Audio" | "Gameplay Video";
   durationOrRounds: string;
   status: "Queued" | "Processing" | "Needs Review" | "Complete";
   submittedAt: string;
   filesize?: string;
+  videoUrl?: string;
   transcript?: TranscriptSnippet[];
 }
 
@@ -208,4 +239,3 @@ export interface GameplayPost {
   viewsCount: number;
   verifiedScoutScore: boolean;
 }
-

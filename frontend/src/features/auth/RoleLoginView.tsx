@@ -17,11 +17,12 @@ import {
   Users,
 } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
+import { authApi } from '@/lib/api/auth';
 
 export type UserRole = 'player' | 'organiser';
 
 interface RoleLoginViewProps {
-  onLogin: (role: UserRole) => void;
+  onLogin: (role: UserRole, token?: string, user?: any) => void;
   theme?: 'dark' | 'light';
   onToggleTheme?: () => void;
   initialRole?: UserRole;
@@ -36,9 +37,12 @@ export function RoleLoginView({
   const isLight = theme === 'light';
   const [selectedRole, setSelectedRole] = useState<UserRole>(initialRole);
   const [identifier, setIdentifier] = useState(
-    initialRole === 'player' ? 'Vortex#VAL' : 'scout@theshadow.gg'
+    initialRole === 'player' ? 'player@scoutforge.gg' : 'analyst@cloud9.gg'
   );
-  const [password, setPassword] = useState('scoutforge2026');
+  const [password, setPassword] = useState(
+    initialRole === 'player' ? 'player123' : 'scoutforge123'
+  );
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -46,27 +50,43 @@ export function RoleLoginView({
   const handleRoleChange = (role: UserRole) => {
     setSelectedRole(role);
     if (role === 'player') {
-      setIdentifier('Vortex#VAL');
+      setIdentifier('player@scoutforge.gg');
+      setPassword('player123');
     } else {
-      setIdentifier('scout@theshadow.gg');
+      setIdentifier('analyst@cloud9.gg');
+      setPassword('scoutforge123');
+    }
+  };
+
+  const doLogin = async (email: string, pass: string, role: UserRole) => {
+    setLoading(true);
+    setErrorMessage(null);
+    try {
+      const res = await authApi.login(email, pass);
+      localStorage.setItem('scoutforge_access_token', res.access_token);
+      localStorage.setItem('scoutforge_user', JSON.stringify(res.user));
+      localStorage.setItem('scoutforge_auth_role', res.user.active_context);
+      localStorage.setItem(
+        'scoutforge_available_contexts',
+        JSON.stringify(res.user.available_contexts)
+      );
+      onLogin(res.user.active_context as UserRole, res.access_token, res.user);
+    } catch (err: any) {
+      setErrorMessage(err.message || 'Authentication failed. Please verify credentials.');
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      onLogin(selectedRole);
-    }, 350);
+    doLogin(identifier, password, selectedRole);
   };
 
   const handleQuickLogin = (role: UserRole) => {
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      onLogin(role);
-    }, 250);
+    const demoEmail = role === 'player' ? 'player@scoutforge.gg' : 'analyst@cloud9.gg';
+    const demoPass = role === 'player' ? 'player123' : 'scoutforge123';
+    doLogin(demoEmail, demoPass, role);
   };
 
   return (
@@ -291,6 +311,11 @@ export function RoleLoginView({
 
             {/* Credentials Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
+              {errorMessage && (
+                <div className="p-2.5 rounded-[6px] border border-red-500/30 bg-red-500/10 text-red-400 text-xs font-mono">
+                  {errorMessage}
+                </div>
+              )}
               {/* Identifier Input */}
               <div className="space-y-1.5">
                 <label

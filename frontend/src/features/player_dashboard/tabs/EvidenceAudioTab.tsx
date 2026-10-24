@@ -10,10 +10,13 @@ import {
   Trash2, 
   Eye, 
   ShieldCheck,
-  RotateCcw
+  RotateCcw,
+  Video,
+  Play
 } from "lucide-react";
-import { EvidenceItem } from "@/types/dashboard";
+import { EvidenceItem, GameplayVideoClip } from "@/types/dashboard";
 import { TranscriptModal } from "../components/TranscriptModal";
+import { VideoPlayerModal } from "../components/VideoPlayerModal";
 
 interface EvidenceAudioTabProps {
   onShowToast: (message: string, type?: "success" | "info" | "warning") => void;
@@ -28,17 +31,19 @@ export const EvidenceAudioTab: React.FC<EvidenceAudioTabProps> = ({
   const [consentChecked, setConsentChecked] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
   const [selectedItemForTranscript, setSelectedItemForTranscript] = useState<EvidenceItem | null>(null);
+  const [selectedClipForPlayback, setSelectedClipForPlayback] = useState<GameplayVideoClip | null>(null);
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [evidenceList, setEvidenceList] = useState<EvidenceItem[]>([
     {
       id: "ev-1",
-      filename: "Scrim_Mirage_Tier2_Map1.json",
-      type: "Match Log",
-      durationOrRounds: "24 Rounds",
+      filename: "Scrim_Erangel_Phase5_Clutch_POV.mp4",
+      type: "Gameplay Video",
+      durationOrRounds: "1m 45s",
       status: "Complete",
-      submittedAt: "Today, 11:30 AM",
-      filesize: "4.2 MB",
+      submittedAt: "Today, 14:10 IST",
+      filesize: "48.2 MB",
     },
     {
       id: "ev-2",
@@ -51,6 +56,15 @@ export const EvidenceAudioTab: React.FC<EvidenceAudioTabProps> = ({
     },
     {
       id: "ev-3",
+      filename: "Scrim_Mirage_Tier2_Map1.json",
+      type: "Match Log",
+      durationOrRounds: "24 Rounds",
+      status: "Complete",
+      submittedAt: "Today, 11:30 AM",
+      filesize: "4.2 MB",
+    },
+    {
+      id: "ev-4",
       filename: "Scrim_Inferno_Map2_Demo.csv",
       type: "Match Log",
       durationOrRounds: "21 Rounds",
@@ -94,20 +108,31 @@ export const EvidenceAudioTab: React.FC<EvidenceAudioTabProps> = ({
   };
 
   const processUpload = (file: File) => {
+    const isVideo =
+      file.type.startsWith("video") ||
+      file.name.endsWith(".mp4") ||
+      file.name.endsWith(".webm") ||
+      file.name.endsWith(".mov") ||
+      file.name.endsWith(".mkv");
+
     const isAudio =
       file.type.startsWith("audio") ||
       file.name.endsWith(".wav") ||
       file.name.endsWith(".m4a") ||
       file.name.endsWith(".mp3");
+
     const newId = `ev-${Date.now()}`;
+    const videoUrl = isVideo ? URL.createObjectURL(file) : undefined;
+
     const newItem: EvidenceItem = {
       id: newId,
       filename: file.name,
-      type: isAudio ? "Comms Audio" : "Match Log",
-      durationOrRounds: isAudio ? "2m 14s" : "24 Rounds",
+      type: isVideo ? "Gameplay Video" : isAudio ? "Comms Audio" : "Match Log",
+      durationOrRounds: isVideo ? "1m 45s" : isAudio ? "2m 14s" : "24 Rounds",
       status: "Processing",
       submittedAt: "Just now",
       filesize: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
+      videoUrl: videoUrl,
     };
 
     setEvidenceList((prev) => [newItem, ...prev]);
@@ -129,16 +154,33 @@ export const EvidenceAudioTab: React.FC<EvidenceAudioTabProps> = ({
     onShowToast("Evidence item removed from player dossier.", "info");
   };
 
+  const handlePlayVideo = (item: EvidenceItem) => {
+    setSelectedClipForPlayback({
+      id: item.id,
+      title: item.filename,
+      game: "BGMI",
+      duration: item.durationOrRounds,
+      resolution: "1080p 60fps",
+      tag: "Uploaded Match Evidence",
+      uploadedAt: item.submittedAt,
+      fileSize: item.filesize,
+      videoUrl: item.videoUrl,
+      aiScore: 28.5,
+      tacticalVerdict: "Synchronized telemetry clip: verified player POV, clean audio callouts, zero crosshair drift."
+    });
+    setIsVideoModalOpen(true);
+  };
+
   const handleResetSampleData = () => {
     setEvidenceList([
       {
         id: "ev-1",
-        filename: "Scrim_Mirage_Tier2_Map1.json",
-        type: "Match Log",
-        durationOrRounds: "24 Rounds",
+        filename: "Scrim_Erangel_Phase5_Clutch_POV.mp4",
+        type: "Gameplay Video",
+        durationOrRounds: "1m 45s",
         status: "Complete",
-        submittedAt: "Today, 11:30 AM",
-        filesize: "4.2 MB",
+        submittedAt: "Today, 14:10 IST",
+        filesize: "48.2 MB",
       },
       {
         id: "ev-2",
@@ -151,6 +193,15 @@ export const EvidenceAudioTab: React.FC<EvidenceAudioTabProps> = ({
       },
       {
         id: "ev-3",
+        filename: "Scrim_Mirage_Tier2_Map1.json",
+        type: "Match Log",
+        durationOrRounds: "24 Rounds",
+        status: "Complete",
+        submittedAt: "Today, 11:30 AM",
+        filesize: "4.2 MB",
+      },
+      {
+        id: "ev-4",
         filename: "Scrim_Inferno_Map2_Demo.csv",
         type: "Match Log",
         durationOrRounds: "21 Rounds",
@@ -169,7 +220,7 @@ export const EvidenceAudioTab: React.FC<EvidenceAudioTabProps> = ({
         type="file"
         ref={fileInputRef}
         onChange={handleFileInputChange}
-        accept=".csv,.json,.wav,.mp4,.m4a,.mp3"
+        accept=".csv,.json,.wav,.mp4,.webm,.mov,.mkv,.m4a,.mp3"
         className="hidden"
       />
 
@@ -218,14 +269,14 @@ export const EvidenceAudioTab: React.FC<EvidenceAudioTabProps> = ({
               isLight ? "text-slate-950" : "text-[#ededed]"
             }`}
           >
-            Upload Match Telemetry / Comms Audio
+            Upload Match Telemetry, Comms Audio, or Gameplay Video
           </h3>
           <p
             className={`text-xs mt-1 max-w-xs ${
               isLight ? "text-slate-500" : "text-[#9a9aa2]"
             }`}
           >
-            Drag and drop scrim recordings (.csv, .json, .wav, .mp4)
+            Drag and drop recordings (.csv, .json, .wav, .mp3, .mp4, .webm)
           </p>
 
           <span
@@ -233,7 +284,7 @@ export const EvidenceAudioTab: React.FC<EvidenceAudioTabProps> = ({
               isLight ? "text-slate-400" : "text-[#9a9aa2]"
             }`}
           >
-            Supported across Valorant, BGMI, Free Fire, MLBB & CS2 (Up to 1.5 GB)
+            Supported across BGMI, Valorant, CS2, Free Fire & MLBB (Up to 1.5 GB)
           </span>
 
           {/* Consent Checkbox */}
@@ -265,7 +316,7 @@ export const EvidenceAudioTab: React.FC<EvidenceAudioTabProps> = ({
                   : "text-[#9a9aa2] hover:text-[#ededed]"
               }`}
             >
-              &ldquo;I confirm player consent for Whisper-small audio transcription and evidence indexing.&rdquo;
+              &ldquo;I confirm player consent for Whisper-small audio transcription and video evidence indexing.&rdquo;
             </label>
           </div>
         </div>
@@ -289,32 +340,29 @@ export const EvidenceAudioTab: React.FC<EvidenceAudioTabProps> = ({
                   isLight ? "text-slate-950" : "text-[#ededed]"
                 }`}
               >
-                <ShieldCheck
-                  className={`w-4 h-4 ${
-                    isLight ? "text-emerald-600" : "text-[#4ade80]"
-                  }`}
-                />
-                <span>Data Quality Summary</span>
+                <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                <span>Verification & Integrity Stats</span>
               </h3>
               <span
-                className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${
+                className={`text-[10px] font-mono px-2 py-0.5 rounded border font-bold ${
                   isLight
-                    ? "text-emerald-800 bg-emerald-100 border-emerald-300"
-                    : "text-[#4ade80] bg-[#4ade80]/10 border-[#4ade80]/30"
+                    ? "bg-lime-100 text-slate-800 border-lime-300"
+                    : "bg-[#e8ff59]/10 text-[#e8ff59] border-[#e8ff59]/30"
                 }`}
               >
-                Verified Clean
+                90 FPS Gyro Cam Calibrated
               </span>
             </div>
 
-            <div className="grid grid-cols-3 gap-4 my-5">
+            {/* Micro Stats Grid */}
+            <div className="grid grid-cols-3 gap-3 my-4">
               <div>
                 <div
                   className={`text-[11px] font-bold ${
                     isLight ? "text-slate-500" : "text-[#9a9aa2]"
                   }`}
                 >
-                  Evidence Coverage
+                  Voice Confidence
                 </div>
                 <div
                   className={`text-2xl font-black font-mono mt-1 ${
@@ -337,14 +385,14 @@ export const EvidenceAudioTab: React.FC<EvidenceAudioTabProps> = ({
                     isLight ? "text-slate-500" : "text-[#9a9aa2]"
                   }`}
                 >
-                  Audio Model
+                  Dual-AI Models
                 </div>
                 <div
                   className={`text-sm font-black mt-1 truncate ${
                     isLight ? "text-slate-950" : "text-[#ededed]"
                   }`}
                 >
-                  Whisper-small v1
+                  Groq + Whisper
                 </div>
                 <div
                   className={`text-[10px] mt-0.5 ${
@@ -387,7 +435,7 @@ export const EvidenceAudioTab: React.FC<EvidenceAudioTabProps> = ({
                 : "border-[#26262a] bg-[#0b0b0c] text-[#9a9aa2]"
             }`}
           >
-            All submitted voice recordings are automatically transcribed and correlated with match round tick rates to verify player communication, target callouts, and clutch execution.
+            All submitted voice recordings and video clips are automatically transcribed and correlated with match round tick rates to verify player communication, target callouts, and clutch execution.
           </div>
         </div>
       </div>
@@ -418,7 +466,7 @@ export const EvidenceAudioTab: React.FC<EvidenceAudioTabProps> = ({
                 isLight ? "text-slate-500" : "text-[#9a9aa2]"
               }`}
             >
-              Indexed match logs and tactical voice recordings
+              Indexed match logs, tactical voice recordings, and gameplay VODs
             </p>
           </div>
 
@@ -468,6 +516,7 @@ export const EvidenceAudioTab: React.FC<EvidenceAudioTabProps> = ({
               }`}
             >
               {evidenceList.map((item) => {
+                const isVideo = item.type === "Gameplay Video";
                 const isAudio = item.type === "Comms Audio";
                 const isComplete = item.status === "Complete";
                 const isProcessing = item.status === "Processing";
@@ -488,10 +537,12 @@ export const EvidenceAudioTab: React.FC<EvidenceAudioTabProps> = ({
                               : "bg-[#0b0b0c] border-[#26262a] text-[#ededed]"
                           }`}
                         >
-                          {isAudio ? (
-                            <FileAudio className="w-3.5 h-3.5" />
+                          {isVideo ? (
+                            <Video className="w-3.5 h-3.5 text-rose-500" />
+                          ) : isAudio ? (
+                            <FileAudio className="w-3.5 h-3.5 text-amber-500" />
                           ) : (
-                            <FileText className="w-3.5 h-3.5" />
+                            <FileText className="w-3.5 h-3.5 text-sky-500" />
                           )}
                         </div>
                         <div>
@@ -520,7 +571,15 @@ export const EvidenceAudioTab: React.FC<EvidenceAudioTabProps> = ({
                         isLight ? "text-slate-600" : "text-[#9a9aa2]"
                       }`}
                     >
-                      {item.type}
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${
+                        isVideo
+                          ? "bg-rose-500/10 text-rose-400 border border-rose-500/30"
+                          : isAudio
+                          ? "bg-amber-500/10 text-amber-400 border border-amber-500/30"
+                          : "bg-sky-500/10 text-sky-400 border border-sky-500/30"
+                      }`}>
+                        {item.type}
+                      </span>
                     </td>
 
                     <td
@@ -560,6 +619,19 @@ export const EvidenceAudioTab: React.FC<EvidenceAudioTabProps> = ({
 
                     <td className="py-3.5 px-2 text-right">
                       <div className="flex items-center justify-end gap-1.5">
+                        {isVideo && isComplete && (
+                          <button
+                            onClick={() => handlePlayVideo(item)}
+                            className={`flex items-center gap-1 px-2.5 py-1 rounded-[4px] border text-[11px] font-bold cursor-pointer transition-colors ${
+                              isLight
+                                ? "border-slate-300 bg-white hover:bg-slate-50 text-slate-700"
+                                : "border-[#26262a] bg-[#18181b] hover:bg-[#202024] text-[#ededed]"
+                            }`}
+                          >
+                            <Play className="w-3 h-3 text-emerald-400 fill-current" />
+                            <span>Watch VOD</span>
+                          </button>
+                        )}
                         {isAudio && isComplete && (
                           <button
                             onClick={() => setSelectedItemForTranscript(item)}
@@ -603,6 +675,14 @@ export const EvidenceAudioTab: React.FC<EvidenceAudioTabProps> = ({
           theme={theme}
         />
       )}
+
+      {/* Video Player Modal */}
+      <VideoPlayerModal
+        clip={selectedClipForPlayback}
+        isOpen={isVideoModalOpen}
+        onClose={() => setIsVideoModalOpen(false)}
+        theme={theme}
+      />
     </div>
   );
 };

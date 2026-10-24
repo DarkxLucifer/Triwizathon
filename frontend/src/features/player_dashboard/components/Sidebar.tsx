@@ -41,7 +41,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: "benchmark", label: "Role Benchmark", icon: <BarChart2 className="w-4 h-4" /> },
     { id: "evidence", label: "Evidence & Audio", icon: <FileAudio className="w-4 h-4" /> },
     { id: "scouting", label: "Scouting Feed", icon: <Eye className="w-4 h-4" /> },
-    { id: "profile", label: "Player Profile", icon: <User className="w-4 h-4" /> },
+    { id: "profile", label: "My Profile", icon: <User className="w-4 h-4" /> },
   ];
 
   return (

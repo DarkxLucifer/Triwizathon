@@ -36,7 +36,7 @@ const tabLabels: Record<TabType, string> = {
   benchmark: "Role Benchmark",
   evidence: "Evidence & Audio",
   scouting: "Scouting Feed",
-  profile: "Player Profile",
+  profile: "My Profile",
 };
 
 const gameIcons: Record<GameType, React.ReactNode> = {

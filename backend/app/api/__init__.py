@@ -8,6 +8,10 @@ from app.api.hidden_gems import router as hidden_gems_router
 from app.api.audio import router as audio_router
 from app.api.decisions import router as decisions_router
 from app.api.ingestion import router as ingestion_router
+from app.api.player_portal import router as player_portal_router
+from app.api.openings import router as openings_router
+from app.api.dashboard import router as dashboard_router
+from app.api.leaderboards import router as leaderboards_router
 
 api_router = APIRouter(prefix="/api")
 
@@ -20,3 +24,7 @@ api_router.include_router(hidden_gems_router)
 api_router.include_router(audio_router)
 api_router.include_router(decisions_router)
 api_router.include_router(ingestion_router)
+api_router.include_router(player_portal_router)
+api_router.include_router(openings_router)
+api_router.include_router(dashboard_router)
+api_router.include_router(leaderboards_router)

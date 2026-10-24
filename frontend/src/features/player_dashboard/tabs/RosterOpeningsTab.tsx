@@ -673,22 +673,31 @@ export const RosterOpeningsTab: React.FC<RosterOpeningsTabProps> = ({
             <span className="text-[11px] text-slate-400 font-mono">Direct Coach Pipeline</span>
           </div>
 
-          {filteredOpenings.length === 0 ? (
-            <div className="rounded-[6px] border border-slate-200 dark:border-[#26262a] bg-white dark:bg-[#131315] p-12 text-center">
-              <Building2 className="w-10 h-10 mx-auto text-slate-300 mb-3" />
-              <h3 className="text-sm font-bold text-slate-900 dark:text-[#ededed]">No organization roles match your criteria</h3>
-              <p className="text-xs text-slate-500 dark:text-[#9a9aa2] mt-1 max-w-sm mx-auto">
-                Try selecting a different skill filter (like Sniper or Bomber) or resetting your search.
+          {openings.length === 0 ? (
+            <div className="rounded-[8px] border border-slate-200 dark:border-[#26262a] bg-white dark:bg-[#131315] p-12 text-center">
+              <Building2 className="w-10 h-10 mx-auto text-slate-400 mb-3" />
+              <h3 className="text-sm font-bold text-slate-900 dark:text-[#ededed]">No Roster Openings Available Yet</h3>
+              <p className="text-xs text-slate-500 dark:text-[#9a9aa2] mt-1 max-w-md mx-auto leading-relaxed">
+                Organizations have not posted any open roles yet. Log in as an organiser to publish roster openings, or check back soon for competitive trials.
+              </p>
+            </div>
+          ) : filteredOpenings.length === 0 ? (
+            <div className="rounded-[8px] border border-slate-200 dark:border-[#26262a] bg-white dark:bg-[#131315] p-12 text-center">
+              <Building2 className="w-10 h-10 mx-auto text-slate-400 mb-3" />
+              <h3 className="text-sm font-bold text-slate-900 dark:text-[#ededed]">No Organization Roles Match Your Filters</h3>
+              <p className="text-xs text-slate-500 dark:text-[#9a9aa2] mt-1 max-w-md mx-auto leading-relaxed">
+                No roles found matching "{selectedGameFilter}" and "{selectedSkillFilter}". Reset your filters to see all {openings.length} active opportunities.
               </p>
               <button
                 onClick={() => {
                   setSelectedGameFilter("All");
                   setSelectedSkillFilter("All");
+                  setSelectedPriorityFilter("All");
                   setSearchQuery("");
                 }}
-                className="mt-4 px-3.5 py-1.5 rounded-lg bg-slate-950 text-white text-xs font-bold hover:bg-slate-800 transition-colors"
+                className="mt-4 px-4 py-2 rounded-[6px] bg-[#e8ff59] text-black text-xs font-black hover:bg-[#d8ef49] transition-colors cursor-pointer shadow-xs"
               >
-                Reset All Filters
+                Reset All Filters ({openings.length} Roles)
               </button>
             </div>
           ) : (
