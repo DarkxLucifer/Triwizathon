@@ -307,264 +307,89 @@ export function PlayerDashboardView({
 
 
   const gamesCatalog: Record<
-
-
-
-    GameType,
-
-
-
+    string,
     {
-
-
-
       role: string;
-
-
-
       secondaryRole: string;
-
-
-
       fitScore: number;
-
-
-
       matches: number;
-
-
-
       cohort: string;
-
-
-
       topStrength: string;
-
-
-
       priorityImprovement: string;
-
-
-
       primaryMastery: string;
-
-
-
     }
-
-
-
   > = {
-
-
-
-    Valorant: {
-
-
-
-      role: 'Duelist',
-
-
-
-      secondaryRole: 'Initiator',
-
-
-
-      fitScore: 84,
-
-
-
-      matches: 52,
-
-
-
-      cohort: 'VCT South Asia Challengers',
-
-
-
-      topStrength: 'First Blood Conversion (84th %ile)',
-
-
-
-      priorityImprovement: 'Post-Plant Flash Utility Efficiency',
-
-
-
-      primaryMastery: 'Jett / Raze Entry Fragger & Sova Recon',
-
-
-
-    },
-
-
-
-    BGMI: {
-
-
-
-      role: 'AWPer',
-
-
-
-      secondaryRole: 'Lurker',
-
-
-
-      fitScore: 88,
-
-
-
-      matches: 64,
-
-
-
-      cohort: 'PandaScore Tier 1 Contender',
-
-
-
-      topStrength: 'First Blood Pick & Multi-Kill Rounds (92nd %ile)',
-
-
-
-      priorityImprovement: 'Phase 5 Compound Rotation Timing',
-
-
-
-      primaryMastery: 'M416 + DBS Frontline Assault & Zone Calling',
-
-
-
-    },
-
-
-
-    'League of Legends': {
-
-
-
-      role: 'Rusher',
-
-
-
-      secondaryRole: 'Sniper',
-
-
-
-      fitScore: 81,
-
-
-
-      matches: 48,
-
-
-
-      cohort: 'LCK / LEC Regional Contender',
-
-
-
-      topStrength: 'Lane CS Differential (+18 @ 15m)',
-
-
-
-      priorityImprovement: 'Dragon Pit Vision Control',
-
-
-
-      primaryMastery: 'Wave Management & Roam Timers',
-
-
-
-    },
-
-
-
-    'Rocket League': {
-
-
-
-      role: 'Jungler',
-
-
-
-      secondaryRole: 'Assassin',
-
-
-
-      fitScore: 86,
-
-
-
-      matches: 58,
-
-
-
-      cohort: 'RLCS Major Contender',
-
-
-
-      topStrength: 'Aerial Speed & Double-Tap Accuracy',
-
-
-
-      priorityImprovement: 'Backboard Boost Conservation',
-
-
-
-      primaryMastery: 'Fast Aerials & Flip Resets',
-
-
-
-    },
-
-
-
     CS2: {
-
-
-
       role: 'AWPer',
-
-
-
       secondaryRole: 'Lurker',
-
-
-
-      fitScore: 76,
-
-
-
-      matches: 45,
-
-
-
-      cohort: 'Tier 2 South Asia Semi-Pro',
-
-
-
+      fitScore: 92,
+      matches: 74,
+      cohort: 'PandaScore Pro Verified',
       topStrength: 'Late-Round Survival (88th %ile)',
-
-
-
       priorityImprovement: 'Opening Duel Win Rate (41st %ile)',
-
-
-
-      primaryMastery: 'IGL (In-Game Leader) & Secondary AWPer',
-
-
-
+      primaryMastery: 'AWP Opening Pick & Anchor Protocol',
     },
-
-
-
+    Valorant: {
+      role: 'Duelist',
+      secondaryRole: 'Initiator',
+      fitScore: 84,
+      matches: 52,
+      cohort: 'VCT South Asia Challengers',
+      topStrength: 'First Blood Conversion (84th %ile)',
+      priorityImprovement: 'Post-Plant Flash Utility Efficiency',
+      primaryMastery: 'Jett / Raze Entry Fragger & Sova Recon',
+    },
+    'League of Legends': {
+      role: 'Mid Laner',
+      secondaryRole: 'ADC',
+      fitScore: 89,
+      matches: 68,
+      cohort: 'LCK / LEC Regional Contender',
+      topStrength: 'Lane CS Differential (+18 @ 15m)',
+      priorityImprovement: 'Dragon Pit Vision Control',
+      primaryMastery: 'Wave Management & Roam Timers',
+    },
+    'Rocket League': {
+      role: 'Striker',
+      secondaryRole: 'Goalkeeper',
+      fitScore: 86,
+      matches: 58,
+      cohort: 'RLCS Major Contender',
+      topStrength: 'Aerial Speed & Double-Tap Accuracy',
+      priorityImprovement: 'Backboard Boost Conservation',
+      primaryMastery: 'Fast Aerials & Flip Resets',
+    },
+    BGMI: {
+      role: 'Assaulter',
+      secondaryRole: 'IGL',
+      fitScore: 88,
+      matches: 64,
+      cohort: 'BGIS Tier 1 Contender',
+      topStrength: 'First Blood Pick & Multi-Kill Rounds (92nd %ile)',
+      priorityImprovement: 'Phase 5 Compound Rotation Timing',
+      primaryMastery: 'M416 + DBS Frontline Assault & Zone Calling',
+    },
+    'Free Fire': {
+      role: 'Mid Laner',
+      secondaryRole: 'ADC',
+      fitScore: 89,
+      matches: 68,
+      cohort: 'LCK / LEC Regional Contender',
+      topStrength: 'Lane CS Differential (+18 @ 15m)',
+      priorityImprovement: 'Dragon Pit Vision Control',
+      primaryMastery: 'Wave Management & Roam Timers',
+    },
+    'Mobile Legends': {
+      role: 'Striker',
+      secondaryRole: 'Goalkeeper',
+      fitScore: 86,
+      matches: 58,
+      cohort: 'RLCS Major Contender',
+      topStrength: 'Aerial Speed & Double-Tap Accuracy',
+      priorityImprovement: 'Backboard Boost Conservation',
+      primaryMastery: 'Fast Aerials & Flip Resets',
+    },
   };
-
-
-
-
-
-
 
   const initialGamesPlayed: GameProfile[] = [
     {
@@ -2365,132 +2190,41 @@ export function PlayerDashboardView({
 
 
   const handleSelectGame = (game: GameType) => {
-
-
-
-    const gameConfig = gamesCatalog[game];
-
-
-
+    const validGame = normalizeGameType(game);
+    const gameConfig = gamesCatalog[validGame] || gamesCatalog[game] || gamesCatalog['CS2'];
     setPlayer(prev => ({
-
-
-
       ...prev,
-
-
-
-      activeGame: game,
-
-
-
-      role: gameConfig.role,
-
-
-
-      secondaryRole: gameConfig.secondaryRole,
-
-
-
-      fitScore: gameConfig.fitScore,
-
-
-
-      matchesSampled: gameConfig.matches,
-
-
-
-      cohort: gameConfig.cohort,
-
-
-
-      topStrength: gameConfig.topStrength,
-
-
-
-      priorityImprovement: gameConfig.priorityImprovement,
-
-
-
-      primaryMastery: gameConfig.primaryMastery,
-
-
-
+      activeGame: validGame,
+      role: gameConfig?.role || 'AWPer',
+      secondaryRole: gameConfig?.secondaryRole || 'Lurker',
+      fitScore: gameConfig?.fitScore || 88,
+      matchesSampled: gameConfig?.matches || 50,
+      cohort: gameConfig?.cohort || 'Tier 1 Contender',
+      topStrength: gameConfig?.topStrength || 'High Combat Impact',
+      priorityImprovement: gameConfig?.priorityImprovement || 'Consistency',
+      primaryMastery: gameConfig?.primaryMastery || 'Tactical Comms & Utility',
     }));
-
-
-
-    addToast(`Switched active scouting title to ${game}!`, 'success');
-
-
-
+    addToast(`Switched active scouting title to ${validGame}!`, 'success');
   };
-
-
-
-
-
-
 
   const handleUpdateAvailability = (updated: Partial<PlayerProfile>) => {
-
-
-
     setPlayer(prev => {
-
-
-
       const newPlayer = { ...prev, ...updated };
-
-
-
       if (updated.activeGame && updated.activeGame !== prev.activeGame) {
-
-
-
-        const gameConfig = gamesCatalog[updated.activeGame];
-
-
-
-        newPlayer.role = gameConfig.role;
-
-
-
-        newPlayer.secondaryRole = gameConfig.secondaryRole;
-
-
-
-        newPlayer.fitScore = gameConfig.fitScore;
-
-
-
-        newPlayer.cohort = gameConfig.cohort;
-
-
-
+        const validGame = normalizeGameType(updated.activeGame);
+        const gameConfig = gamesCatalog[validGame] || gamesCatalog[updated.activeGame] || gamesCatalog['CS2'];
+        if (gameConfig) {
+          newPlayer.activeGame = validGame;
+          newPlayer.role = gameConfig.role;
+          newPlayer.secondaryRole = gameConfig.secondaryRole;
+          newPlayer.fitScore = gameConfig.fitScore;
+          newPlayer.cohort = gameConfig.cohort;
+        }
       }
-
-
-
       return newPlayer;
-
-
-
     });
-
-
-
     addToast('Player profile details and availability updated.', 'success');
-
-
-
   };
-
-
-
-
-
-
 
   const handleApplyToOpening = async (
     opening: RosterOpening,
