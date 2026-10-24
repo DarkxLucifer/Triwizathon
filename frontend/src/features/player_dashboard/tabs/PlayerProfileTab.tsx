@@ -185,6 +185,19 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
     tier: string;
     primaryStat: string;
     winRate: string;
+    kd?: string;
+    rating?: string;
+    headshotRate?: string;
+    openingDuel?: string;
+    tradeEfficiency?: string;
+    flashDuration?: string;
+    utilityDamage?: string;
+    clutchRate?: string;
+    firstFragWinDelta?: string;
+    aimScore?: number;
+    positioningScore?: number;
+    utilityScore?: number;
+    gameSenseScore?: number;
     server?: string;
   }>>({
     BGMI: {
@@ -289,7 +302,7 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
         }));
 
         if (res.valid && res.data) {
-          // Auto-update telemetry metrics from verified registry
+          // Auto-update ALL telemetry metrics from verified registry
           setPerGameDetails(prev => ({
             ...prev,
             [game]: {
@@ -301,6 +314,19 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
               tier: res.data?.tier || prev[game]?.tier || 'Verified',
               primaryStat: res.data?.primary_stat || prev[game]?.primaryStat || '',
               winRate: res.data?.win_rate || prev[game]?.winRate || '',
+              kd: res.data?.kd,
+              rating: res.data?.rating,
+              headshotRate: res.data?.headshot_rate,
+              openingDuel: res.data?.opening_duel,
+              tradeEfficiency: res.data?.trade_efficiency,
+              flashDuration: res.data?.flash_duration,
+              utilityDamage: res.data?.utility_damage,
+              clutchRate: res.data?.clutch_rate,
+              firstFragWinDelta: res.data?.first_frag_win_delta,
+              aimScore: res.data?.aim_score,
+              positioningScore: res.data?.positioning_score,
+              utilityScore: res.data?.utility_score,
+              gameSenseScore: res.data?.game_sense_score,
             }
           }));
         }
@@ -359,6 +385,19 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
               tier: res.tier || prev[activeGameView]?.tier || 'Verified Candidate',
               primaryStat: res.primary_stat || prev[activeGameView]?.primaryStat || '',
               winRate: res.win_rate || prev[activeGameView]?.winRate || '',
+              kd: (res as any).kd,
+              rating: (res as any).rating,
+              headshotRate: (res as any).headshot_rate,
+              openingDuel: (res as any).opening_duel,
+              tradeEfficiency: (res as any).trade_efficiency,
+              flashDuration: (res as any).flash_duration,
+              utilityDamage: (res as any).utility_damage,
+              clutchRate: (res as any).clutch_rate,
+              firstFragWinDelta: (res as any).first_frag_win_delta,
+              aimScore: (res as any).aim_score,
+              positioningScore: (res as any).positioning_score,
+              utilityScore: (res as any).utility_score,
+              gameSenseScore: (res as any).game_sense_score,
             }
           }));
 
@@ -682,25 +721,32 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
         currentDetails?.winRate?.trim()
       );
 
-  const statNum = parseFloat(currentDetails?.primaryStat?.replace(/[^0-9.]/g, '') || '87.4') || 87.4;
-  const winNum = parseFloat(currentDetails?.winRate?.replace(/[^0-9.]/g, '') || '68') || 68;
+  const statNum = parseFloat(currentDetails?.primaryStat?.replace(/[^0-9.]/g, '') || '80') || 80;
+  const winNum = parseFloat(currentDetails?.winRate?.replace(/[^0-9.]/g, '') || '55') || 55;
   
-  const computedRating = activeGameView === 'CS2'
-    ? Number((0.68 + (statNum / 100) * 0.70).toFixed(2))
+  const baseFactor = activeGameView === 'CS2'
+    ? Math.min(1.4, Math.max(0.6, statNum / 82.0))
     : activeGameView === 'Valorant'
-    ? Number((0.60 + (statNum / 300) * 0.75).toFixed(2))
-    : Number((0.60 + (statNum / 900) * 0.75).toFixed(2));
+    ? Math.min(1.4, Math.max(0.6, statNum / 240.0))
+    : Math.min(1.4, Math.max(0.6, statNum / 780.0));
 
-  const computedKd = activeGameView === 'CS2'
-    ? Number((0.78 + (statNum / 110) * 0.72).toFixed(2))
-    : activeGameView === 'Valorant'
-    ? Number((0.70 + (statNum / 320) * 0.75).toFixed(2))
-    : Number((1.5 + (statNum / 200)).toFixed(2));
+  const winFactor = Math.min(1.3, Math.max(0.7, winNum / 55.0));
 
-  const computedHs = Math.min(74, Math.max(38, Math.round(statNum * 0.58 + (winNum - 50) * 0.2)));
-  const computedOpening = Math.min(86, Math.max(48, Math.round(winNum * 0.95 + (statNum > 85 ? 5 : -3))));
-  const computedUtilityDmg = Math.round(statNum * 0.32 + 2);
-  const computedClutch = Math.min(64, Math.max(32, Math.round(winNum * 0.64)));
+  const computedRating = currentDetails?.rating || (0.75 + baseFactor * 0.52).toFixed(2);
+  const computedKd = currentDetails?.kd || (0.78 + baseFactor * 0.55).toFixed(2);
+  const computedHs = currentDetails?.headshotRate ? parseInt(currentDetails.headshotRate) : Math.round(Math.min(78, Math.max(28, 38 + baseFactor * 18)));
+  const computedOpening = currentDetails?.openingDuel ? parseInt(currentDetails.openingDuel) : Math.round(Math.min(84, Math.max(38, 44 + winFactor * 16)));
+  const computedTrade = currentDetails?.tradeEfficiency || `${(68.0 + baseFactor * 14.0).toFixed(1)}%`;
+  const computedFlash = currentDetails?.flashDuration || `${(1.65 + winFactor * 0.45).toFixed(2)}s`;
+  const computedUtilityDmg = currentDetails?.utilityDamage || `${Math.round(18 + baseFactor * 10)} HP`;
+  const clutchNumeric = currentDetails?.clutchRate ? parseInt(currentDetails.clutchRate) : Math.round(Math.min(65, Math.max(22, 28 + winFactor * 12)));
+  const computedClutch = currentDetails?.clutchRate || `${clutchNumeric}%`;
+  const computedDelta = currentDetails?.firstFragWinDelta || `+${(10.0 + winFactor * 4.5).toFixed(1)}%`;
+
+  const computedAim = currentDetails?.aimScore ?? Math.round(Math.min(99, Math.max(55, 68 + baseFactor * 22)));
+  const computedPos = currentDetails?.positioningScore ?? Math.round(Math.min(98, Math.max(52, 66 + winFactor * 20)));
+  const computedUtil = currentDetails?.utilityScore ?? Math.round(Math.min(97, Math.max(50, 65 + baseFactor * 12 + winFactor * 10)));
+  const computedSense = currentDetails?.gameSenseScore ?? Math.round(Math.min(98, Math.max(54, 67 + winFactor * 22)));
 
   return (
     <div className="space-y-6 animate-in fade-in duration-150">
@@ -1929,23 +1975,23 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
                 <div className="space-y-2 text-[11px] font-mono">
                   <div className="flex items-center justify-between">
                     <span className="text-slate-500 dark:text-[#9a9aa2]">Trade Re-Frag Efficiency (3.0s):</span>
-                    <span className="font-bold text-slate-900 dark:text-[#ededed]">84.8% Success</span>
+                    <span className="font-bold text-slate-900 dark:text-[#ededed]">{computedTrade} Success</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-slate-500 dark:text-[#9a9aa2]">Flash Assist Blind Duration:</span>
-                    <span className="font-bold text-slate-900 dark:text-[#ededed]">2.14s avg / enemy</span>
+                    <span className="font-bold text-slate-900 dark:text-[#ededed]">{computedFlash} avg / enemy</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-slate-500 dark:text-[#9a9aa2]">Utility Damage Per Round:</span>
-                    <span className="font-bold text-slate-900 dark:text-[#ededed]">{computedUtilityDmg} HP / Round</span>
+                    <span className="font-bold text-slate-900 dark:text-[#ededed]">{computedUtilityDmg} / Round</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-slate-500 dark:text-[#9a9aa2]">1vX Clutch Conversion:</span>
-                    <span className="font-bold text-slate-900 dark:text-[#ededed]">{computedClutch}% (1v1: 76%, 1v2: 38%)</span>
+                    <span className="font-bold text-slate-900 dark:text-[#ededed]">{computedClutch} (1v1: {Math.min(95, Math.round(clutchNumeric * 1.6))}%, 1v2: {Math.round(clutchNumeric * 0.75)}%)</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-slate-500 dark:text-[#9a9aa2]">Round Win Delta on First Frag:</span>
-                    <span className="font-bold text-slate-900 dark:text-[#ededed]">+14.2% Probability</span>
+                    <span className="font-bold text-slate-900 dark:text-[#ededed]">{computedDelta} Probability</span>
                   </div>
                 </div>
               </div>
@@ -1965,40 +2011,40 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
                   <div>
                     <div className="flex justify-between text-[10px] font-mono text-slate-600 dark:text-[#9a9aa2] mb-1">
                       <span>Aim Precision & Crosshair Placement</span>
-                      <span className="font-bold text-slate-900 dark:text-white">94%</span>
+                      <span className="font-bold text-slate-900 dark:text-white">{computedAim}%</span>
                     </div>
                     <div className="w-full bg-slate-200 dark:bg-[#222226] h-1.5 rounded-full overflow-hidden">
-                      <div className="bg-slate-900 dark:bg-white h-full rounded-full" style={{ width: '94%' }} />
+                      <div className="bg-slate-900 dark:bg-white h-full rounded-full transition-all duration-300" style={{ width: `${computedAim}%` }} />
                     </div>
                   </div>
 
                   <div>
                     <div className="flex justify-between text-[10px] font-mono text-slate-600 dark:text-[#9a9aa2] mb-1">
                       <span>Map Geometry & Angle Isolation</span>
-                      <span className="font-bold text-slate-900 dark:text-white">90%</span>
+                      <span className="font-bold text-slate-900 dark:text-white">{computedPos}%</span>
                     </div>
                     <div className="w-full bg-slate-200 dark:bg-[#222226] h-1.5 rounded-full overflow-hidden">
-                      <div className="bg-slate-900 dark:bg-white h-full rounded-full" style={{ width: '90%' }} />
+                      <div className="bg-slate-900 dark:bg-white h-full rounded-full transition-all duration-300" style={{ width: `${computedPos}%` }} />
                     </div>
                   </div>
 
                   <div>
                     <div className="flex justify-between text-[10px] font-mono text-slate-600 dark:text-[#9a9aa2] mb-1">
                       <span>Economic & Utility Discipline</span>
-                      <span className="font-bold text-slate-900 dark:text-white">86%</span>
+                      <span className="font-bold text-slate-900 dark:text-white">{computedUtil}%</span>
                     </div>
                     <div className="w-full bg-slate-200 dark:bg-[#222226] h-1.5 rounded-full overflow-hidden">
-                      <div className="bg-slate-900 dark:bg-white h-full rounded-full" style={{ width: '86%' }} />
+                      <div className="bg-slate-900 dark:bg-white h-full rounded-full transition-all duration-300" style={{ width: `${computedUtil}%` }} />
                     </div>
                   </div>
 
                   <div>
                     <div className="flex justify-between text-[10px] font-mono text-slate-600 dark:text-[#9a9aa2] mb-1">
                       <span>Retake & Post-Plant Execution</span>
-                      <span className="font-bold text-slate-900 dark:text-white">89%</span>
+                      <span className="font-bold text-slate-900 dark:text-white">{computedSense}%</span>
                     </div>
                     <div className="w-full bg-slate-200 dark:bg-[#222226] h-1.5 rounded-full overflow-hidden">
-                      <div className="bg-slate-900 dark:bg-white h-full rounded-full" style={{ width: '89%' }} />
+                      <div className="bg-slate-900 dark:bg-white h-full rounded-full transition-all duration-300" style={{ width: `${computedSense}%` }} />
                     </div>
                   </div>
                 </div>

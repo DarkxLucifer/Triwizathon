@@ -265,6 +265,17 @@ export const playerApi = {
       win_rate?: string;
       kd?: string;
       rating?: string;
+      headshot_rate?: string;
+      opening_duel?: string;
+      trade_efficiency?: string;
+      flash_duration?: string;
+      utility_damage?: string;
+      clutch_rate?: string;
+      first_frag_win_delta?: string;
+      aim_score?: number;
+      positioning_score?: number;
+      utility_score?: number;
+      game_sense_score?: number;
     } | null;
   }> {
     const params = new URLSearchParams({
