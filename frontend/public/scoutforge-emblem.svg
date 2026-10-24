@@ -1,0 +1,22 @@
+<svg viewBox="0 0 100 112" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Top Roof Segment -->
+  <path d="M 50 4 L 8 20 L 8 28 L 18 28 C 24 18 36 14 50 14 C 62 14 70 17 74 22 L 78 18 L 74 12 Z" fill="#c6ff00" />
+  
+  <!-- Left Vertical Segment -->
+  <path d="M 8 36 L 22 38 L 22 72 L 8 74 Z" fill="#c6ff00" />
+
+  <!-- Right Vertical Segment -->
+  <path d="M 78 40 L 92 40 L 92 74 L 78 72 Z" fill="#c6ff00" />
+
+  <!-- Bottom Chevron Segment -->
+  <path d="M 8 80 L 50 108 L 92 80 L 80 78 L 50 96 L 20 78 Z" fill="#c6ff00" />
+
+  <!-- Diagonal Beam -->
+  <path d="M 48 45 L 84 9 L 93 18 L 57 54 Z" fill="#c6ff00" />
+
+  <!-- Center Target Ring -->
+  <path fill-rule="evenodd" clip-rule="evenodd" d="M 50 32 C 60 32 68 40 68 50 C 68 60 60 68 50 68 C 40 68 32 60 32 50 C 32 40 40 32 50 32 Z M 50 42 C 54.4 42 58 45.6 58 50 C 58 54.4 54.4 58 50 58 C 45.6 58 42 54.4 42 50 C 42 45.6 45.6 42 50 42 Z" fill="#c6ff00" />
+
+  <!-- Center Bullseye Dot -->
+  <circle cx="50" cy="50" r="3.5" fill="#c6ff00" />
+</svg>
