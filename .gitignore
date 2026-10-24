@@ -1,0 +1,42 @@
+# Secrets and local config
+.env
+*.env
+!.env.example
+
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Python cache & artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Environments
+.venv/
+venv/
+
+# Node & Frontend (currently excluded until requested)
+node_modules/
+.next/
+out/
+build/
+dist/
+
+# Local media & uploads
+uploads/*
+!uploads/.gitkeep
+*.wav
+*.mp3
+*.ogg
+*.flac
+
+# OS & Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

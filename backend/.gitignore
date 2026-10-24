@@ -1,0 +1,38 @@
+# Environment variables & secrets
+.env
+*.env
+!.env.example
+
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+scoutforge.db
+scoutforge_test_copy.db
+
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# Uploads & local media
+uploads/*
+!uploads/.gitkeep
+*.wav
+*.mp3
+sample_tactical_comms.wav
+sample_tactical_comms.mp3
+
+# IDE & OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
