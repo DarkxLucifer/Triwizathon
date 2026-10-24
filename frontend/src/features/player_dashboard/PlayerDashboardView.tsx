@@ -438,7 +438,7 @@ export function PlayerDashboardView({
 
 
 
-    'Free Fire': {
+    'League of Legends': {
 
 
 
@@ -458,19 +458,19 @@ export function PlayerDashboardView({
 
 
 
-      cohort: 'FFWS South Asia Pro League',
+      cohort: 'LCK / LEC Regional Contender',
 
 
 
-      topStrength: 'Gloo Wall Placement Speed (89th %ile)',
+      topStrength: 'Lane CS Differential (+18 @ 15m)',
 
 
 
-      priorityImprovement: 'Mid-Range Drag Headshot Stability',
+      priorityImprovement: 'Dragon Pit Vision Control',
 
 
 
-      primaryMastery: 'AWM Long-Sight Sniping & Shotgun Rush',
+      primaryMastery: 'Wave Management & Roam Timers',
 
 
 
@@ -478,7 +478,7 @@ export function PlayerDashboardView({
 
 
 
-    'Mobile Legends': {
+    'Rocket League': {
 
 
 
@@ -498,19 +498,19 @@ export function PlayerDashboardView({
 
 
 
-      cohort: 'MPL Regional Qualifier',
+      cohort: 'RLCS Major Contender',
 
 
 
-      topStrength: 'Lord Retribution Timing (92nd %ile)',
+      topStrength: 'Aerial Speed & Double-Tap Accuracy',
 
 
 
-      priorityImprovement: 'Early Gold Lane Gank Frequency',
+      priorityImprovement: 'Backboard Boost Conservation',
 
 
 
-      primaryMastery: 'Ling, Fanny & Hayabusa Jungle Carry',
+      primaryMastery: 'Fast Aerials & Flip Resets',
 
 
 
@@ -604,40 +604,40 @@ export function PlayerDashboardView({
       server: 'Mumbai (18ms)',
     },
     {
-      id: 'Free Fire',
-      name: 'Free Fire',
-      shortName: 'FF',
-      badge: 'Mobile BR',
-      ign: 'Vortex_FF#77',
-      rank: 'Grandmaster V',
-      primaryRole: 'Rusher',
-      secondaryRole: 'Sniper',
-      tier: 'FFWS Circuit',
-      fitScore: 81,
-      matchesSampled: 48,
-      kdOrKda: '4.60',
-      primaryStatLabel: 'HS Rate',
-      primaryStatValue: '68.4%',
-      winRate: '64%',
-      server: 'India (24ms)',
+      id: 'League of Legends',
+      name: 'League of Legends',
+      shortName: 'LoL',
+      badge: 'PC MOBA',
+      ign: 'Vortex#LoL',
+      rank: 'Challenger 740 LP',
+      primaryRole: 'Mid Laner',
+      secondaryRole: 'Jungler',
+      tier: 'LCK / LEC Contender',
+      fitScore: 89,
+      matchesSampled: 68,
+      kdOrKda: '4.8 KDA',
+      primaryStatLabel: 'CS / Min',
+      primaryStatValue: '9.4 CS/M',
+      winRate: '67%',
+      server: 'EU West (24ms)',
     },
     {
-      id: 'Mobile Legends',
-      name: 'Mobile Legends',
-      shortName: 'MLBB',
-      badge: 'Mobile MOBA',
-      ign: 'VortexMLBB',
-      rank: 'Mythical Glory 1,240★',
-      primaryRole: 'Jungler',
-      secondaryRole: 'Assassin',
-      tier: 'MPL Qualifier',
+      id: 'Rocket League',
+      name: 'Rocket League',
+      shortName: 'RLCS',
+      badge: 'PC Vehicular Soccer',
+      ign: 'Vortex_RL',
+      rank: 'Supersonic Legend (1,920 MMR)',
+      primaryRole: 'First Man / Striker',
+      secondaryRole: 'Third Man / Anchor',
+      tier: 'RLCS Major Contender',
       fitScore: 86,
-      matchesSampled: 58,
-      kdOrKda: '8.40',
-      primaryStatLabel: 'Gold/Min',
-      primaryStatValue: '740 GPM',
-      winRate: '76%',
-      server: 'South Asia (32ms)',
+      matchesSampled: 54,
+      kdOrKda: '2.40 GPG',
+      primaryStatLabel: 'Score/Match',
+      primaryStatValue: '685 Avg',
+      winRate: '71%',
+      server: 'Europe / APAC (28ms)',
     },
     {
       id: 'BGMI',
@@ -941,7 +941,7 @@ export function PlayerDashboardView({
 
 
 
-      game: 'Free Fire',
+      game: 'League of Legends',
 
 
 
@@ -1025,7 +1025,7 @@ export function PlayerDashboardView({
 
 
 
-      game: 'Mobile Legends',
+      game: 'Rocket League',
 
 
 
@@ -1461,7 +1461,7 @@ export function PlayerDashboardView({
 
 
 
-      game: 'Free Fire',
+      game: 'League of Legends',
 
 
 
@@ -2261,10 +2261,10 @@ export function PlayerDashboardView({
               detectedGame = 'BGMI';
             } else if (lowerTitle.includes('vct') || lowerTitle.includes('valorant') || lowerTitle.includes('jett') || lowerTitle.includes('duelist')) {
               detectedGame = 'Valorant';
-            } else if (lowerTitle.includes('ffws') || lowerTitle.includes('free fire') || lowerTitle.includes('gloo wall') || lowerTitle.includes('rusher')) {
-              detectedGame = 'Free Fire';
-            } else if (lowerTitle.includes('mpl') || lowerTitle.includes('mobile legends') || lowerTitle.includes('ling') || lowerTitle.includes('jungler')) {
-              detectedGame = 'Mobile Legends';
+            } else if (lowerTitle.includes('lol') || lowerTitle.includes('league') || lowerTitle.includes('gloo wall') || lowerTitle.includes('rusher')) {
+              detectedGame = 'League of Legends';
+            } else if (lowerTitle.includes('rocket league') || lowerTitle.includes('rlcs') || lowerTitle.includes('ling') || lowerTitle.includes('jungler')) {
+              detectedGame = 'Rocket League';
             }
 
             return {
@@ -2712,7 +2712,7 @@ export function PlayerDashboardView({
 
 
 
-  const gameOptions: GameType[] = ['CS2', 'Valorant', 'Free Fire', 'Mobile Legends', 'BGMI'];
+  const gameOptions: GameType[] = ['CS2', 'Valorant', 'League of Legends', 'Rocket League', 'BGMI'];
 
 
 

@@ -41,11 +41,11 @@ const tabLabels: Record<TabType, string> = {
 };
 
 const gameIcons: Record<GameType, React.ReactNode> = {
-  "Valorant": <Crosshair className="w-3.5 h-3.5 text-rose-500" />,
-  "BGMI": <Shield className="w-3.5 h-3.5 text-amber-600" />,
-  "Free Fire": <Flame className="w-3.5 h-3.5 text-orange-500" />,
-  "Mobile Legends": <Swords className="w-3.5 h-3.5 text-blue-600" />,
   "CS2": <Zap className="w-3.5 h-3.5 text-emerald-600" />,
+  "Valorant": <Crosshair className="w-3.5 h-3.5 text-rose-500" />,
+  "League of Legends": <Swords className="w-3.5 h-3.5 text-cyan-600" />,
+  "Rocket League": <Flame className="w-3.5 h-3.5 text-amber-500" />,
+  "BGMI": <Shield className="w-3.5 h-3.5 text-amber-600" />,
 };
 
 export const Header: React.FC<HeaderProps> = ({
@@ -71,7 +71,7 @@ export const Header: React.FC<HeaderProps> = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const games: GameType[] = ["Valorant", "BGMI", "Free Fire", "Mobile Legends", "CS2"];
+  const games: GameType[] = ["CS2", "Valorant", "League of Legends", "Rocket League", "BGMI"];
 
   return (
     <header className="h-16 border-b border-slate-200/90 bg-white/95 backdrop-blur sticky top-0 z-30 flex items-center justify-between px-6 lg:px-8 shadow-[0_1px_3px_rgba(0,0,0,0.03)]">

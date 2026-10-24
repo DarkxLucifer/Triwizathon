@@ -284,7 +284,7 @@ export const EvidenceAudioTab: React.FC<EvidenceAudioTabProps> = ({
               isLight ? "text-slate-400" : "text-[#9a9aa2]"
             }`}
           >
-            Supported across BGMI, Valorant, CS2, Free Fire & MLBB (Up to 1.5 GB)
+            Supported across BGMI, Valorant, CS2, League of Legends & Rocket League (Up to 1.5 GB)
           </span>
 
           {/* Consent Checkbox */}

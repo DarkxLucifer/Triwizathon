@@ -363,7 +363,7 @@ export const PlayerLoginView: React.FC<PlayerLoginViewProps> = ({
                   className={`flex items-center gap-1 font-semibold ${
                     isLight ? "text-slate-800" : "text-[#ededed]"
                   }`}
-                  title="Free Fire"
+                  title="League of Legends"
                 >
                   <Flame className="w-3.5 h-3.5 text-orange-500" />
                   FF
@@ -373,7 +373,7 @@ export const PlayerLoginView: React.FC<PlayerLoginViewProps> = ({
                   className={`flex items-center gap-1 font-semibold ${
                     isLight ? "text-slate-800" : "text-[#ededed]"
                   }`}
-                  title="Mobile Legends"
+                  title="Rocket League"
                 >
                   <Swords className="w-3.5 h-3.5 text-blue-400" />
                   MLBB

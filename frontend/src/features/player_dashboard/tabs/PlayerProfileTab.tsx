@@ -66,8 +66,8 @@ interface PlayerProfileTabProps {
 const gameIcons: Record<GameType, React.ReactNode> = {
   "Valorant": <Crosshair className="w-4 h-4 text-rose-500" />,
   "BGMI": <Shield className="w-4 h-4 text-amber-500" />,
-  "Free Fire": <Flame className="w-4 h-4 text-orange-500" />,
-  "Mobile Legends": <Swords className="w-4 h-4 text-blue-500" />,
+  "League of Legends": <Swords className="w-4 h-4 text-cyan-400" />,
+  "Rocket League": <Flame className="w-4 h-4 text-amber-500" />,
   "CS2": <Zap className="w-4 h-4 text-emerald-500" />,
 };
 
@@ -75,8 +75,8 @@ const gamePosters: Record<string, string> = {
   "CS2": "/images/games/cs2.jpg",
   "Valorant": "/images/games/valorant.jpg",
   "BGMI": "/images/games/bgmi.jpg",
-  "Free Fire": "/images/games/apex.jpg",
-  "Mobile Legends": "/images/games/fortnite.jpg",
+  "League of Legends": "/images/games/apex.jpg",
+  "Rocket League": "/images/games/fortnite.jpg",
 };
 
 const defaultClips: GameplayVideoClip[] = [
@@ -213,23 +213,23 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
       primaryStat: '87.4 ADR',
       winRate: '62%',
     },
-    'Free Fire': {
-      ign: 'Vortex_FF#77',
-      gameId: '88194012',
-      rank: 'Grandmaster V',
-      role: 'Flank Rusher',
-      tier: 'FFWS Circuit',
-      primaryStat: '68.4% HS Rate',
-      winRate: '64%',
+    'League of Legends': {
+      ign: 'Vortex#LoL',
+      gameId: 'Vortex#EUW',
+      rank: 'Challenger 740 LP',
+      role: 'Mid Laner / Playmaker',
+      tier: 'LCK / LEC Contender',
+      primaryStat: '9.4 CS/Min (4.8 KDA)',
+      winRate: '67%',
     },
-    'Mobile Legends': {
-      ign: 'VortexMLBB',
-      gameId: '98124801 (4012)',
-      rank: 'Mythical Glory 1,240★',
-      role: 'Jungle Carry',
-      tier: 'MPL Qualifier',
-      primaryStat: '740 GPM',
-      winRate: '76%',
+    'Rocket League': {
+      ign: 'Vortex_RL',
+      gameId: 'VortexRL#7741',
+      rank: 'Supersonic Legend (1,920 MMR)',
+      role: 'First Man / Striker',
+      tier: 'RLCS Major Contender',
+      primaryStat: '2.4 Goals/Game (685 Score)',
+      winRate: '71%',
     },
   });
 
@@ -913,8 +913,8 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
             const gamePriority: Record<string, number> = {
               'CS2': 1,
               'Valorant': 2,
-              'Free Fire': 3,
-              'Mobile Legends': 4,
+              'League of Legends': 3,
+              'Rocket League': 4,
               'BGMI': 5,
             };
             const ordered = [...(player.gamesPlayed || [])].sort(
@@ -931,8 +931,8 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
                   if (gameItem.id === 'BGMI') setUploadMap('Erangel');
                   else if (gameItem.id === 'Valorant') setUploadMap('Haven');
                   else if (gameItem.id === 'CS2') setUploadMap('Mirage');
-                  else if (gameItem.id === 'Free Fire') setUploadMap('Bermuda');
-                  else if (gameItem.id === 'Mobile Legends') setUploadMap('Land of Dawn');
+                  else if (gameItem.id === 'League of Legends') setUploadMap('Summoners Rift');
+                  else if (gameItem.id === 'Rocket League') setUploadMap('DFH Stadium / Champions Field');
                   if (onSelectGame) onSelectGame(gameItem.id);
                 }}
                 className={`p-4 rounded-[6px] border transition-all cursor-pointer flex flex-col justify-between ${
@@ -1201,13 +1201,17 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
                 <span>
                   <strong>Krafton Character UID (10 Digits)</strong> is required for official BGIS / BMPS tournament roster verification and scrim registrations. Enter your UID and average damage below.
                 </span>
-              ) : activeGameView === 'Free Fire' ? (
+              ) : activeGameView === 'League of Legends' ? (
                 <span>
-                  <strong>Garena Character UID (8–10 Digits)</strong> is required for official FFWS roster locks. Enter your UID and headshot % below.
+                  <strong>Riot Summoner Name & Tagline (PUUID)</strong> is required for official LoL ranked MMR and match history ingestion. Enter your Riot ID and CS/Min below.
+                </span>
+              ) : activeGameView === 'Rocket League' ? (
+                <span>
+                  <strong>Epic Games ID / Tracker Slug</strong> is required for official RLCS tournament registration and MMR ingestion. Enter your ID and Score/Match below.
                 </span>
               ) : (
                 <span>
-                  <strong>MLBB User ID & 4-digit Zone ID</strong> is required for official MPL contender check-in. Enter your ID and GPM below.
+                  <strong>Official Game ID / Identifier</strong> is required for tournament registration.
                 </span>
               )}
             </div>
@@ -1286,7 +1290,7 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
                   activeGameView === 'CS2' ? 'e.g. Vortex' :
                   activeGameView === 'Valorant' ? 'e.g. Vortex' :
                   activeGameView === 'BGMI' ? 'e.g. 5128940192 (Vortex)' :
-                  activeGameView === 'Free Fire' ? 'e.g. Vortex_FF#77' : 'e.g. VortexMLBB'
+                  activeGameView === 'League of Legends' ? 'e.g. Vortex#LoL' : 'e.g. Vortex_RL'
                 }
                 className={`w-full p-2 rounded-[6px] border text-xs font-bold outline-hidden ${
                   isLight ? "bg-white border-slate-300 text-slate-900" : "bg-[#0b0b0c] border-[#26262a] text-[#ededed]"
@@ -1303,9 +1307,9 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
                   ? 'RIOT ID (NAME#TAG - REQUIRED FOR VALORANT)' 
                   : activeGameView === 'BGMI'
                   ? 'KRAFTON CHARACTER UID (10 DIGITS - REQUIRED)'
-                  : activeGameView === 'Free Fire'
-                  ? 'FREE FIRE CHARACTER UID (REQUIRED)'
-                  : 'MLBB USER ID & ZONE ID (REQUIRED)'}
+                  : activeGameView === 'League of Legends'
+                  ? 'RIOT SUMMONER ID / PUUID (REQUIRED)'
+                  : 'EPIC GAMES ACCOUNT ID (REQUIRED)'}
               </label>
               <input
                 type="text"
@@ -1321,9 +1325,9 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
                     ? 'Vortex#VAL or Player#1234' 
                     : activeGameView === 'BGMI'
                     ? '5128940192'
-                    : activeGameView === 'Free Fire'
-                    ? '88194012'
-                    : '98124801 (4012)'
+                    : activeGameView === 'League of Legends'
+                    ? 'Vortex#EUW'
+                    : 'VortexRL#7741'
                 }
                 className={`w-full p-2 rounded-[6px] border text-xs font-mono font-bold outline-hidden ${
                   isLight ? "bg-white border-slate-300 text-slate-900" : "bg-[#0b0b0c] border-[#26262a] text-[#ededed]"
@@ -1340,9 +1344,9 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
                   ? 'COMPETITIVE RANK (RADIANT / IMMORTAL)' 
                   : activeGameView === 'BGMI'
                   ? 'BGMI RANK (CONQUEROR / ACE)'
-                  : activeGameView === 'Free Fire'
-                  ? 'RANK (GRANDMASTER / HEROIC)'
-                  : 'RANK (MYTHICAL GLORY / IMMORTAL)'}
+                  : activeGameView === 'League of Legends'
+                  ? 'COMPETITIVE RANK (CHALLENGER / GRANDMASTER)'
+                  : 'COMPETITIVE RANK (SUPERSONIC LEGEND / GC3)'}
               </label>
               <input
                 type="text"
@@ -1355,7 +1359,7 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
                   activeGameView === 'CS2' ? 'FACEIT Level 10 (2,480 ELO)' :
                   activeGameView === 'Valorant' ? 'Radiant #412' :
                   activeGameView === 'BGMI' ? 'Conqueror Top 100' :
-                  activeGameView === 'Free Fire' ? 'Grandmaster V' : 'Mythical Glory 1,240★'
+                  activeGameView === 'League of Legends' ? 'Challenger 740 LP' : 'Supersonic Legend (1,920 MMR)'
                 }
                 className={`w-full p-2 rounded-[6px] border text-xs font-bold outline-hidden ${
                   isLight ? "bg-white border-slate-300 text-slate-900" : "bg-[#0b0b0c] border-[#26262a] text-[#ededed]"
@@ -1372,9 +1376,9 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
                   ? 'PRIMARY AGENT / COMBAT ROLE' 
                   : activeGameView === 'BGMI'
                   ? 'SQUAD COMBAT ROLE'
-                  : activeGameView === 'Free Fire'
-                  ? 'TACTICAL RUSHER / FLANK ROLE'
-                  : 'LANE & HERO SPECIALIZATION'}
+                  : activeGameView === 'League of Legends'
+                  ? 'SUMMONERS RIFT LANE / ROLE'
+                  : 'ROCKET LEAGUE ROTATION POSITION'}
               </label>
               <input
                 type="text"
@@ -1387,7 +1391,7 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
                   activeGameView === 'CS2' ? 'Dedicated AWPer / Entry' :
                   activeGameView === 'Valorant' ? 'Duelist (Jett/Reyna) / Initiator' :
                   activeGameView === 'BGMI' ? 'Frontline Assaulter / IGL' :
-                  activeGameView === 'Free Fire' ? 'Flank Rusher' : 'Jungle Carry (Assassin)'
+                  activeGameView === 'League of Legends' ? 'Mid Laner / Playmaker' : 'First Man / Striker'
                 }
                 className={`w-full p-2 rounded-[6px] border text-xs outline-hidden ${
                   isLight ? "bg-white border-slate-300 text-slate-900" : "bg-[#0b0b0c] border-[#26262a] text-[#ededed]"
@@ -1404,9 +1408,9 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
                   ? 'AVERAGE COMBAT SCORE (ACS)' 
                   : activeGameView === 'BGMI'
                   ? 'AVERAGE DAMAGE / FINISH-TO-DEATH'
-                  : activeGameView === 'Free Fire'
-                  ? 'HEADSHOT % / K/D RATIO'
-                  : 'GOLD PER MINUTE (GPM) / KDA'}
+                  : activeGameView === 'League of Legends'
+                  ? 'CREEP SCORE PER MINUTE (CS/M) & KDA'
+                  : 'GOALS PER GAME (GPG) & MATCH SCORE'}
               </label>
               <input
                 type="text"
@@ -1419,7 +1423,7 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
                   activeGameView === 'CS2' ? '87.4 ADR' :
                   activeGameView === 'Valorant' ? '284.5 ACS' :
                   activeGameView === 'BGMI' ? '842.0 Avg Dmg (F/D: 4.8)' :
-                  activeGameView === 'Free Fire' ? '68.4% HS Rate' : '740 GPM (4.8 KDA)'
+                  activeGameView === 'League of Legends' ? '9.4 CS/Min (4.8 KDA)' : '2.4 GPG (685 Score)'
                 }
                 className={`w-full p-2 rounded-[6px] border text-xs font-mono outline-hidden ${
                   isLight ? "bg-white border-slate-300 text-slate-900" : "bg-[#0b0b0c] border-[#26262a] text-[#ededed]"
@@ -1436,9 +1440,9 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
                   ? 'VALORANT RANKED WIN RATE' 
                   : activeGameView === 'BGMI'
                   ? 'BGMI SCRIM / TOURNAMENT WIN RATE'
-                  : activeGameView === 'Free Fire'
-                  ? 'BR / CLASH SQUAD WIN RATE'
-                  : 'MLBB RANKED WIN RATE'}
+                  : activeGameView === 'League of Legends'
+                  ? 'LOL RANKED / TOURNAMENT WIN RATE'
+                  : 'RLCS / 3v3 COMPETITIVE WIN RATE'}
               </label>
               <input
                 type="text"
@@ -1740,7 +1744,7 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
                     activeGameView === 'BGMI' ? 'Erangel, Miramar, Sanhok' :
                     activeGameView === 'Valorant' ? 'Haven, Ascent, Bind, Split' :
                     activeGameView === 'CS2' ? 'Mirage, Inferno, Nuke, Dust2' :
-                    activeGameView === 'Free Fire' ? 'Bermuda, Purgatory' :
+                    activeGameView === 'League of Legends' ? 'Summoners Rift, Howling Abyss' : activeGameView === 'Rocket League' ? 'DFH Stadium, Champions Field' :
                     'Land of Dawn'
                   }
                   className={`w-full p-2 rounded-[6px] border text-xs outline-hidden ${

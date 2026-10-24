@@ -84,11 +84,11 @@ interface RosterOpeningsTabProps {
 }
 
 const gameIcons: Record<GameType, React.ReactNode> = {
-  "Valorant": <Crosshair className="w-3.5 h-3.5 text-rose-500" />,
-  "BGMI": <Shield className="w-3.5 h-3.5 text-amber-600" />,
-  "Free Fire": <Flame className="w-3.5 h-3.5 text-orange-500" />,
-  "Mobile Legends": <Swords className="w-3.5 h-3.5 text-blue-600" />,
   "CS2": <Zap className="w-3.5 h-3.5 text-emerald-600" />,
+  "Valorant": <Crosshair className="w-3.5 h-3.5 text-rose-500" />,
+  "League of Legends": <Swords className="w-3.5 h-3.5 text-cyan-600" />,
+  "Rocket League": <Flame className="w-3.5 h-3.5 text-amber-500" />,
+  "BGMI": <Shield className="w-3.5 h-3.5 text-amber-600" />,
 };
 
 type SkillCategory = "All" | "Sniper" | "Bomber" | "Entry Fragger" | "IGL" | "Assaulter" | "Rusher" | "Support";
@@ -118,17 +118,17 @@ const getGameUidConfig = (game: GameType) => {
         placeholder: "e.g., 5128940192",
         hint: "Your numeric in-game character ID used for Krafton official roster verify",
       };
-    case "Free Fire":
+    case "League of Legends":
       return {
-        label: "Free Fire Player UID *",
-        placeholder: "e.g., 2849104829",
-        hint: "Your in-game UID displayed on your profile card",
+        label: "Riot Summoner Name / Tagline *",
+        placeholder: "e.g., Faker#KR1 or Vortex#EUW",
+        hint: "Your official Riot identifier used for LoL ranked MMR and tournament check-in",
       };
-    case "Mobile Legends":
+    case "Rocket League":
       return {
-        label: "MLBB User ID & Zone ID *",
-        placeholder: "e.g., 84910284 (2041)",
-        hint: "Your numeric User ID followed by 4-digit Zone ID in parentheses",
+        label: "Epic Games / Tracker ID *",
+        placeholder: "e.g., Vortex_RL or EpicAccountID",
+        hint: "Your official Epic/Psyonix ID used for RLCS circuit rosters",
       };
     case "CS2":
       return {
@@ -457,7 +457,7 @@ export const RosterOpeningsTab: React.FC<RosterOpeningsTabProps> = ({
     onShowToast("Gameplay appreciation updated!", "info");
   };
 
-  const games: string[] = ["All", "Valorant", "BGMI", "Free Fire", "Mobile Legends", "CS2"];
+  const games: string[] = ["All", "CS2", "Valorant", "League of Legends", "Rocket League", "BGMI"];
   const skillsList: SkillCategory[] = [
     "All", 
     "Sniper", 
@@ -1566,8 +1566,8 @@ export const RosterOpeningsTab: React.FC<RosterOpeningsTabProps> = ({
                   >
                     <option value="Valorant">Valorant</option>
                     <option value="BGMI">BGMI</option>
-                    <option value="Free Fire">Free Fire</option>
-                    <option value="Mobile Legends">Mobile Legends</option>
+                    <option value="League of Legends">League of Legends (LoL)</option>
+                    <option value="Rocket League">Rocket League (RLCS)</option>
                     <option value="CS2">CS2</option>
                   </select>
                 </div>

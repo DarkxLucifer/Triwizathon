@@ -138,11 +138,11 @@ export const AvailabilityModal: React.FC<AvailabilityModalProps> = ({
                 onChange={(e) => setFormData({ ...formData, activeGame: e.target.value as GameType })}
                 className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-[#0b0b0c] border border-slate-300 dark:border-[#26262a] text-xs text-slate-950 dark:text-[#ededed] font-semibold focus:outline-none focus:border-slate-900 dark:focus:border-[#e8ff59]"
               >
-                <option value="BGMI">BGMI (Battlegrounds Mobile India)</option>
                 <option value="CS2">Counter-Strike 2 (PC)</option>
                 <option value="Valorant">Valorant (PC)</option>
-                <option value="Free Fire">Free Fire (Mobile)</option>
-                <option value="Mobile Legends">Mobile Legends: Bang Bang (Mobile)</option>
+                <option value="League of Legends">League of Legends (PC)</option>
+                <option value="Rocket League">Rocket League (PC)</option>
+                <option value="BGMI">BGMI (Battlegrounds Mobile India)</option>
               </select>
             </div>
 
