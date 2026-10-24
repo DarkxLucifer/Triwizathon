@@ -37,7 +37,11 @@ import {
   RefreshCw,
   Info,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Sparkles,
+  Camera,
+  FileText,
+  AlertCircle
 } from "lucide-react";
 import { PlayerProfile, GameType, GameplayVideoClip, AvailabilityStatus, GameProfile, RoleApplication, normalizeGameType } from "@/types/dashboard";
 import { VideoPlayerModal } from "../components/VideoPlayerModal";
@@ -201,6 +205,53 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
     },
   });
 
+  // AI Credentials Extractor State
+  const [extractScreenshot, setExtractScreenshot] = useState<File | null>(null);
+  const [extractText, setExtractText] = useState<string>("");
+  const [isExtracting, setIsExtracting] = useState<boolean>(false);
+  const [extractSuccess, setExtractSuccess] = useState<string | null>(null);
+  const [extractMode, setExtractMode] = useState<"screenshot" | "text">("screenshot");
+
+  const handleAiExtractCredentials = async () => {
+    if (!extractScreenshot && !extractText.trim()) {
+      onShowToast("Please upload a screenshot or enter text to extract", "warning");
+      return;
+    }
+    setIsExtracting(true);
+    setExtractSuccess(null);
+    try {
+      const token = localStorage.getItem('scoutforge_access_token') || undefined;
+      const res = await playerApi.extractGameCredentials(activeGameView, {
+        rawText: extractText.trim() || undefined,
+        screenshotFile: extractScreenshot || undefined,
+        token,
+      });
+
+      if (res) {
+        setPerGameDetails(prev => ({
+          ...prev,
+          [activeGameView]: {
+            ign: res.ign || prev[activeGameView]?.ign || '',
+            gameId: res.game_id || prev[activeGameView]?.gameId || '',
+            rank: res.rank || prev[activeGameView]?.rank || '',
+            role: res.role || prev[activeGameView]?.role || '',
+            tier: res.tier || prev[activeGameView]?.tier || 'Verified Candidate',
+            primaryStat: res.primary_stat || prev[activeGameView]?.primaryStat || '',
+            winRate: res.win_rate || prev[activeGameView]?.winRate || '',
+          }
+        }));
+
+        setExtractSuccess(`AI Extracted: ${res.ign} (UID: ${res.game_id}) • Rank: ${res.rank} • Metric: ${res.primary_stat}`);
+        onShowToast(`AI successfully extracted credentials for ${activeGameView}!`, "success");
+      }
+    } catch (err: any) {
+      console.warn("AI extraction notice:", err);
+      onShowToast(err?.message || "Failed to extract credentials", "warning");
+    } finally {
+      setIsExtracting(false);
+    }
+  };
+
   // Video / Audio upload & management
   const [mediaClips, setMediaClips] = useState<GameplayVideoClip[]>(player.videoClips || defaultClips);
   const [selectedClip, setSelectedClip] = useState<GameplayVideoClip | null>(null);
@@ -273,6 +324,19 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
   const handleSaveGameCredentials = async (e: React.FormEvent) => {
     e.preventDefault();
     const details = perGameDetails[activeGameView];
+    const isFormValid = Boolean(
+      details?.ign?.trim() &&
+      details?.gameId?.trim() &&
+      details?.rank?.trim() &&
+      details?.role?.trim() &&
+      details?.primaryStat?.trim() &&
+      details?.winRate?.trim()
+    );
+
+    if (!isFormValid) {
+      onShowToast("All 6 fields are required before saving. Fill manually or use AI extraction.", "warning");
+      return;
+    }
     try {
       const token = localStorage.getItem('scoutforge_access_token') || undefined;
       await playerApi.registerGameTitle({
@@ -863,6 +927,132 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
           </span>
         </div>
 
+        {/* AI Career Credentials & Telemetry Extractor (Gemini LLM) */}
+        <div className={`mt-4 p-4 rounded-[8px] border transition-colors ${
+          isLight ? "bg-slate-50/80 border-slate-200" : "bg-[#0b0b0c] border-[#26262a]"
+        }`}>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 rounded-md bg-[#e8ff59]/10 border border-[#e8ff59]/30 flex items-center justify-center text-[#e8ff59]">
+                <Sparkles className="w-3.5 h-3.5" />
+              </div>
+              <div>
+                <div className={`text-xs font-black tracking-wide ${isLight ? "text-slate-900" : "text-[#ededed]"}`}>
+                  AI Telemetry & Career Extractor (Gemini 2.5 LLM)
+                </div>
+                <div className={`text-[11px] ${isLight ? "text-slate-500" : "text-[#9a9aa2]"}`}>
+                  Upload a match scorecard/profile screenshot or paste stats text to auto-populate required fields
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-1 bg-slate-200/50 dark:bg-[#18181b] p-0.5 rounded-lg border border-slate-300/50 dark:border-[#26262a]">
+              <button
+                type="button"
+                onClick={() => setExtractMode("screenshot")}
+                className={`px-2.5 py-1 rounded text-[11px] font-bold flex items-center gap-1 cursor-pointer transition-colors ${
+                  extractMode === "screenshot"
+                    ? isLight ? "bg-white text-slate-900 shadow-xs" : "bg-[#26262a] text-[#ededed]"
+                    : "text-slate-500 hover:text-slate-800 dark:hover:text-white"
+                }`}
+              >
+                <Camera className="w-3 h-3" />
+                <span>Screenshot</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setExtractMode("text")}
+                className={`px-2.5 py-1 rounded text-[11px] font-bold flex items-center gap-1 cursor-pointer transition-colors ${
+                  extractMode === "text"
+                    ? isLight ? "bg-white text-slate-900 shadow-xs" : "bg-[#26262a] text-[#ededed]"
+                    : "text-slate-500 hover:text-slate-800 dark:hover:text-white"
+                }`}
+              >
+                <FileText className="w-3 h-3" />
+                <span>Raw Text</span>
+              </button>
+            </div>
+          </div>
+
+          {extractMode === "screenshot" ? (
+            <div className="space-y-2">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                <label className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-[6px] border border-dashed cursor-pointer text-xs transition-colors ${
+                  extractScreenshot
+                    ? "border-emerald-500 bg-emerald-500/5 text-emerald-600 dark:text-emerald-400"
+                    : isLight
+                    ? "border-slate-300 hover:border-slate-400 bg-white text-slate-600"
+                    : "border-[#26262a] hover:border-[#38383e] bg-[#131315] text-[#9a9aa2]"
+                }`}>
+                  <UploadCloud className="w-4 h-4 shrink-0" />
+                  <span className="truncate">
+                    {extractScreenshot ? extractScreenshot.name : `Select ${activeGameView} in-game scoreboard or profile screenshot`}
+                  </span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      if (e.target.files && e.target.files[0]) {
+                        setExtractScreenshot(e.target.files[0]);
+                        setExtractSuccess(null);
+                      }
+                    }}
+                  />
+                </label>
+
+                <button
+                  type="button"
+                  disabled={!extractScreenshot || isExtracting}
+                  onClick={handleAiExtractCredentials}
+                  className={`px-4 py-2.5 rounded-[6px] text-xs font-black flex items-center justify-center gap-1.5 transition-all shadow-xs ${
+                    !extractScreenshot || isExtracting
+                      ? "bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed opacity-60"
+                      : "bg-[#bef226] text-slate-950 hover:bg-[#a6d817] cursor-pointer"
+                  }`}
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>{isExtracting ? "Extracting with Gemini..." : "Extract with AI"}</span>
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <textarea
+                rows={2}
+                value={extractText}
+                onChange={(e) => setExtractText(e.target.value)}
+                placeholder={`Paste in-game career text, e.g. "IGN: Vortex, UID: 5128940192, Conqueror Top 100, 842.0 Avg Dmg, 72% Win Rate, Pure Assaulter"`}
+                className={`w-full p-2.5 rounded-[6px] border text-xs outline-hidden resize-none ${
+                  isLight ? "bg-white border-slate-300 text-slate-900" : "bg-[#131315] border-[#26262a] text-[#ededed]"
+                }`}
+              />
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  disabled={!extractText.trim() || isExtracting}
+                  onClick={handleAiExtractCredentials}
+                  className={`px-4 py-2 rounded-[6px] text-xs font-black flex items-center gap-1.5 transition-all shadow-xs ${
+                    !extractText.trim() || isExtracting
+                      ? "bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed opacity-60"
+                      : "bg-[#bef226] text-slate-950 hover:bg-[#a6d817] cursor-pointer"
+                  }`}
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>{isExtracting ? "Extracting with Gemini..." : "Extract with AI"}</span>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {extractSuccess && (
+            <div className="mt-3 p-2.5 rounded-[6px] bg-emerald-500/10 border border-emerald-500/30 flex items-center gap-2 text-xs text-emerald-400">
+              <CheckCircle2 className="w-4 h-4 shrink-0" />
+              <span>{extractSuccess}</span>
+            </div>
+          )}
+        </div>
+
         {/* Form Fields for the Selected Game */}
         <form onSubmit={handleSaveGameCredentials} className="mt-4 space-y-4 text-xs">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -991,10 +1181,28 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center justify-end pt-2">
+          {/* Form Completion Status & Save Button */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-slate-200 dark:border-[#26262a]">
+            {!(Boolean(currentDetails?.ign?.trim() && currentDetails?.gameId?.trim() && currentDetails?.rank?.trim() && currentDetails?.role?.trim() && currentDetails?.primaryStat?.trim() && currentDetails?.winRate?.trim())) ? (
+              <div className="flex items-center gap-2 text-[11px] text-amber-500 font-medium">
+                <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                <span>All 6 fields required. Fill manually or click "Extract with AI" above to enable saving.</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1.5 text-[11px] text-emerald-500 font-medium">
+                <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                <span>All required credentials complete and verified. Ready to save.</span>
+              </div>
+            )}
+
             <button
               type="submit"
-              className="px-4 py-2 rounded-[6px] text-xs font-black bg-[#e8ff59] text-black hover:bg-[#d8ef49] flex items-center gap-1.5 cursor-pointer shadow-xs"
+              disabled={!(Boolean(currentDetails?.ign?.trim() && currentDetails?.gameId?.trim() && currentDetails?.rank?.trim() && currentDetails?.role?.trim() && currentDetails?.primaryStat?.trim() && currentDetails?.winRate?.trim()))}
+              className={`px-4 py-2 rounded-[6px] text-xs font-black flex items-center gap-1.5 shadow-xs transition-all ${
+                (Boolean(currentDetails?.ign?.trim() && currentDetails?.gameId?.trim() && currentDetails?.rank?.trim() && currentDetails?.role?.trim() && currentDetails?.primaryStat?.trim() && currentDetails?.winRate?.trim()))
+                  ? "bg-[#e8ff59] text-black hover:bg-[#d8ef49] cursor-pointer"
+                  : "bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed opacity-60"
+              }`}
             >
               <Save className="w-3.5 h-3.5" />
               <span>Save {activeGameView} Credentials</span>

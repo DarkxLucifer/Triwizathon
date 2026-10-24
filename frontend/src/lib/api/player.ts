@@ -212,4 +212,34 @@ export const playerApi = {
       token,
     });
   },
+
+  async extractGameCredentials(
+    gameTitle: string,
+    options: {
+      rawText?: string;
+      screenshotFile?: File;
+      token?: string;
+    } = {}
+  ): Promise<{
+    ign: string;
+    game_id: string;
+    rank: string;
+    role: string;
+    tier: string;
+    primary_stat: string;
+    win_rate: string;
+    source: string;
+  }> {
+    const formData = new FormData();
+    formData.append('game_title', gameTitle);
+    if (options.rawText) formData.append('raw_text', options.rawText);
+    if (options.screenshotFile) formData.append('screenshot', options.screenshotFile);
+
+    return apiFetch('/player/me/extract-credentials', {
+      method: 'POST',
+      token: options.token,
+      isFormData: true,
+      body: formData,
+    });
+  },
 };

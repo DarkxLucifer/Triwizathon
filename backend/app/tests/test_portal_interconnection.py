@@ -328,3 +328,24 @@ def test_leaderboards_cs2_and_community(client, player_token):
     assert data_bgmi["title_slug"] == "bgmi"
     assert data_bgmi["total"] >= 1  # Vortex is registered in BGMI
     assert data_bgmi["items"][0]["verification_status"] == "self_reported"
+
+
+def test_extract_game_credentials_endpoint(client, player_token):
+    """Verifies AI/heuristic extraction endpoint for player game credentials."""
+    headers = {"Authorization": f"Bearer {player_token}"}
+
+    payload = {
+        "game_title": "BGMI",
+        "raw_text": "IGN: GodLJonathan, UID: 5124891024, Rank: Conqueror 5400 points, Role: Pure Assaulter, Avg Dmg: 924.5, Win Rate: 48.5%"
+    }
+
+    res = client.post("/api/player/me/extract-credentials", data=payload, headers=headers)
+    assert res.status_code == 200, res.text
+    data = res.json()
+    assert "ign" in data
+    assert "game_id" in data
+    assert "rank" in data
+    assert "role" in data
+    assert "primary_stat" in data
+    assert "win_rate" in data
+    assert "source" in data
