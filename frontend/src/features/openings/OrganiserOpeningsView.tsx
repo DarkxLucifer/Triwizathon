@@ -412,7 +412,7 @@ export function OrganiserOpeningsView({
             <span
               className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-[4px] border ${
                 isLight
-                  ? 'bg-blue-50 text-blue-900 border-blue-200'
+                  ? 'bg-slate-100 text-slate-800 border-slate-300'
                   : 'bg-[#131315] text-[#e8ff59] border-[#e8ff59]/30'
               }`}
             >
@@ -481,7 +481,7 @@ export function OrganiserOpeningsView({
         >
           <div className="flex items-center justify-between text-xs font-mono mb-1">
             <span className={isLight ? 'text-slate-500' : 'text-[#9a9aa2]'}>TOTAL APPLICANTS</span>
-            <Users className="w-4 h-4 text-emerald-400" />
+            <Users className="w-4 h-4 text-[#ededed]" />
           </div>
           <div className="text-2xl font-black">{applications.length}</div>
           <div className={`text-[11px] mt-1 ${isLight ? 'text-slate-500' : 'text-[#9a9aa2]'}`}>
@@ -496,7 +496,7 @@ export function OrganiserOpeningsView({
         >
           <div className="flex items-center justify-between text-xs font-mono mb-1">
             <span className={isLight ? 'text-slate-500' : 'text-[#9a9aa2]'}>SHORTLISTED FOR TRIAL</span>
-            <Sparkles className="w-4 h-4 text-amber-400" />
+            <Sparkles className="w-4 h-4 text-[#e8ff59]" />
           </div>
           <div className="text-2xl font-black">
             {applications.filter(a => a.status === 'shortlisted' || a.status === 'trial').length}
@@ -651,10 +651,8 @@ export function OrganiserOpeningsView({
                         <span
                           className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-[4px] border ${
                             op.urgency === 'Immediate'
-                              ? 'bg-red-500/10 text-red-400 border-red-500/30'
-                              : op.urgency === 'High'
-                              ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
-                              : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                              ? isLight ? 'bg-slate-200 text-slate-900 border-slate-400' : 'bg-[#e8ff59]/10 text-[#e8ff59] border-[#e8ff59]/30 font-black'
+                              : isLight ? 'bg-slate-100 text-slate-700 border-slate-300' : 'bg-[#0b0b0c] text-[#ededed] border-[#26262a]'
                           }`}
                         >
                           {op.urgency} Urgency
@@ -662,9 +660,7 @@ export function OrganiserOpeningsView({
 
                         <span
                           className={`text-[11px] font-mono font-bold px-2 py-0.5 rounded-[4px] border ${
-                            op.title_name === 'General'
-                              ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/30'
-                              : isLight
+                            isLight
                               ? 'bg-slate-100 border-slate-300 text-slate-700'
                               : 'bg-[#0b0b0c] border-[#26262a] text-[#9a9aa2]'
                           }`}
@@ -711,7 +707,7 @@ export function OrganiserOpeningsView({
                           <span className={isLight ? 'text-slate-500' : 'text-[#9a9aa2]'}>
                             Package:
                           </span>
-                          <span className="font-bold text-emerald-500">{op.package_text}</span>
+                          <span className="font-bold text-[#e8ff59]">{op.package_text}</span>
                         </div>
                       </div>
                     </div>
@@ -787,7 +783,7 @@ export function OrganiserOpeningsView({
                   <span>•</span>
                   <span>Schedule: <strong className="text-[#ededed]">{selectedOpening.scrim_window}</strong></span>
                   <span>•</span>
-                  <span>Package: <strong className="text-emerald-400">{selectedOpening.package_text}</strong></span>
+                  <span>Package: <strong className="text-[#e8ff59]">{selectedOpening.package_text}</strong></span>
                 </div>
               </div>
 
@@ -802,10 +798,8 @@ export function OrganiserOpeningsView({
                 <span
                   className={`text-xs font-mono font-bold px-2.5 py-1 rounded-[4px] border ${
                     selectedOpening.urgency === 'Immediate'
-                      ? 'bg-red-500/10 text-red-400 border-red-500/30'
-                      : selectedOpening.urgency === 'High'
-                      ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
-                      : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                      ? isLight ? 'bg-slate-200 text-slate-900 border-slate-400' : 'bg-[#e8ff59]/10 text-[#e8ff59] border-[#e8ff59]/30 font-black'
+                      : isLight ? 'bg-slate-100 text-slate-700 border-slate-300' : 'bg-[#0b0b0c] text-[#ededed] border-[#26262a]'
                   }`}
                 >
                   {selectedOpening.urgency} Urgency
@@ -817,13 +811,13 @@ export function OrganiserOpeningsView({
           {/* Subheader with Sorting & Count */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
             <div className="flex items-center gap-2">
-              <Trophy className="w-4 h-4 text-amber-400" />
+              <Trophy className="w-4 h-4 text-[#e8ff59]" />
               <span className="text-xs font-mono font-bold uppercase tracking-wider">
                 {selectedOpeningFilter === 'all'
                   ? `All Candidate Dossiers (${rankedApplications.length})`
                   : `Ranked Leaderboard for ${selectedOpening?.role_name || 'Vacancy'} (${rankedApplications.length})`}
               </span>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-[3px] bg-amber-400/10 text-amber-300 border border-amber-400/20">
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-[3px] bg-[#18181b] text-[#ededed] border border-[#26262a]">
                 AI Telemetry Ranked
               </span>
             </div>
@@ -903,18 +897,18 @@ export function OrganiserOpeningsView({
                           {/* Rank Column */}
                           <td className="py-3.5 px-4 text-center">
                             {rankNum === 1 ? (
-                              <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-[4px] bg-amber-400/10 border border-amber-400/40 text-amber-300 font-mono font-black text-xs shadow-xs">
-                                <Trophy className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                              <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-[4px] bg-[#e8ff59]/15 border border-[#e8ff59]/40 text-[#e8ff59] font-mono font-black text-xs shadow-xs">
+                                <Trophy className="w-3.5 h-3.5 text-[#e8ff59] shrink-0" />
                                 <span>#1</span>
                               </div>
                             ) : rankNum === 2 ? (
-                              <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-[4px] bg-slate-300/10 border border-slate-300/40 text-slate-200 font-mono font-bold text-xs">
-                                <Award className="w-3.5 h-3.5 text-slate-300 shrink-0" />
+                              <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-[4px] bg-[#18181b] border border-[#26262a] text-[#ededed] font-mono font-bold text-xs">
+                                <Award className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                                 <span>#2</span>
                               </div>
                             ) : rankNum === 3 ? (
-                              <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-[4px] bg-amber-700/10 border border-amber-600/40 text-amber-500 font-mono font-bold text-xs">
-                                <Award className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                              <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-[4px] bg-[#18181b] border border-[#26262a] text-[#9a9aa2] font-mono font-bold text-xs">
+                                <Award className="w-3.5 h-3.5 text-slate-500 shrink-0" />
                                 <span>#3</span>
                               </div>
                             ) : (
@@ -934,7 +928,7 @@ export function OrganiserOpeningsView({
                                 <div className="font-extrabold text-[13px] flex items-center gap-1.5">
                                   <span>{app.player_handle || 'Player'}</span>
                                   {rankNum === 1 && (
-                                    <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-amber-400/20 text-amber-300 border border-amber-400/30">
+                                    <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-[#e8ff59]/15 text-[#e8ff59] border border-[#e8ff59]/30">
                                       TOP CANDIDATE
                                     </span>
                                   )}
@@ -963,24 +957,14 @@ export function OrganiserOpeningsView({
                             <div className="space-y-1">
                               <div className="flex items-center gap-1.5">
                                 <span
-                                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-[3px] border text-xs ${
-                                    (app.overall_score || 85) >= 90
-                                      ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 font-black'
-                                      : 'bg-[#e8ff59]/10 text-[#e8ff59] border-[#e8ff59]/30'
-                                  }`}
+                                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-[3px] border text-xs bg-[#e8ff59]/10 text-[#e8ff59] border-[#e8ff59]/30 font-black"
                                 >
                                   {((app.overall_score || 85)).toFixed(1)} FitScore
                                 </span>
                               </div>
                               <div className="w-24 h-1.5 rounded-full bg-[#26262a] overflow-hidden">
                                 <div
-                                  className={`h-full rounded-full ${
-                                    (app.overall_score || 85) >= 90
-                                      ? 'bg-emerald-400'
-                                      : (app.overall_score || 85) >= 80
-                                      ? 'bg-[#e8ff59]'
-                                      : 'bg-amber-400'
-                                  }`}
+                                  className="h-full rounded-full bg-[#e8ff59]"
                                   style={{ width: `${Math.min(100, Math.max(0, app.overall_score || 85))}%` }}
                                 />
                               </div>
@@ -1009,12 +993,10 @@ export function OrganiserOpeningsView({
                           <td className="py-3.5 px-4">
                             <span
                               className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-[4px] text-[11px] font-mono font-bold border uppercase ${
-                                app.status === 'shortlisted' || app.status === 'trial'
-                                  ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
-                                  : app.status === 'accepted'
-                                  ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                                app.status === 'shortlisted' || app.status === 'trial' || app.status === 'accepted'
+                                  ? 'bg-[#e8ff59]/10 text-[#e8ff59] border-[#e8ff59]/30'
                                   : app.status === 'rejected'
-                                  ? 'bg-red-500/10 text-red-400 border-red-500/30'
+                                  ? isLight ? 'bg-slate-100 text-slate-500 border-slate-200' : 'bg-[#18181b] text-[#9a9aa2] border-[#26262a]'
                                   : isLight
                                   ? 'bg-slate-100 text-slate-800 border-slate-300'
                                   : 'bg-[#0b0b0c] text-[#ededed] border-[#26262a]'
@@ -1045,7 +1027,7 @@ export function OrganiserOpeningsView({
                                 <button
                                   type="button"
                                   onClick={() => handleUpdateStatus(app.id, 'shortlisted')}
-                                  className="px-2 py-1 rounded-[4px] text-[11px] font-bold border border-amber-500/40 text-amber-400 hover:bg-amber-500/10 transition-colors cursor-pointer"
+                                  className="px-2 py-1 rounded-[4px] text-[11px] font-bold border border-[#26262a] text-[#ededed] hover:bg-[#18181b] transition-colors cursor-pointer"
                                   title="Shortlist Candidate for Trial Scrims"
                                 >
                                   Shortlist
@@ -1056,7 +1038,7 @@ export function OrganiserOpeningsView({
                                 <button
                                   type="button"
                                   onClick={() => handleUpdateStatus(app.id, 'accepted')}
-                                  className="px-2 py-1 rounded-[4px] text-[11px] font-bold border border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/10 transition-colors cursor-pointer"
+                                  className="px-2 py-1 rounded-[4px] text-[11px] font-bold border border-[#e8ff59]/40 text-[#e8ff59] hover:bg-[#e8ff59]/10 transition-colors cursor-pointer"
                                   title="Accept Applicant to Roster"
                                 >
                                   Accept
@@ -1070,7 +1052,7 @@ export function OrganiserOpeningsView({
                                   className={`px-2 py-1 rounded-[4px] text-[11px] font-medium border transition-colors cursor-pointer ${
                                     isLight
                                       ? 'border-slate-300 text-slate-600 hover:bg-slate-100'
-                                      : 'border-[#26262a] text-[#9a9aa2] hover:text-red-400 hover:border-red-500/30'
+                                      : 'border-[#26262a] text-[#9a9aa2] hover:text-[#ededed] hover:bg-[#18181b]'
                                   }`}
                                   title="Reject Application"
                                 >
