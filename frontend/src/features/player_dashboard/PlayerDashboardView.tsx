@@ -2185,7 +2185,9 @@ export function PlayerDashboardView({
             let detectedGame: GameType = 'CS2';
             const tName = o.title_name || '';
             const lowerTitle = (o.title + ' ' + o.description).toLowerCase();
-            if (tName.includes('Valorant') || lowerTitle.includes('vct') || lowerTitle.includes('valorant') || lowerTitle.includes('jett') || lowerTitle.includes('duelist')) {
+            if (tName === 'General' || lowerTitle.includes('general') || lowerTitle.includes('multi-title') || lowerTitle.includes('multi-game')) {
+              detectedGame = 'General';
+            } else if (tName.includes('Valorant') || lowerTitle.includes('vct') || lowerTitle.includes('valorant') || lowerTitle.includes('jett') || lowerTitle.includes('duelist')) {
               detectedGame = 'Valorant';
             } else if (tName.includes('League') || tName.includes('LoL') || lowerTitle.includes('lol') || lowerTitle.includes('league') || lowerTitle.includes('summoner')) {
               detectedGame = 'League of Legends';
@@ -2304,6 +2306,24 @@ export function PlayerDashboardView({
       return newPlayer;
     });
     addToast('Player profile details and availability updated.', 'success');
+  };
+
+  const handleUpdateGameProfile = (updatedGame: GameProfile) => {
+    setPlayer(prev => {
+      const idx = prev.gamesPlayed.findIndex(g => g.id === updatedGame.id);
+      let newGames = [...prev.gamesPlayed];
+      if (idx >= 0) {
+        newGames[idx] = updatedGame;
+      } else {
+        newGames.push(updatedGame);
+      }
+      return {
+        ...prev,
+        gamesPlayed: newGames,
+        activeGame: updatedGame.id,
+      };
+    });
+    addToast(`Profile for ${updatedGame.name} updated with verified UID and telemetry!`, 'success');
   };
 
   const handleApplyToOpening = async (
@@ -3093,6 +3113,7 @@ export function PlayerDashboardView({
             applications={applications}
             gameplayPosts={gameplayPosts}
             onApply={handleApplyToOpening}
+            onUpdateGameProfile={handleUpdateGameProfile}
             onPostGameplay={handlePostGameplay}
             onShowToast={addToast}
             theme={theme}
@@ -3107,6 +3128,7 @@ export function PlayerDashboardView({
             applications={applications}
             gameplayPosts={gameplayPosts}
             onApply={handleApplyToOpening}
+            onUpdateGameProfile={handleUpdateGameProfile}
             onPostGameplay={handlePostGameplay}
             onShowToast={addToast}
             theme={theme}

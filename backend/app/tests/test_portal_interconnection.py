@@ -589,3 +589,109 @@ def test_user_registration_and_opening_application_flow(client):
     my_app = next(a for a in player_apps.json() if a["id"] == app_id)
     assert my_app["status"] == "shortlisted"
     assert "invited to trial scrims" in my_app["reviewer_notes"]
+
+
+def test_game_specific_profile_incomplete_error_and_general_opening_flow(client: TestClient):
+    import uuid
+    suffix = uuid.uuid4().hex[:6]
+    player_email = f"gamer_{suffix}@scoutforge.gg"
+    org_email = f"director_{suffix}@sentinels.gg"
+
+    # 1. Register player
+    p_reg = client.post("/api/auth/register", json={
+        "email": player_email,
+        "password": "strongPassword123",
+        "full_name": "Tyler Contender",
+        "role": "player",
+    })
+    assert p_reg.status_code == 200
+    player_token = p_reg.json()["access_token"]
+
+    # 2. Register organiser
+    o_reg = client.post("/api/auth/register", json={
+        "email": org_email,
+        "password": "strongPassword123",
+        "full_name": "Sentinels Recruiter",
+        "org_name": f"Sentinels Org {suffix}",
+        "role": "organiser",
+    })
+    assert o_reg.status_code == 200
+    org_token = o_reg.json()["access_token"]
+
+    # 3. Organiser creates a "General" opening
+    gen_op = client.post("/api/openings", json={
+        "title": "General Esports Academy Multi-Title Prospect",
+        "role_name": "Flex / Multi-Title",
+        "game_name": "General",
+        "description": "Seeking adaptable multi-game competitor for upcoming tournaments.",
+        "min_rank_text": "Competitive Calibrated / Top 10% Regional",
+        "scrim_window": "18:00 - 22:00 IST",
+        "package_text": "$1,200/mo + Prize Pool",
+        "urgency": "High",
+        "status": "open",
+    }, headers={"Authorization": f"Bearer {org_token}"})
+    assert gen_op.status_code == 200
+    gen_data = gen_op.json()
+    assert gen_data["title_name"] == "General"
+
+    # Player can apply to General opening
+    apply_gen = client.post(f"/api/openings/{gen_data['id']}/apply", json={
+        "cover_note": "Multi-title veteran ready for tactical trials."
+    }, headers={"Authorization": f"Bearer {player_token}"})
+    assert apply_gen.status_code == 200
+    assert apply_gen.json()["status"] == "applied"
+    assert apply_gen.json()["overall_score"] is not None
+
+    # 4. Organiser creates a specific opening for "Valorant"
+    val_op = client.post("/api/openings", json={
+        "title": "Sentinels VCT Challengers Primary Duelist",
+        "role_name": "Duelist",
+        "game_name": "Valorant",
+        "description": "Need explosive Jett/Raze player with verified VCT stats.",
+        "min_rank_text": "Radiant / Immortal 3",
+        "scrim_window": "17:00 - 23:00 CET",
+        "package_text": "$3,000/mo",
+        "urgency": "Immediate",
+        "status": "open",
+    }, headers={"Authorization": f"Bearer {org_token}"})
+    assert val_op.status_code == 200
+    val_id = val_op.json()["id"]
+
+    # 5. Player attempts to apply without completing Valorant profile -> 400 Bad Request
+    fail_apply = client.post(f"/api/openings/{val_id}/apply", json={
+        "cover_note": "I really want to play for Sentinels."
+    }, headers={"Authorization": f"Bearer {player_token}"})
+    assert fail_apply.status_code == 400
+    assert "Incomplete profile for Valorant" in fail_apply.json()["detail"]
+
+    # 6. Player completes their Valorant profile by registering in-game UID and rank
+    reg_title = client.post("/api/player/me/titles", json={
+        "title_slug": "valorant",
+        "title_name": "Valorant",
+        "in_game_name": "Tyler#SEN",
+        "in_game_id": "Tyler#SEN",
+        "self_reported_rank": "Radiant Top 300",
+        "verification_status": "verified",
+        "stats_json": {"acs": 289.4, "kd": 1.42, "win_rate": "68%"}
+    }, headers={"Authorization": f"Bearer {player_token}"})
+    assert reg_title.status_code == 200
+
+    # 7. Player now applies successfully to the Valorant opening
+    success_apply = client.post(f"/api/openings/{val_id}/apply", json={
+        "cover_note": "Game UID: Tyler#SEN | Radiant Top 300 | 289.4 ACS | Verified dossier attached."
+    }, headers={"Authorization": f"Bearer {player_token}"})
+    assert success_apply.status_code == 200
+    val_app = success_apply.json()
+    assert val_app["status"] == "applied"
+    assert val_app["combat_score"] is not None
+    assert val_app["tactical_score"] is not None
+    assert val_app["overall_score"] is not None
+
+    # 8. Organiser retrieves applications and verifies scores and details are present
+    org_apps = client.get("/api/openings/org/applications", headers={"Authorization": f"Bearer {org_token}"})
+    assert org_apps.status_code == 200
+    val_matched = next(a for a in org_apps.json() if a["opening_id"] == val_id)
+    assert val_matched["player_handle"] is not None
+    assert val_matched["combat_score"] > 0
+    assert val_matched["overall_score"] > 0
+

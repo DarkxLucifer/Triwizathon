@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { 
+  Globe,
   FileText, 
   CheckCircle2, 
   ChevronRight, 
@@ -46,6 +47,7 @@ const gameIcons: Record<GameType, React.ReactNode> = {
   "League of Legends": <Swords className="w-3.5 h-3.5 text-cyan-600" />,
   "Rocket League": <Flame className="w-3.5 h-3.5 text-amber-500" />,
   "BGMI": <Shield className="w-3.5 h-3.5 text-amber-600" />,
+  "General": <Globe className="w-3.5 h-3.5 text-indigo-400" />,
 };
 
 export const Header: React.FC<HeaderProps> = ({

@@ -1,10 +1,11 @@
 export type TabType = "overview" | "benchmark" | "evidence" | "scouting" | "profile" | "openings" | "players" | "applied";
 
-export type GameType = "CS2" | "Valorant" | "League of Legends" | "Rocket League" | "BGMI";
+export type GameType = "CS2" | "Valorant" | "League of Legends" | "Rocket League" | "BGMI" | "General";
 
 export function normalizeGameType(game?: string): GameType {
   if (!game) return "CS2";
   const lower = game.toLowerCase().trim();
+  if (lower === "general" || lower.includes("general") || lower.includes("multi-game") || lower.includes("multi-title")) return "General";
   if (lower.includes("counter-strike") || lower.includes("cs2") || lower.includes("cs:go") || lower.includes("counterstrike")) return "CS2";
   if (lower.includes("valorant")) return "Valorant";
   if (lower.includes("league") || lower.includes("lol") || lower.includes("riot")) return "League of Legends";

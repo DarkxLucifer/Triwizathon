@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { 
+  Globe,
   Mail, 
   Phone, 
   MapPin, 
@@ -69,6 +70,7 @@ const gameIcons: Record<GameType, React.ReactNode> = {
   "League of Legends": <Swords className="w-4 h-4 text-cyan-400" />,
   "Rocket League": <Flame className="w-4 h-4 text-amber-500" />,
   "CS2": <Zap className="w-4 h-4 text-emerald-500" />,
+  "General": <Globe className="w-4 h-4 text-indigo-400" />,
 };
 
 const gamePosters: Record<string, string> = {
@@ -261,6 +263,15 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
       primaryStat: '2.4 Goals/Game (685 Score)',
       winRate: '71%',
     },
+    General: {
+      ign: 'Vortex',
+      gameId: 'Vortex#GEN',
+      rank: 'High Competitive Calibrated',
+      role: 'Flex / Multi-Title',
+      tier: 'Verified Competitor',
+      primaryStat: '88.5 FitScore',
+      winRate: '68%',
+    },
   });
 
   // AI Credentials Extractor State
@@ -284,6 +295,7 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
     'League of Legends': { isValid: true, status: 'verified_lol', message: 'Valid Riot Summoner verified.', isChecking: false },
     'Rocket League': { isValid: true, status: 'verified_rl', message: 'Valid Epic ID verified.', isChecking: false },
     BGMI: { isValid: true, status: 'verified_bgmi', message: 'Verified BGIS roster UID.', isChecking: false },
+    General: { isValid: true, status: 'verified_general', message: 'General dossier verified.', isChecking: false },
   });
 
   const checkIdentifierDebounceRef = useRef<NodeJS.Timeout | null>(null);

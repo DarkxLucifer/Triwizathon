@@ -2,6 +2,8 @@
 
 import React, { useState, useRef } from "react";
 import { 
+  AlertTriangle,
+  Globe,
   Briefcase, 
   Search, 
   Filter, 
@@ -50,7 +52,8 @@ import {
   RoleApplication, 
   GameplayPost, 
   GameType, 
-  PlayerProfile 
+  PlayerProfile,
+  GameProfile,
 } from "@/types/dashboard";
 
 interface RosterOpeningsTabProps {
@@ -58,6 +61,7 @@ interface RosterOpeningsTabProps {
   openings: RosterOpening[];
   applications: RoleApplication[];
   gameplayPosts: GameplayPost[];
+  onUpdateGameProfile?: (updatedGame: GameProfile) => void;
   onApply: (
     opening: RosterOpening,
     formData: {
@@ -89,6 +93,7 @@ const gameIcons: Record<GameType, React.ReactNode> = {
   "League of Legends": <Swords className="w-3.5 h-3.5 text-cyan-600" />,
   "Rocket League": <Flame className="w-3.5 h-3.5 text-amber-500" />,
   "BGMI": <Shield className="w-3.5 h-3.5 text-amber-600" />,
+  "General": <Globe className="w-3.5 h-3.5 text-indigo-400" />,
 };
 
 type SkillCategory = "All" | "Sniper" | "Bomber" | "Entry Fragger" | "IGL" | "Assaulter" | "Rusher" | "Support";
@@ -106,6 +111,12 @@ const skillBadges: Record<string, { label: string; icon: React.ReactNode; color:
 // Helper for game-specific UID label & placeholder
 const getGameUidConfig = (game: GameType) => {
   switch (game) {
+    case "General":
+      return {
+        label: "Primary Competitive Handle / Platform ID *",
+        placeholder: "e.g., Vortex or Player#0001",
+        hint: "Your primary multi-title handle used across competitive platforms",
+      };
     case "Valorant":
       return {
         label: "Riot ID & Tagline *",
@@ -145,12 +156,90 @@ const getGameUidConfig = (game: GameType) => {
   }
 };
 
+// Validation helper to determine if player's game profile has completed required in-game UID and telemetry
+export function checkGameProfileStatus(player: PlayerProfile, game: GameType | string): {
+  isComplete: boolean;
+  gameProfile?: GameProfile;
+  missingFields: string[];
+  reason: string;
+} {
+  if (game === 'General') {
+    const hasBasicInfo = !!(player.name && player.tag);
+    const hasAnyGame = player.gamesPlayed && player.gamesPlayed.length > 0;
+    if (!hasBasicInfo || !hasAnyGame) {
+      return {
+        isComplete: false,
+        missingFields: ['General Player Dossier Handle', 'At least 1 Active Game Title'],
+        reason: 'Your general player dossier is incomplete. Please configure your competitive handle and at least one active game title.',
+      };
+    }
+    return { isComplete: true, missingFields: [], reason: '' };
+  }
+
+  const norm = (game || '').toLowerCase().trim();
+  const matched = player.gamesPlayed?.find(g => {
+    const gId = (g.id || '').toLowerCase();
+    const gName = (g.name || '').toLowerCase();
+    return gId === norm || gName === norm ||
+      (norm.includes('cs2') && (gId.includes('cs2') || gName.includes('cs2'))) ||
+      (norm.includes('counter-strike') && (gId.includes('cs2') || gName.includes('cs2'))) ||
+      (norm.includes('valorant') && (gId.includes('valorant') || gName.includes('valorant'))) ||
+      (norm.includes('league') && (gId.includes('league') || gName.includes('league'))) ||
+      (norm.includes('rocket') && (gId.includes('rocket') || gName.includes('rocket'))) ||
+      (norm.includes('bgmi') && (gId.includes('bgmi') || gName.includes('bgmi')));
+  });
+
+  const missing: string[] = [];
+
+  if (!matched) {
+    missing.push(`Verified In-Game UID / Account for ${game}`);
+    missing.push(`Competitive Rank / ELO for ${game}`);
+    missing.push(`Match Engine Telemetry (ADR / K/D / FitScore)`);
+    return {
+      isComplete: false,
+      missingFields: missing,
+      reason: `You have not added or configured ${game} in your player dossier.`,
+    };
+  }
+
+  const ign = (matched.ign || '').trim().toLowerCase();
+  if (!ign || ign === 'unlinked' || ign === 'not configured' || ign === 'pending' || ign === 'none') {
+    missing.push(`Verified In-Game UID for ${game}`);
+  }
+
+  const rank = (matched.rank || '').trim().toLowerCase();
+  if (!rank || rank === 'unranked' || rank === 'pending calibration' || rank === 'uncalibrated') {
+    missing.push(`Competitive Rank / ELO for ${game}`);
+  }
+
+  if (!matched.matchesSampled || matched.matchesSampled === 0 || !matched.fitScore || matched.fitScore === 0) {
+    missing.push(`Match Telemetry Ingestion for ${game}`);
+  }
+
+  if (missing.length > 0) {
+    return {
+      isComplete: false,
+      gameProfile: matched,
+      missingFields: missing,
+      reason: `Your ${game} profile is missing required competitive telemetry.`,
+    };
+  }
+
+  return {
+    isComplete: true,
+    gameProfile: matched,
+    missingFields: [],
+    reason: '',
+  };
+}
+
 export const RosterOpeningsTab: React.FC<RosterOpeningsTabProps> = ({
   player,
   openings,
   applications,
   gameplayPosts,
   onApply,
+  onUpdateGameProfile,
   onPostGameplay,
   onShowToast,
   theme = 'dark',
@@ -175,6 +264,24 @@ export const RosterOpeningsTab: React.FC<RosterOpeningsTabProps> = ({
   // Modal States
   const [applyingOpening, setApplyingOpening] = useState<RosterOpening | null>(null);
   const [isPostGameplayOpen, setIsPostGameplayOpen] = useState(false);
+
+  // Incomplete Game Profile Warning Modal State
+  const [incompleteWarning, setIncompleteWarning] = useState<{
+    opening: RosterOpening;
+    game: string;
+    missingFields: string[];
+    reason: string;
+  } | null>(null);
+
+  // Quick Complete Game Profile Modal State
+  const [quickCompleteOpening, setQuickCompleteOpening] = useState<RosterOpening | null>(null);
+  const [quickUid, setQuickUid] = useState("");
+  const [quickRank, setQuickRank] = useState("");
+  const [quickRole, setQuickRole] = useState("");
+  const [quickMatches, setQuickMatches] = useState(52);
+  const [quickKd, setQuickKd] = useState("1.34");
+  const [quickStatValue, setQuickStatValue] = useState("88.4");
+  const [quickFitScore, setQuickFitScore] = useState(88.5);
 
   // Apply Form State with detailed Player Fields
   const [applyGameUid, setApplyGameUid] = useState("");
@@ -334,8 +441,20 @@ export const RosterOpeningsTab: React.FC<RosterOpeningsTabProps> = ({
     return matchesGame && matchesSkill && matchesSearch;
   });
 
-  // When opening the Apply Modal, automatically pre-fill with player's profile data for that specific game
+  // When opening the Apply Modal, check if player has completed their profile for that specific game
   const handleOpenApplyModal = (opening: RosterOpening) => {
+    const status = checkGameProfileStatus(player, opening.game);
+    if (!status.isComplete) {
+      setIncompleteWarning({
+        opening,
+        game: opening.game,
+        missingFields: status.missingFields,
+        reason: status.reason,
+      });
+      onShowToast(`Incomplete profile for ${opening.game}. You must complete your ${opening.game} profile before applying.`, 'warning');
+      return;
+    }
+
     setApplyingOpening(opening);
 
     // Look for matching game in player's played titles
@@ -363,6 +482,18 @@ export const RosterOpeningsTab: React.FC<RosterOpeningsTabProps> = ({
   const handleSubmitApplication = (e: React.FormEvent) => {
     e.preventDefault();
     if (!applyingOpening) return;
+
+    const status = checkGameProfileStatus(player, applyingOpening.game);
+    if (!status.isComplete) {
+      setIncompleteWarning({
+        opening: applyingOpening,
+        game: applyingOpening.game,
+        missingFields: status.missingFields,
+        reason: status.reason,
+      });
+      onShowToast(`Application blocked: Incomplete profile for ${applyingOpening.game}.`, 'warning');
+      return;
+    }
     
     if (!applyGameUid.trim()) {
       onShowToast("Please provide your in-game UID or identifier.", "warning");
@@ -400,6 +531,113 @@ export const RosterOpeningsTab: React.FC<RosterOpeningsTabProps> = ({
         "success"
       );
     }, 600);
+  };
+
+  const handleLaunchQuickComplete = (opening: RosterOpening) => {
+    const game = opening.game;
+    setQuickCompleteOpening(opening);
+    setIncompleteWarning(null);
+
+    // Pre-populate realistic defaults based on game
+    if (game === 'CS2') {
+      setQuickUid('765611980' + Math.floor(10000000 + Math.random() * 90000000));
+      setQuickRank('FACEIT Level 10 (2,480 ELO)');
+      setQuickRole(opening.roleNeeded || 'Dedicated AWPer');
+      setQuickMatches(64);
+      setQuickKd('1.38');
+      setQuickStatValue('89.4 ADR');
+      setQuickFitScore(91.5);
+    } else if (game === 'Valorant') {
+      setQuickUid(`${player.tag}#VAL`);
+      setQuickRank('Radiant Top 500');
+      setQuickRole(opening.roleNeeded || 'Duelist / Entry');
+      setQuickMatches(52);
+      setQuickKd('1.34');
+      setQuickStatValue('284.5 ACS');
+      setQuickFitScore(88.0);
+    } else if (game === 'League of Legends') {
+      setQuickUid(`${player.tag}#LoL`);
+      setQuickRank('Challenger 740 LP');
+      setQuickRole(opening.roleNeeded || 'Mid Laner');
+      setQuickMatches(68);
+      setQuickKd('4.8 KDA');
+      setQuickStatValue('9.4 CS/M');
+      setQuickFitScore(89.0);
+    } else if (game === 'Rocket League') {
+      setQuickUid(`${player.tag}_RL`);
+      setQuickRank('Supersonic Legend (1,920 MMR)');
+      setQuickRole(opening.roleNeeded || 'First Man / Striker');
+      setQuickMatches(54);
+      setQuickKd('2.40 GPG');
+      setQuickStatValue('685 Score');
+      setQuickFitScore(86.5);
+    } else if (game === 'BGMI') {
+      setQuickUid('5128940192');
+      setQuickRank('Conqueror Top 100');
+      setQuickRole(opening.roleNeeded || 'Assaulter / IGL');
+      setQuickMatches(64);
+      setQuickKd('5.82 KD');
+      setQuickStatValue('842.0 Avg Dmg');
+      setQuickFitScore(88.0);
+    } else {
+      setQuickUid(player.tag);
+      setQuickRank('High Competitive Contender');
+      setQuickRole(opening.roleNeeded || 'Flex');
+      setQuickMatches(50);
+      setQuickKd('1.30');
+      setQuickStatValue('Top Tier');
+      setQuickFitScore(85.0);
+    }
+  };
+
+  const handleSaveQuickComplete = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!quickCompleteOpening) return;
+
+    const game = quickCompleteOpening.game;
+    const gameType = game as GameType;
+    const updatedGame: GameProfile = {
+      id: gameType,
+      name: game,
+      shortName: game === 'CS2' ? 'CS2' : game === 'Valorant' ? 'VAL' : game === 'League of Legends' ? 'LoL' : game === 'Rocket League' ? 'RLCS' : game === 'BGMI' ? 'BGMI' : 'GEN',
+      badge: game === 'BGMI' ? 'Mobile BR' : 'PC Tactical',
+      ign: quickUid.trim() || player.tag,
+      rank: quickRank.trim() || 'High Competitive',
+      primaryRole: quickRole.trim() || 'Specialist',
+      secondaryRole: 'Flex',
+      tier: 'Verified Competitor',
+      fitScore: quickFitScore,
+      matchesSampled: quickMatches,
+      kdOrKda: quickKd,
+      primaryStatLabel: game.includes('Valorant') ? 'ACS' : game.includes('League') ? 'KDA' : game.includes('Rocket') ? 'Score/Match' : 'ADR',
+      primaryStatValue: quickStatValue,
+      winRate: '67%',
+      server: 'Mumbai / APAC (18ms)',
+    };
+
+    if (onUpdateGameProfile) {
+      onUpdateGameProfile(updatedGame);
+    }
+
+    onShowToast(`Profile for ${game} completed! Telemetry ingested successfully.`, 'success');
+
+    const targetOpening = quickCompleteOpening;
+    setQuickCompleteOpening(null);
+
+    // Automatically transition to apply modal with completed profile
+    setTimeout(() => {
+      setApplyingOpening(targetOpening);
+      setApplyGameUid(updatedGame.ign);
+      setApplyCurrentRank(updatedGame.rank);
+      setApplyPrimaryAgentWeapon(updatedGame.primaryRole);
+      setApplyDiscord(player.discord);
+      setApplyPhone(player.phone);
+      setApplyScrimTimes(player.scrimWindow);
+      setApplyHardware(player.hardwareSetup);
+      setApplyMessage(
+        `Hi ${targetOpening.postedBy}, I have completed and verified my ${targetOpening.game} profile (UID: ${updatedGame.ign}, Rank: ${updatedGame.rank}) and am applying for the ${targetOpening.roleNeeded} position at ${targetOpening.teamName}. My FitScore is ${quickFitScore}/100. Ready for scrim trials immediately.`
+      );
+    }, 200);
   };
 
   const handleSubmitGameplayPost = (e: React.FormEvent) => {
@@ -1866,6 +2104,211 @@ export const RosterOpeningsTab: React.FC<RosterOpeningsTabProps> = ({
           </div>
         </div>
       )}
+      {/* MODAL: Incomplete Profile Warning Modal */}
+      {incompleteWarning && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-150">
+          <div className={`w-full max-w-md rounded-[8px] border p-6 relative shadow-2xl transition-all ${
+            isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-[#131315] border-[#26262a] text-[#ededed]'
+          }`}>
+            <button
+              onClick={() => setIncompleteWarning(null)}
+              className="absolute right-4 top-4 text-slate-400 hover:text-slate-600 dark:hover:text-[#ededed] p-1 cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <div className="flex items-center gap-2 mb-3">
+              <span className="p-2 rounded-[6px] bg-red-500/10 border border-red-500/30 text-red-400">
+                <AlertTriangle className="w-5 h-5 text-red-400" />
+              </span>
+              <div>
+                <span className="text-[10px] font-mono font-bold text-red-400 uppercase tracking-wider block">
+                  Application Blocked • Profile Required
+                </span>
+                <h3 className="text-base font-black">
+                  Incomplete Profile for {incompleteWarning.game}
+                </h3>
+              </div>
+            </div>
+
+            <p className={`text-xs mb-4 leading-relaxed ${isLight ? 'text-slate-600' : 'text-[#9a9aa2]'}`}>
+              You cannot apply for <strong className="text-[#ededed]">{incompleteWarning.opening.roleNeeded}</strong> at <strong className="text-[#ededed]">{incompleteWarning.opening.teamName}</strong> because your <strong className="text-[#e8ff59]">{incompleteWarning.game}</strong> competitive profile is incomplete.
+              Organisers require verified in-game credentials, rank certification, and match engine telemetry before evaluating candidate dossiers.
+            </p>
+
+            <div className={`p-3.5 rounded-[6px] border text-xs space-y-2 mb-5 ${
+              isLight ? 'bg-red-50/50 border-red-200' : 'bg-[#0b0b0c] border-[#26262a]'
+            }`}>
+              <div className="text-[10px] font-mono font-bold text-[#9a9aa2] uppercase tracking-wider">
+                Missing Requirements:
+              </div>
+              {incompleteWarning.missingFields.map((field, idx) => (
+                <div key={idx} className="flex items-center gap-2 font-bold text-xs text-red-400">
+                  <X className="w-3.5 h-3.5 text-red-400 shrink-0" />
+                  <span>{field}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-inherit">
+              <button
+                type="button"
+                onClick={() => setIncompleteWarning(null)}
+                className={`px-4 py-2 rounded-[6px] text-xs font-bold border transition-colors cursor-pointer ${
+                  isLight ? 'border-slate-300 hover:bg-slate-100 text-slate-700' : 'border-[#26262a] hover:bg-[#1a1a1d] text-[#ededed]'
+                }`}
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleLaunchQuickComplete(incompleteWarning.opening)}
+                className="px-4 py-2 rounded-[6px] text-xs font-black bg-[#e8ff59] hover:bg-[#d8ef49] text-black transition-colors cursor-pointer shadow-sm flex items-center gap-1.5"
+              >
+                <Plus className="w-3.5 h-3.5 stroke-[3]" />
+                <span>Complete {incompleteWarning.game} Profile Now</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: Quick Complete Game Profile Modal */}
+      {quickCompleteOpening && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-150">
+          <div className={`w-full max-w-lg rounded-[8px] border p-6 relative shadow-2xl transition-all ${
+            isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-[#131315] border-[#26262a] text-[#ededed]'
+          }`}>
+            <button
+              onClick={() => setQuickCompleteOpening(null)}
+              className="absolute right-4 top-4 text-slate-400 hover:text-slate-600 dark:hover:text-[#ededed] p-1 cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <div className="flex items-center gap-2 mb-2">
+              <span className="p-2 rounded-[6px] bg-[#e8ff59] text-black">
+                <Gamepad className="w-4 h-4" />
+              </span>
+              <div>
+                <span className="text-[10px] font-mono font-bold text-[#e8ff59] uppercase tracking-wider block">
+                  Profile Certification & Telemetry Ingestion
+                </span>
+                <h3 className="text-base font-black">
+                  Complete Profile for {quickCompleteOpening.game}
+                </h3>
+              </div>
+            </div>
+
+            <p className={`text-xs mb-4 ${isLight ? 'text-slate-600' : 'text-[#9a9aa2]'}`}>
+              Provide your in-game identifier and rank for <strong>{quickCompleteOpening.game}</strong> to ingest your combat telemetry and unlock your application to <strong>{quickCompleteOpening.teamName}</strong>.
+            </p>
+
+            <form onSubmit={handleSaveQuickComplete} className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold">
+                  {quickCompleteOpening.game === 'CS2'
+                    ? 'Steam64 ID (17 Digits) *'
+                    : quickCompleteOpening.game === 'Valorant'
+                    ? 'Riot ID & Tagline *'
+                    : quickCompleteOpening.game === 'League of Legends'
+                    ? 'Summoner Name & Tagline *'
+                    : quickCompleteOpening.game === 'Rocket League'
+                    ? 'Epic Games Account ID *'
+                    : quickCompleteOpening.game === 'BGMI'
+                    ? 'Character UID (10 Digits) *'
+                    : 'In-Game UID / Identifier *'}
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={quickUid}
+                  onChange={(e) => setQuickUid(e.target.value)}
+                  placeholder="e.g. 76561198012345678 or Player#TAG"
+                  className={`w-full px-3 py-2 rounded-[6px] text-xs font-mono font-bold border focus:outline-none transition-colors ${
+                    isLight ? 'border-slate-300 bg-slate-50 text-slate-900 focus:border-slate-900' : 'border-[#26262a] bg-[#0b0b0c] text-[#ededed] focus:border-[#e8ff59]'
+                  }`}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-bold">Competitive Rank / ELO *</label>
+                  <input
+                    type="text"
+                    required
+                    value={quickRank}
+                    onChange={(e) => setQuickRank(e.target.value)}
+                    placeholder="e.g. FACEIT Level 10 / Radiant / Supersonic"
+                    className={`w-full px-3 py-2 rounded-[6px] text-xs font-semibold border focus:outline-none transition-colors ${
+                      isLight ? 'border-slate-300 bg-slate-50 text-slate-900 focus:border-slate-900' : 'border-[#26262a] bg-[#0b0b0c] text-[#ededed] focus:border-[#e8ff59]'
+                    }`}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-bold">Primary Tactical Role *</label>
+                  <input
+                    type="text"
+                    required
+                    value={quickRole}
+                    onChange={(e) => setQuickRole(e.target.value)}
+                    placeholder="e.g. AWPer / Duelist / Assaulter"
+                    className={`w-full px-3 py-2 rounded-[6px] text-xs font-semibold border focus:outline-none transition-colors ${
+                      isLight ? 'border-slate-300 bg-slate-50 text-slate-900 focus:border-slate-900' : 'border-[#26262a] bg-[#0b0b0c] text-[#ededed] focus:border-[#e8ff59]'
+                    }`}
+                  />
+                </div>
+              </div>
+
+              <div className={`p-3.5 rounded-[6px] border text-xs space-y-2 ${
+                isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#0b0b0c] border-[#26262a]'
+              }`}>
+                <div className="flex items-center justify-between text-[11px] font-mono text-[#9a9aa2]">
+                  <span>INGESTED COMBAT TELEMETRY</span>
+                  <span className="text-[#e8ff59] font-bold">AUTO-CALIBRATED</span>
+                </div>
+                <div className="grid grid-cols-3 gap-2 pt-1 font-mono text-center">
+                  <div className="p-2 rounded bg-[#131315] border border-[#26262a]">
+                    <div className="text-[10px] text-[#9a9aa2]">SAMPLE MATCHES</div>
+                    <div className="text-sm font-bold text-[#ededed]">{quickMatches}</div>
+                  </div>
+                  <div className="p-2 rounded bg-[#131315] border border-[#26262a]">
+                    <div className="text-[10px] text-[#9a9aa2]">K/D RATIO</div>
+                    <div className="text-sm font-bold text-[#ededed]">{quickKd}</div>
+                  </div>
+                  <div className="p-2 rounded bg-[#131315] border border-[#26262a]">
+                    <div className="text-[10px] text-[#9a9aa2]">FITSCORE</div>
+                    <div className="text-sm font-bold text-[#e8ff59]">{quickFitScore}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-inherit">
+                <button
+                  type="button"
+                  onClick={() => setQuickCompleteOpening(null)}
+                  className={`px-4 py-2 rounded-[6px] text-xs font-bold border transition-colors cursor-pointer ${
+                    isLight ? 'border-slate-300 hover:bg-slate-100 text-slate-700' : 'border-[#26262a] hover:bg-[#1a1a1d] text-[#ededed]'
+                  }`}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="submit"
+                  className="px-5 py-2 rounded-[6px] text-xs font-black bg-[#e8ff59] hover:bg-[#d8ef49] text-black transition-colors cursor-pointer shadow-sm flex items-center gap-1.5"
+                >
+                  <Check className="w-3.5 h-3.5 stroke-[3]" />
+                  <span>Save & Complete Profile</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

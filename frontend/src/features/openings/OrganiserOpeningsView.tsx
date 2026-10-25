@@ -41,6 +41,7 @@ interface OrganiserOpeningsViewProps {
 }
 
 const SUPPORTED_GAMES = [
+  'General',
   'Counter-Strike 2',
   'Valorant',
   'League of Legends',
@@ -49,6 +50,7 @@ const SUPPORTED_GAMES = [
 ];
 
 const ROLES_BY_GAME: Record<string, string[]> = {
+  'General': ['Flex / Multi-Title', 'IGL / Team Captain', 'Primary Fragger / Carry', 'Support / Anchor', 'Head Coach / Strategic Analyst'],
   'Counter-Strike 2': ['Sniper / AWPer', 'IGL / In-Game Leader', 'Entry Fragger', 'Rifler / Lurker', 'Support'],
   'Valorant': ['Duelist', 'Initiator', 'Controller / Smokes', 'Sentinel', 'IGL / Flex'],
   'League of Legends': ['Top Laner', 'Jungler', 'Mid Laner', 'ADC / Marksman', 'Support'],
@@ -95,7 +97,10 @@ export function OrganiserOpeningsView({
     const roles = ROLES_BY_GAME[game] || ROLES_BY_GAME['Counter-Strike 2'];
     setFormRole(roles[0]);
 
-    if (game === 'Counter-Strike 2') {
+    if (game === 'General') {
+      setFormMinRank('Competitive Calibrated / Top Tier Regional');
+      setFormTitle('Competitive Esports Contender / Multi-Title Flex');
+    } else if (game === 'Counter-Strike 2') {
       setFormMinRank('FACEIT Level 10 / 2200+ ELO');
       setFormTitle('Dedicated CS2 AWPer / Sniper for Premier Division');
     } else if (game === 'Valorant') {
@@ -657,12 +662,14 @@ export function OrganiserOpeningsView({
 
                         <span
                           className={`text-[11px] font-mono font-bold px-2 py-0.5 rounded-[4px] border ${
-                            isLight
+                            op.title_name === 'General'
+                              ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/30'
+                              : isLight
                               ? 'bg-slate-100 border-slate-300 text-slate-700'
                               : 'bg-[#0b0b0c] border-[#26262a] text-[#9a9aa2]'
                           }`}
                         >
-                          {op.title_name || 'Counter-Strike 2'}
+                          {op.title_name === 'General' ? '🌐 General Esports' : (op.title_name || 'Counter-Strike 2')}
                         </span>
                       </div>
 
