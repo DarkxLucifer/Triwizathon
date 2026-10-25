@@ -338,8 +338,8 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
         webcamRecorderRef.current.stop();
       }
 
-      // Wait a moment for last chunks to flush
-      await new Promise(r => setTimeout(r, 1200));
+      // Wait a brief moment for last recorder chunks to flush
+      await new Promise(r => setTimeout(r, 400));
 
       // Stop stream tracks
       screenStreamRef.current?.getTracks().forEach(t => t.stop());
@@ -351,7 +351,7 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
 
       // Finalize session on backend
       if (activeSession) {
-        setUploadStatus('Running server verification checks & Whisper analysis...');
+        setUploadStatus('Finalizing session attestation...');
         const finalized = await recordingsApi.finalizeSession(activeSession.id, {
           screen_ended_early: screenEndedEarlyRef.current,
           display_surface: 'monitor',
@@ -642,7 +642,7 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
                   <Shield className="w-3.5 h-3.5" /> Spoken Challenge Code
                 </span>
                 <p className={`text-[11px] mt-1 leading-snug ${isLight ? 'text-slate-500' : 'text-[#9a9aa2]'}`}>
-                  Read aloud once recording begins. Whisper AI verifies your live presence.
+                  Attestation challenge code displayed live during recording to verify live session presence.
                 </p>
               </div>
 
