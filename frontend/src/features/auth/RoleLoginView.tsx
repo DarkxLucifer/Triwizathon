@@ -29,6 +29,7 @@ interface RoleLoginViewProps {
   theme?: 'dark' | 'light';
   onToggleTheme?: () => void;
   initialRole?: UserRole;
+  onBack?: () => void;
 }
 
 export function RoleLoginView({
@@ -36,6 +37,7 @@ export function RoleLoginView({
   theme = 'dark',
   onToggleTheme,
   initialRole = 'organiser',
+  onBack,
 }: RoleLoginViewProps) {
   const isLight = theme === 'light';
   const [isRegisterMode, setIsRegisterMode] = useState(false);
@@ -153,6 +155,19 @@ export function RoleLoginView({
       >
         <div className="flex items-center gap-3">
           <Logo size="md" theme={theme} />
+          {onBack && (
+            <button
+              type="button"
+              onClick={onBack}
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-[6px] border text-xs font-semibold transition-all cursor-pointer ${
+                isLight
+                  ? 'bg-white hover:bg-slate-100 text-slate-700 border-slate-300'
+                  : 'bg-[#131315] hover:bg-[#1f1f23] text-[#ededed] border-[#26262a] hover:border-[#e8ff59]'
+              }`}
+            >
+              ← Back to Home
+            </button>
+          )}
           <span
             className={`hidden sm:inline-block text-[11px] font-mono font-bold px-2 py-0.5 rounded-[4px] border ${
               isLight

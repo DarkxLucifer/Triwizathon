@@ -34,6 +34,7 @@ import { PlayerDashboardView } from '@/features/player_dashboard/PlayerDashboard
 
 import { RoleLoginView, UserRole } from '@/features/auth/RoleLoginView';
 import { OrganiserOpeningsView } from '@/features/openings/OrganiserOpeningsView';
+import { HomePageView } from '@/features/home/HomePageView';
 
 import { Role } from '@/types';
 
@@ -56,6 +57,7 @@ export default function ScoutForgeApp() {
   const [selectedGame, setSelectedGame] = useState('All Games');
 
   const [searchTerm, setSearchTerm] = useState('');
+  const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
   const [availableContexts, setAvailableContexts] = useState<string[]>([]);
   const canSwitchRole = availableContexts.length > 1;
 
@@ -181,6 +183,8 @@ export default function ScoutForgeApp() {
 
     setIsAuthenticated(false);
 
+    setShowAuthModal(false);
+
     localStorage.setItem('scoutforge_authenticated', 'false');
 
   };
@@ -261,22 +265,30 @@ export default function ScoutForgeApp() {
 
   // If not logged in, render dual role-based login portal
 
-  if (mounted && !isAuthenticated) {
+  if (!isAuthenticated) {
+
+    if (showAuthModal) {
+      return (
+        <RoleLoginView
+          onLogin={(role, token, user) => {
+            handleLogin(role);
+            setShowAuthModal(false);
+          }}
+          theme={theme}
+          onToggleTheme={toggleTheme}
+          initialRole={authRole}
+          onBack={() => setShowAuthModal(false)}
+        />
+      );
+    }
 
     return (
-
-      <RoleLoginView
-
-        onLogin={handleLogin}
-
-        theme={theme}
-
-        onToggleTheme={toggleTheme}
-
-        initialRole={authRole}
-
+      <HomePageView
+        onGoToLogin={(mode) => {
+          setShowAuthModal(true);
+        }}
+        isAuthenticated={false}
       />
-
     );
 
   }
