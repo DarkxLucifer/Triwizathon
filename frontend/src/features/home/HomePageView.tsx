@@ -223,6 +223,25 @@ export function HomePageView({
     notes: '',
   });
 
+  // Subtle Web Audio Synth SFX
+  const playTactileClick = (freq = 480, duration = 0.04) => {
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, ctx.currentTime);
+      gain.gain.setValueAtTime(0.04, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + duration);
+    } catch (e) {}
+  };
+
   // Toast feedback
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -246,12 +265,8 @@ export function HomePageView({
   }, [isReplayOpen, isPlaying, isSlowmo]);
 
   const handleCardClick = (clip: typeof VAULT_CLIPS[0]) => {
-    if (isAuthenticated && onGoToDashboard) {
-      onGoToDashboard();
-    } else {
-      // Redirect to login as requested
-      onGoToLogin('login');
-    }
+    playTactileClick(600, 0.05);
+    handleOpenReplay(clip.game);
   };
 
   const handleOpenReplay = (game: SupportedGame) => {
@@ -318,10 +333,9 @@ export function HomePageView({
               <button
                 type="button"
                 className="btn-nav-auth"
-                style={{ backgroundColor: '#e8ff59', color: '#0b0b0c', border: '1px solid #e8ff59', fontWeight: 600 }}
                 onClick={onGoToDashboard}
               >
-                Go to Dashboard →
+                Dashboard →
               </button>
             ) : (
               <>
@@ -329,7 +343,10 @@ export function HomePageView({
                   type="button"
                   className="btn-nav-auth"
                   id="nav-login-btn"
-                  onClick={() => onGoToLogin('login')}
+                  onClick={() => {
+                    playTactileClick(520, 0.04);
+                    onGoToLogin('login');
+                  }}
                 >
                   Log in
                 </button>
@@ -337,8 +354,10 @@ export function HomePageView({
                   type="button"
                   className="btn-nav-auth"
                   id="nav-signup-btn"
-                  style={{ backgroundColor: '#e8ff59', color: '#0b0b0c', border: '1px solid #e8ff59', fontWeight: 600 }}
-                  onClick={() => onGoToLogin('signup')}
+                  onClick={() => {
+                    playTactileClick(520, 0.04);
+                    onGoToLogin('signup');
+                  }}
                 >
                   Sign up
                 </button>
