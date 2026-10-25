@@ -432,20 +432,20 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-12 select-none">
+    <div className={`space-y-6 max-w-7xl mx-auto pb-12 select-none ${isLight ? 'text-slate-900' : 'text-[#ededed]'}`}>
       {/* Top Banner / Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#26262a]">
+      <div className={`flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b ${isLight ? 'border-slate-200' : 'border-[#26262a]'}`}>
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="w-2 h-2 rounded-full bg-[#e8ff59] animate-pulse" />
-            <span className="text-[11px] font-mono tracking-wider text-[#e8ff59] uppercase font-semibold">
+            <span className={`w-2 h-2 rounded-full ${isLight ? 'bg-slate-700' : 'bg-zinc-400'}`} />
+            <span className={`text-[11px] font-mono tracking-wider uppercase font-semibold ${isLight ? 'text-slate-600' : 'text-zinc-400'}`}>
               Anti-Cheat Session Verification
             </span>
           </div>
           <h1 className={`text-2xl font-bold tracking-tight ${isLight ? 'text-slate-900' : 'text-[#ededed]'}`}>
             Recording & Telemetry Attestation
           </h1>
-          <p className="text-xs text-[#9a9aa2] mt-0.5">
+          <p className={`text-xs mt-0.5 ${isLight ? 'text-slate-500' : 'text-[#9a9aa2]'}`}>
             Capture live full-screen matches with simultaneous webcam verification, continuous streaming upload, and spoken challenge anti-cheat checks.
           </p>
         </div>
@@ -454,9 +454,9 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
           <button
             type="button"
             onClick={loadRecordings}
-            className={`px-3 py-1.5 rounded-[6px] border text-xs font-medium inline-flex items-center gap-1.5 transition-colors ${
+            className={`px-3 py-1.5 rounded-[6px] border text-xs font-medium inline-flex items-center gap-1.5 transition-colors cursor-pointer ${
               isLight
-                ? 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                ? 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50 shadow-xs'
                 : 'bg-[#131315] border-[#26262a] text-[#ededed] hover:bg-[#19191d]'
             }`}
           >
@@ -468,26 +468,34 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
 
       {/* Warnings & Alerts */}
       {warningMessage && (
-        <div className="p-3.5 rounded-[6px] border border-amber-500/40 bg-amber-500/10 text-amber-300 text-xs flex items-start gap-2.5">
-          <AlertTriangle className="w-4 h-4 shrink-0 text-amber-400 mt-0.5" />
+        <div className={`p-3.5 rounded-[6px] border text-xs flex items-start gap-2.5 ${
+          isLight
+            ? 'border-amber-300 bg-amber-50 text-amber-900'
+            : 'border-amber-500/40 bg-amber-500/10 text-amber-300'
+        }`}>
+          <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
           <div className="flex-1">
             <p className="font-semibold">Notice</p>
             <p className="text-[11px] opacity-90 mt-0.5">{warningMessage}</p>
           </div>
-          <button type="button" onClick={() => setWarningMessage(null)} className="text-amber-400 hover:text-amber-200 text-xs">
+          <button type="button" onClick={() => setWarningMessage(null)} className="opacity-70 hover:opacity-100 text-xs cursor-pointer">
             ✕
           </button>
         </div>
       )}
 
       {errorMessage && (
-        <div className="p-3.5 rounded-[6px] border border-red-500/40 bg-red-500/10 text-red-300 text-xs flex items-start gap-2.5">
-          <XCircle className="w-4 h-4 shrink-0 text-red-400 mt-0.5" />
+        <div className={`p-3.5 rounded-[6px] border text-xs flex items-start gap-2.5 ${
+          isLight
+            ? 'border-red-300 bg-red-50 text-red-900'
+            : 'border-red-500/40 bg-red-500/10 text-red-300'
+        }`}>
+          <XCircle className="w-4 h-4 shrink-0 mt-0.5" />
           <div className="flex-1">
             <p className="font-semibold">Action Failed</p>
             <p className="text-[11px] opacity-90 mt-0.5">{errorMessage}</p>
           </div>
-          <button type="button" onClick={() => setErrorMessage(null)} className="text-red-400 hover:text-red-200 text-xs">
+          <button type="button" onClick={() => setErrorMessage(null)} className="opacity-70 hover:opacity-100 text-xs cursor-pointer">
             ✕
           </button>
         </div>
@@ -498,20 +506,22 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
         {/* RECORDER CARD (Span 2) */}
         <div
           className={`lg:col-span-2 p-5 rounded-[8px] border transition-colors ${
-            isLight ? 'bg-white border-slate-200 shadow-sm' : 'bg-[#131315] border-[#26262a]'
+            isLight ? 'bg-white border-slate-200 shadow-sm text-slate-900' : 'bg-[#131315] border-[#26262a] text-[#ededed]'
           }`}
         >
           {/* Header Row */}
-          <div className="flex items-center justify-between pb-4 mb-4 border-b border-[#26262a]">
+          <div className={`flex items-center justify-between pb-4 mb-4 border-b ${isLight ? 'border-slate-200' : 'border-[#26262a]'}`}>
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-[6px] bg-[#e8ff59]/10 border border-[#e8ff59]/30 flex items-center justify-center text-[#e8ff59]">
+              <div className={`w-8 h-8 rounded-[6px] border flex items-center justify-center ${
+                isLight ? 'bg-slate-100 border-slate-200 text-slate-800' : 'bg-zinc-800 border-zinc-700 text-zinc-200'
+              }`}>
                 <Video className="w-4 h-4" />
               </div>
               <div>
                 <h2 className={`text-sm font-semibold ${isLight ? 'text-slate-900' : 'text-[#ededed]'}`}>
                   Live Recorder Studio
                 </h2>
-                <p className="text-[11px] text-[#9a9aa2]">
+                <p className={`text-[11px] ${isLight ? 'text-slate-500' : 'text-[#9a9aa2]'}`}>
                   Dual track streaming: Screen & Webcam + Microphone
                 </p>
               </div>
@@ -520,17 +530,21 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
             {/* Status Chip */}
             <div className="flex items-center gap-2">
               {isRecording ? (
-                <span className="px-2.5 py-1 rounded-full text-[11px] font-mono font-semibold bg-red-500/20 text-red-400 border border-red-500/40 inline-flex items-center gap-1.5 animate-pulse">
+                <span className="px-2.5 py-1 rounded-full text-[11px] font-mono font-semibold bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/30 inline-flex items-center gap-1.5 animate-pulse">
                   <span className="w-2 h-2 rounded-full bg-red-500" />
                   REC {formatTime(timerSec)}
                 </span>
               ) : isFinalizing ? (
-                <span className="px-2.5 py-1 rounded-full text-[11px] font-mono font-semibold bg-amber-500/20 text-amber-400 border border-amber-500/40 inline-flex items-center gap-1.5">
+                <span className={`px-2.5 py-1 rounded-full text-[11px] font-mono font-semibold border inline-flex items-center gap-1.5 ${
+                  isLight ? 'bg-slate-100 border-slate-300 text-slate-700' : 'bg-zinc-800 border-zinc-700 text-zinc-300'
+                }`}>
                   <RefreshCw className="w-3 h-3 animate-spin" />
                   FINALIZING
                 </span>
               ) : (
-                <span className="px-2.5 py-1 rounded-full text-[11px] font-mono text-[#9a9aa2] bg-[#0b0b0c] border border-[#26262a]">
+                <span className={`px-2.5 py-1 rounded-full text-[11px] font-mono border ${
+                  isLight ? 'text-slate-600 bg-slate-100 border-slate-300' : 'text-[#9a9aa2] bg-[#0b0b0c] border-[#26262a]'
+                }`}>
                   IDLE / STANDBY
                 </span>
               )}
@@ -545,13 +559,15 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
                 checked={consentGiven}
                 disabled={isRecording || isFinalizing}
                 onChange={e => setConsentGiven(e.target.checked)}
-                className="mt-0.5 w-4 h-4 rounded border-[#26262a] text-[#e8ff59] focus:ring-0 cursor-pointer accent-[#e8ff59]"
+                className={`mt-0.5 w-4 h-4 rounded cursor-pointer ${
+                  isLight ? 'border-slate-300 accent-slate-900' : 'border-[#26262a] accent-white'
+                }`}
               />
               <div className="text-[12px] leading-relaxed">
-                <span className={`font-semibold ${isLight ? 'text-slate-800' : 'text-[#ededed]'}`}>
+                <span className={`font-semibold ${isLight ? 'text-slate-900' : 'text-[#ededed]'}`}>
                   Explicit Consent & Privacy Attestation
                 </span>
-                <p className="text-[#9a9aa2] text-[11px] mt-0.5">
+                <p className={`text-[11px] mt-0.5 ${isLight ? 'text-slate-500' : 'text-[#9a9aa2]'}`}>
                   I consent to capture full-screen gameplay video and microphone audio for trial verification. Data is retained for 14 days and remains private until explicitly shared with an organization. No facial recognition templates or biometrics are generated or stored. You can delete this recording and derived evidence at any time.
                 </p>
               </div>
@@ -562,29 +578,33 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             {/* Device Toggles */}
             <div className={`p-3.5 rounded-[6px] border space-y-2.5 ${isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#0b0b0c] border-[#26262a]'}`}>
-              <span className="text-[11px] font-mono uppercase text-[#9a9aa2] font-semibold block">
+              <span className={`text-[11px] font-mono uppercase font-semibold block ${isLight ? 'text-slate-500' : 'text-[#9a9aa2]'}`}>
                 Capture Stream Inputs
               </span>
               <div className="flex items-center justify-between">
-                <span className="text-xs text-[#ededed] flex items-center gap-2">
-                  <Monitor className="w-3.5 h-3.5 text-[#e8ff59]" /> Primary Screen Share
+                <span className={`text-xs flex items-center gap-2 ${isLight ? 'text-slate-800' : 'text-[#ededed]'}`}>
+                  <Monitor className={`w-3.5 h-3.5 ${isLight ? 'text-slate-700' : 'text-zinc-300'}`} /> Primary Screen Share
                 </span>
-                <span className="text-[10px] font-mono text-emerald-400 font-semibold uppercase">
+                <span className={`text-[10px] font-mono font-semibold uppercase ${isLight ? 'text-slate-700' : 'text-zinc-400'}`}>
                   Mandatory
                 </span>
               </div>
               <div className="flex items-center justify-between pt-1">
-                <span className="text-xs text-[#ededed] flex items-center gap-2">
-                  {enableCamera ? <Camera className="w-3.5 h-3.5 text-blue-400" /> : <CameraOff className="w-3.5 h-3.5 text-zinc-500" />}
+                <span className={`text-xs flex items-center gap-2 ${isLight ? 'text-slate-800' : 'text-[#ededed]'}`}>
+                  {enableCamera ? <Camera className={`w-3.5 h-3.5 ${isLight ? 'text-slate-700' : 'text-zinc-300'}`} /> : <CameraOff className="w-3.5 h-3.5 text-zinc-400" />}
                   Webcam Picture-in-Picture
                 </span>
                 <button
                   type="button"
                   disabled={isRecording || isFinalizing}
                   onClick={() => setEnableCamera(!enableCamera)}
-                  className={`px-2 py-0.5 rounded text-[11px] font-mono transition-colors ${
+                  className={`px-2 py-0.5 rounded text-[11px] font-mono transition-colors cursor-pointer ${
                     enableCamera
-                      ? 'bg-blue-500/20 text-blue-400 border border-blue-500/40'
+                      ? isLight
+                        ? 'bg-slate-900 text-white border border-slate-900'
+                        : 'bg-zinc-200 text-black border border-zinc-200 font-semibold'
+                      : isLight
+                      ? 'bg-slate-200 text-slate-600 border border-slate-300'
                       : 'bg-[#131315] text-[#9a9aa2] border border-[#26262a]'
                   }`}
                 >
@@ -592,17 +612,21 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
                 </button>
               </div>
               <div className="flex items-center justify-between pt-1">
-                <span className="text-xs text-[#ededed] flex items-center gap-2">
-                  {enableMic ? <Mic className="w-3.5 h-3.5 text-emerald-400" /> : <MicOff className="w-3.5 h-3.5 text-zinc-500" />}
+                <span className={`text-xs flex items-center gap-2 ${isLight ? 'text-slate-800' : 'text-[#ededed]'}`}>
+                  {enableMic ? <Mic className={`w-3.5 h-3.5 ${isLight ? 'text-slate-700' : 'text-zinc-300'}`} /> : <MicOff className="w-3.5 h-3.5 text-zinc-400" />}
                   Voice Microphone Comms
                 </span>
                 <button
                   type="button"
                   disabled={isRecording || isFinalizing}
                   onClick={() => setEnableMic(!enableMic)}
-                  className={`px-2 py-0.5 rounded text-[11px] font-mono transition-colors ${
+                  className={`px-2 py-0.5 rounded text-[11px] font-mono transition-colors cursor-pointer ${
                     enableMic
-                      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+                      ? isLight
+                        ? 'bg-slate-900 text-white border border-slate-900'
+                        : 'bg-zinc-200 text-black border border-zinc-200 font-semibold'
+                      : isLight
+                      ? 'bg-slate-200 text-slate-600 border border-slate-300'
                       : 'bg-[#131315] text-[#9a9aa2] border border-[#26262a]'
                   }`}
                 >
@@ -614,21 +638,23 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
             {/* Cryptographic Challenge Code Box */}
             <div className={`p-3.5 rounded-[6px] border flex flex-col justify-between ${isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#0b0b0c] border-[#26262a]'}`}>
               <div>
-                <span className="text-[11px] font-mono uppercase text-[#e8ff59] font-semibold flex items-center gap-1.5">
+                <span className={`text-[11px] font-mono uppercase font-semibold flex items-center gap-1.5 ${isLight ? 'text-slate-700' : 'text-zinc-300'}`}>
                   <Shield className="w-3.5 h-3.5" /> Spoken Challenge Code
                 </span>
-                <p className="text-[11px] text-[#9a9aa2] mt-1 leading-snug">
+                <p className={`text-[11px] mt-1 leading-snug ${isLight ? 'text-slate-500' : 'text-[#9a9aa2]'}`}>
                   Read aloud once recording begins. Whisper AI verifies your live presence.
                 </p>
               </div>
 
-              <div className="mt-2.5 p-2 bg-[#131315] border border-[#26262a] rounded-[4px] text-center">
+              <div className={`mt-2.5 p-2 rounded-[4px] border text-center ${
+                isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-[#131315] border-[#26262a] text-[#ededed]'
+              }`}>
                 {activeSession?.challenge ? (
-                  <span className="text-xl font-mono font-bold tracking-widest text-[#e8ff59]">
+                  <span className={`text-xl font-mono font-bold tracking-widest ${isLight ? 'text-slate-900' : 'text-white'}`}>
                     {activeSession.challenge.code}
                   </span>
                 ) : (
-                  <span className="text-xs font-mono text-[#9a9aa2] italic">
+                  <span className={`text-xs font-mono italic ${isLight ? 'text-slate-400' : 'text-[#9a9aa2]'}`}>
                     [Generated when you click Start]
                   </span>
                 )}
@@ -638,21 +664,25 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
 
           {/* Active Recording Monitor & Live Video Previews */}
           {isRecording && (
-            <div className="mb-6 p-4 rounded-[8px] bg-[#0b0b0c] border border-red-500/40 space-y-4 shadow-lg shadow-red-950/20">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-[#26262a]">
+            <div className={`mb-6 p-4 rounded-[8px] border space-y-4 shadow-sm ${
+              isLight ? 'bg-slate-50 border-slate-300 text-slate-900' : 'bg-[#0b0b0c] border-[#26262a] text-[#ededed]'
+            }`}>
+              <div className={`flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b ${
+                isLight ? 'border-slate-200' : 'border-[#26262a]'
+              }`}>
                 <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-2 px-2.5 py-1 rounded bg-red-500/10 border border-red-500/30 text-red-500 text-xs font-mono font-bold animate-pulse">
+                  <div className="flex items-center gap-2 px-2.5 py-1 rounded bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-xs font-mono font-bold animate-pulse">
                     <Radio className="w-3.5 h-3.5" />
                     <span>REC LIVE</span>
                   </div>
                   <div>
-                    <h4 className="text-sm font-bold text-[#ededed] flex items-center gap-2">
+                    <h4 className={`text-sm font-bold flex items-center gap-2 ${isLight ? 'text-slate-900' : 'text-[#ededed]'}`}>
                       <span>Active Stream Ingest</span>
-                      <span className="text-xs font-mono text-[#e8ff59] font-normal">
+                      <span className={`text-xs font-mono font-semibold ${isLight ? 'text-slate-700' : 'text-zinc-300'}`}>
                         [{formatTime(timerSec)}]
                       </span>
                     </h4>
-                    <p className="text-[11px] font-mono text-[#9a9aa2]">
+                    <p className={`text-[11px] font-mono ${isLight ? 'text-slate-500' : 'text-[#9a9aa2]'}`}>
                       Screen chunks: {screenChunkCount} | Cam chunks: {cameraChunkCount} | Streamed: {formatBytes(uploadedBytes)}
                     </p>
                   </div>
@@ -662,7 +692,7 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
                   <button
                     type="button"
                     onClick={handleStopRecording}
-                    className="flex-1 sm:flex-none px-4 py-2 rounded-[6px] text-xs font-bold bg-red-600 hover:bg-red-500 text-white inline-flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md shadow-red-600/20"
+                    className="flex-1 sm:flex-none px-4 py-2 rounded-[6px] text-xs font-bold bg-red-600 hover:bg-red-500 text-white inline-flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs"
                   >
                     <Square className="w-3.5 h-3.5 fill-current" />
                     <span>Stop & Finalize</span>
@@ -670,7 +700,11 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
                   <button
                     type="button"
                     onClick={handleAbortRecording}
-                    className="px-3 py-2 rounded-[6px] text-xs font-medium text-[#9a9aa2] hover:text-white border border-[#26262a] hover:bg-[#19191d] transition-colors cursor-pointer"
+                    className={`px-3 py-2 rounded-[6px] text-xs font-medium border transition-colors cursor-pointer ${
+                      isLight
+                        ? 'border-slate-300 text-slate-700 hover:bg-slate-200'
+                        : 'border-[#26262a] text-[#9a9aa2] hover:bg-[#19191d] hover:text-white'
+                    }`}
                   >
                     Abort
                   </button>
@@ -681,14 +715,16 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Screen Share Live Feed (Takes 2/3 width if cam active, else full 3/3) */}
                 <div className={`${enableCamera && activeWebcamStream ? 'md:col-span-2' : 'md:col-span-3'} space-y-1.5`}>
-                  <div className="flex items-center justify-between text-[11px] font-mono text-[#9a9aa2]">
+                  <div className={`flex items-center justify-between text-[11px] font-mono ${isLight ? 'text-slate-500' : 'text-[#9a9aa2]'}`}>
                     <span className="flex items-center gap-1.5">
-                      <Monitor className="w-3.5 h-3.5 text-[#e8ff59]" />
+                      <Monitor className="w-3.5 h-3.5" />
                       SCREEN SHARE LIVE OUTPUT
                     </span>
-                    <span className="text-emerald-400 text-[10px]">Active MediaStream</span>
+                    <span className="text-[10px] font-semibold text-slate-600 dark:text-zinc-400">Active MediaStream</span>
                   </div>
-                  <div className="aspect-video bg-black rounded-[6px] border border-[#26262a] overflow-hidden relative shadow-inner flex items-center justify-center">
+                  <div className={`aspect-video bg-black rounded-[6px] border overflow-hidden relative shadow-inner flex items-center justify-center ${
+                    isLight ? 'border-slate-300' : 'border-[#26262a]'
+                  }`}>
                     <video
                       ref={screenVideoPreviewRef}
                       autoPlay
@@ -706,14 +742,16 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
                 {/* Webcam Live Feed */}
                 {enableCamera && activeWebcamStream && (
                   <div className="space-y-1.5">
-                    <div className="flex items-center justify-between text-[11px] font-mono text-[#9a9aa2]">
+                    <div className={`flex items-center justify-between text-[11px] font-mono ${isLight ? 'text-slate-500' : 'text-[#9a9aa2]'}`}>
                       <span className="flex items-center gap-1.5">
-                        <Camera className="w-3.5 h-3.5 text-[#e8ff59]" />
+                        <Camera className="w-3.5 h-3.5" />
                         FACECAM LIVE OUTPUT
                       </span>
-                      <span className="text-emerald-400 text-[10px]">Webcam Ingest</span>
+                      <span className="text-[10px] font-semibold text-slate-600 dark:text-zinc-400">Webcam Ingest</span>
                     </div>
-                    <div className="aspect-video bg-black rounded-[6px] border border-[#26262a] overflow-hidden relative shadow-inner flex items-center justify-center">
+                    <div className={`aspect-video bg-black rounded-[6px] border overflow-hidden relative shadow-inner flex items-center justify-center ${
+                      isLight ? 'border-slate-300' : 'border-[#26262a]'
+                    }`}>
                       <video
                         ref={webcamVideoPreviewRef}
                         autoPlay
@@ -721,7 +759,7 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
                         playsInline
                         className="w-full h-full object-cover bg-black"
                       />
-                      <div className="absolute top-2 left-2 px-2 py-0.5 rounded bg-black/80 backdrop-blur-xs text-[10px] font-mono text-[#e8ff59] border border-[#e8ff59]/20">
+                      <div className="absolute top-2 left-2 px-2 py-0.5 rounded bg-black/80 backdrop-blur-xs text-[10px] font-mono text-white border border-white/10">
                         CAM VERIFIED
                       </div>
                     </div>
@@ -730,7 +768,9 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
               </div>
 
               {uploadStatus && (
-                <div className="p-2.5 rounded bg-[#131315] border border-[#26262a] text-[11px] font-mono text-[#e8ff59] flex items-center gap-2">
+                <div className={`p-2.5 rounded border text-[11px] font-mono flex items-center gap-2 ${
+                  isLight ? 'bg-white border-slate-200 text-slate-700' : 'bg-[#131315] border-[#26262a] text-zinc-300'
+                }`}>
                   <Sparkles className="w-3.5 h-3.5 shrink-0" />
                   <span>{uploadStatus}</span>
                 </div>
@@ -740,9 +780,11 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
 
           {/* Countdown Overlay */}
           {countdown !== null && (
-            <div className="mb-4 p-6 rounded-[6px] bg-[#0b0b0c] border border-[#e8ff59]/50 text-center animate-pulse">
-              <span className="text-4xl font-mono font-black text-[#e8ff59]">{countdown}</span>
-              <p className="text-xs text-[#9a9aa2] font-mono uppercase tracking-wider mt-1">
+            <div className={`mb-4 p-6 rounded-[6px] border text-center animate-pulse ${
+              isLight ? 'bg-slate-100 border-slate-300' : 'bg-[#0b0b0c] border-[#26262a]'
+            }`}>
+              <span className={`text-4xl font-mono font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>{countdown}</span>
+              <p className={`text-xs font-mono uppercase tracking-wider mt-1 ${isLight ? 'text-slate-500' : 'text-[#9a9aa2]'}`}>
                 Starting Capture... Speak challenge code clearly!
               </p>
             </div>
@@ -751,7 +793,7 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
           {/* Action Footer Buttons */}
           {!isRecording && (
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
-              <div className="text-[11px] text-[#9a9aa2]">
+              <div className={`text-[11px] ${isLight ? 'text-slate-500' : 'text-[#9a9aa2]'}`}>
                 Timeslice: 5.0s chunks | Codec: VP9/Opus WebM | Idempotent Assembly
               </div>
               <button
@@ -760,8 +802,12 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
                 onClick={handleStartCapture}
                 className={`w-full sm:w-auto px-6 py-2.5 rounded-[6px] text-xs font-semibold inline-flex items-center justify-center gap-2 transition-all cursor-pointer ${
                   !consentGiven || isStarting || isFinalizing
-                    ? 'bg-zinc-800 text-zinc-500 border border-zinc-700 cursor-not-allowed'
-                    : 'bg-[#e8ff59] hover:bg-[#d6f03d] text-[#0b0b0c] border border-[#e8ff59] font-bold shadow-sm'
+                    ? isLight
+                      ? 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed'
+                      : 'bg-zinc-800 text-zinc-500 border border-zinc-700 cursor-not-allowed'
+                    : isLight
+                    ? 'bg-slate-900 hover:bg-slate-800 text-white border border-slate-900 font-bold shadow-sm'
+                    : 'bg-white hover:bg-slate-200 text-black border border-white font-bold shadow-sm'
                 }`}
               >
                 {isStarting ? (
@@ -781,49 +827,49 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
         {/* RIGHT CARD: "WHAT WILL BE CHECKED" */}
         <div
           className={`p-5 rounded-[8px] border space-y-4 ${
-            isLight ? 'bg-white border-slate-200' : 'bg-[#131315] border-[#26262a]'
+            isLight ? 'bg-white border-slate-200 shadow-sm text-slate-900' : 'bg-[#131315] border-[#26262a] text-[#ededed]'
           }`}
         >
-          <div className="flex items-center gap-2 pb-2 border-b border-[#26262a]">
-            <Shield className="w-4 h-4 text-[#e8ff59]" />
+          <div className={`flex items-center gap-2 pb-2 border-b ${isLight ? 'border-slate-200' : 'border-[#26262a]'}`}>
+            <Shield className={`w-4 h-4 ${isLight ? 'text-slate-700' : 'text-zinc-300'}`} />
             <h3 className={`text-xs font-semibold uppercase tracking-wider ${isLight ? 'text-slate-900' : 'text-[#ededed]'}`}>
               Automated Integrity Checks
             </h3>
           </div>
 
-          <p className="text-[11px] text-[#9a9aa2] leading-relaxed">
+          <p className={`text-[11px] leading-relaxed ${isLight ? 'text-slate-500' : 'text-[#9a9aa2]'}`}>
             Every recording undergoes five deterministic verification tests. Here is what each check proves and does not prove:
           </p>
 
           <div className="space-y-3 text-[11px]">
-            <div className="p-2.5 rounded-[4px] bg-[#0b0b0c] border border-[#26262a]">
-              <span className="font-semibold text-[#ededed] block">1. Spoken Challenge Code</span>
-              <p className="text-emerald-400 mt-0.5">✓ Proves live human presence at session start.</p>
-              <p className="text-[#9a9aa2]">✗ Does not prove continued gameplay throughout match.</p>
+            <div className={`p-2.5 rounded-[4px] border ${isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#0b0b0c] border-[#26262a]'}`}>
+              <span className={`font-semibold block ${isLight ? 'text-slate-900' : 'text-[#ededed]'}`}>1. Spoken Challenge Code</span>
+              <p className={`mt-0.5 ${isLight ? 'text-slate-700 font-medium' : 'text-zinc-300'}`}>✓ Proves live human presence at session start.</p>
+              <p className={isLight ? 'text-slate-500' : 'text-[#9a9aa2]'}>✗ Does not prove continued gameplay throughout match.</p>
             </div>
 
-            <div className="p-2.5 rounded-[4px] bg-[#0b0b0c] border border-[#26262a]">
-              <span className="font-semibold text-[#ededed] block">2. Chunk Delivery Lifecycle</span>
-              <p className="text-emerald-400 mt-0.5">✓ Proves chunks streamed sequentially in real time.</p>
-              <p className="text-[#9a9aa2]">✗ Does not rule out hardware capture-card passthroughs.</p>
+            <div className={`p-2.5 rounded-[4px] border ${isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#0b0b0c] border-[#26262a]'}`}>
+              <span className={`font-semibold block ${isLight ? 'text-slate-900' : 'text-[#ededed]'}`}>2. Chunk Delivery Lifecycle</span>
+              <p className={`mt-0.5 ${isLight ? 'text-slate-700 font-medium' : 'text-zinc-300'}`}>✓ Proves chunks streamed sequentially in real time.</p>
+              <p className={isLight ? 'text-slate-500' : 'text-[#9a9aa2]'}>✗ Does not rule out hardware capture-card passthroughs.</p>
             </div>
 
-            <div className="p-2.5 rounded-[4px] bg-[#0b0b0c] border border-[#26262a]">
-              <span className="font-semibold text-[#ededed] block">3. FFprobe Stream Telemetry</span>
-              <p className="text-emerald-400 mt-0.5">✓ Validates resolution, steady 30+ fps, and codecs.</p>
-              <p className="text-[#9a9aa2]">✗ Does not verify in-game resolution stretch factors.</p>
+            <div className={`p-2.5 rounded-[4px] border ${isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#0b0b0c] border-[#26262a]'}`}>
+              <span className={`font-semibold block ${isLight ? 'text-slate-900' : 'text-[#ededed]'}`}>3. FFprobe Stream Telemetry</span>
+              <p className={`mt-0.5 ${isLight ? 'text-slate-700 font-medium' : 'text-zinc-300'}`}>✓ Validates resolution, steady 30+ fps, and codecs.</p>
+              <p className={isLight ? 'text-slate-500' : 'text-[#9a9aa2]'}>✗ Does not verify in-game resolution stretch factors.</p>
             </div>
 
-            <div className="p-2.5 rounded-[4px] bg-[#0b0b0c] border border-[#26262a]">
-              <span className="font-semibold text-[#ededed] block">4. Duplicate Fingerprint Match</span>
-              <p className="text-emerald-400 mt-0.5">✓ Guarantees clip has not been submitted by others.</p>
-              <p className="text-[#9a9aa2]">✗ Does not prevent private offline re-recordings.</p>
+            <div className={`p-2.5 rounded-[4px] border ${isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#0b0b0c] border-[#26262a]'}`}>
+              <span className={`font-semibold block ${isLight ? 'text-slate-900' : 'text-[#ededed]'}`}>4. Duplicate Fingerprint Match</span>
+              <p className={`mt-0.5 ${isLight ? 'text-slate-700 font-medium' : 'text-zinc-300'}`}>✓ Guarantees clip has not been submitted by others.</p>
+              <p className={isLight ? 'text-slate-500' : 'text-[#9a9aa2]'}>✗ Does not prevent private offline re-recordings.</p>
             </div>
 
-            <div className="p-2.5 rounded-[4px] bg-[#0b0b0c] border border-[#26262a]">
-              <span className="font-semibold text-[#ededed] block">5. Display Surface & Continuity</span>
-              <p className="text-emerald-400 mt-0.5">✓ Confirms full monitor was shared without early stop.</p>
-              <p className="text-[#9a9aa2]">✗ Does not detect secondary physical monitor usage.</p>
+            <div className={`p-2.5 rounded-[4px] border ${isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#0b0b0c] border-[#26262a]'}`}>
+              <span className={`font-semibold block ${isLight ? 'text-slate-900' : 'text-[#ededed]'}`}>5. Display Surface & Continuity</span>
+              <p className={`mt-0.5 ${isLight ? 'text-slate-700 font-medium' : 'text-zinc-300'}`}>✓ Confirms full monitor was shared without early stop.</p>
+              <p className={isLight ? 'text-slate-500' : 'text-[#9a9aa2]'}>✗ Does not detect secondary physical monitor usage.</p>
             </div>
           </div>
         </div>
@@ -832,28 +878,28 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
       {/* MY RECORDINGS TABLE */}
       <div
         className={`p-5 rounded-[8px] border transition-colors ${
-          isLight ? 'bg-white border-slate-200' : 'bg-[#131315] border-[#26262a]'
+          isLight ? 'bg-white border-slate-200 shadow-sm text-slate-900' : 'bg-[#131315] border-[#26262a] text-[#ededed]'
         }`}
       >
-        <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#26262a]">
+        <div className={`flex items-center justify-between pb-3 mb-4 border-b ${isLight ? 'border-slate-200' : 'border-[#26262a]'}`}>
           <div>
             <h2 className={`text-sm font-semibold ${isLight ? 'text-slate-900' : 'text-[#ededed]'}`}>
               My Anti-Cheat Recordings
             </h2>
-            <p className="text-[11px] text-[#9a9aa2]">
+            <p className={`text-[11px] ${isLight ? 'text-slate-500' : 'text-[#9a9aa2]'}`}>
               Historical gameplay sessions stored in encrypted server vaults
             </p>
           </div>
-          <span className="text-xs font-mono text-[#9a9aa2]">
+          <span className={`text-xs font-mono ${isLight ? 'text-slate-500' : 'text-[#9a9aa2]'}`}>
             {recordings.length} session{recordings.length !== 1 ? 's' : ''}
           </span>
         </div>
 
         {recordings.length === 0 ? (
           <div className="text-center py-12">
-            <Video className="w-10 h-10 text-[#9a9aa2] mx-auto mb-2 opacity-40" />
-            <h4 className="text-sm font-semibold text-[#ededed]">No recordings found</h4>
-            <p className="text-xs text-[#9a9aa2] max-w-sm mx-auto mt-1">
+            <Video className={`w-10 h-10 mx-auto mb-2 opacity-30 ${isLight ? 'text-slate-400' : 'text-[#9a9aa2]'}`} />
+            <h4 className={`text-sm font-semibold ${isLight ? 'text-slate-800' : 'text-[#ededed]'}`}>No recordings found</h4>
+            <p className={`text-xs max-w-sm mx-auto mt-1 ${isLight ? 'text-slate-500' : 'text-[#9a9aa2]'}`}>
               Start your first anti-cheat verified session above. All stream chunks and audio checks will appear here automatically.
             </p>
           </div>
@@ -861,7 +907,7 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-[#26262a] text-[#9a9aa2] font-mono text-[11px] uppercase">
+                <tr className={`border-b font-mono text-[11px] uppercase ${isLight ? 'border-slate-200 text-slate-500' : 'border-[#26262a] text-[#9a9aa2]'}`}>
                   <th className="pb-2.5 pr-4">Session Date</th>
                   <th className="pb-2.5 px-4">Duration</th>
                   <th className="pb-2.5 px-4">Capture Mode</th>
@@ -872,7 +918,7 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
                   <th className="pb-2.5 pl-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#26262a]/60">
+              <tbody className={`divide-y ${isLight ? 'divide-slate-200' : 'divide-[#26262a]/60'}`}>
                 {recordings.map(s => {
                   const passedChecks = s.checks.filter(c => c.status === 'passed').length;
                   const warningChecks = s.checks.filter(c => c.status === 'warning').length;
@@ -880,8 +926,8 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
                   const activeShare = s.shares.find(sh => sh.is_active);
 
                   return (
-                    <tr key={s.id} className="hover:bg-[#0b0b0c]/40 transition-colors">
-                      <td className="py-3 pr-4 font-mono text-[11px] text-[#ededed]">
+                    <tr key={s.id} className={`transition-colors ${isLight ? 'hover:bg-slate-50' : 'hover:bg-white/5'}`}>
+                      <td className={`py-3 pr-4 font-mono text-[11px] font-medium ${isLight ? 'text-slate-900' : 'text-[#ededed]'}`}>
                         {new Date(s.started_at).toLocaleString([], {
                           month: 'short',
                           day: 'numeric',
@@ -890,22 +936,28 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
                         })}
                       </td>
 
-                      <td className="py-3 px-4 font-mono text-[11px] text-[#9a9aa2]">
+                      <td className={`py-3 px-4 font-mono text-[11px] ${isLight ? 'text-slate-600' : 'text-[#9a9aa2]'}`}>
                         {formatTime(s.duration_sec)}
                       </td>
 
                       <td className="py-3 px-4">
-                        <span className="text-[11px] font-mono uppercase px-2 py-0.5 rounded bg-[#0b0b0c] border border-[#26262a] text-[#ededed]">
+                        <span className={`text-[11px] font-mono uppercase px-2 py-0.5 rounded border ${
+                          isLight ? 'bg-slate-100 border-slate-200 text-slate-700' : 'bg-[#0b0b0c] border-[#26262a] text-[#ededed]'
+                        }`}>
                           {s.mode === 'dual' ? 'Dual (Screen+Cam)' : 'Screen Only'}
                         </span>
                       </td>
 
                       <td className="py-3 px-4">
                         <span
-                          className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded font-semibold ${
+                          className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded font-semibold border ${
                             s.label === 'live_recorded'
-                              ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
-                              : 'bg-zinc-800 text-zinc-400 border border-zinc-700'
+                              ? isLight
+                                ? 'bg-slate-100 text-slate-800 border-slate-300'
+                                : 'bg-zinc-800 text-zinc-200 border-zinc-700'
+                              : isLight
+                              ? 'bg-slate-50 text-slate-500 border-slate-200'
+                              : 'bg-zinc-900 text-zinc-400 border-zinc-800'
                           }`}
                         >
                           {s.label}
@@ -914,14 +966,16 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
 
                       <td className="py-3 px-4">
                         <span
-                          className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded font-semibold ${
+                          className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded font-semibold border ${
                             s.status === 'completed'
-                              ? 'bg-emerald-500/10 text-emerald-400'
-                              : s.status === 'incomplete'
-                              ? 'bg-amber-500/10 text-amber-400'
+                              ? isLight
+                                ? 'bg-slate-100 text-slate-800 border-slate-300'
+                                : 'bg-zinc-800 text-zinc-200 border-zinc-700'
                               : s.status === 'recording'
-                              ? 'bg-red-500/10 text-red-400 animate-pulse'
-                              : 'bg-zinc-800 text-zinc-400'
+                              ? 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/30 animate-pulse'
+                              : isLight
+                              ? 'bg-slate-100 text-slate-600 border-slate-200'
+                              : 'bg-zinc-900 text-zinc-400 border-zinc-800'
                           }`}
                         >
                           {s.status}
@@ -931,17 +985,17 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
                       <td className="py-3 px-4 font-mono text-[11px]">
                         <div className="flex items-center gap-1.5">
                           {passedChecks > 0 && (
-                            <span className="text-emerald-400" title={`${passedChecks} checks passed`}>
+                            <span className={isLight ? 'text-slate-800 font-semibold' : 'text-zinc-200 font-semibold'} title={`${passedChecks} checks passed`}>
                               ✓{passedChecks}
                             </span>
                           )}
                           {warningChecks > 0 && (
-                            <span className="text-amber-400" title={`${warningChecks} checks warning`}>
+                            <span className="text-amber-600 dark:text-amber-400 font-semibold" title={`${warningChecks} checks warning`}>
                               !{warningChecks}
                             </span>
                           )}
                           {failedChecks > 0 && (
-                            <span className="text-red-400" title={`${failedChecks} checks failed`}>
+                            <span className="text-red-600 dark:text-red-400 font-semibold" title={`${failedChecks} checks failed`}>
                               ✗{failedChecks}
                             </span>
                           )}
@@ -951,19 +1005,21 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
                       <td className="py-3 px-4 text-[11px]">
                         {activeShare ? (
                           <div className="flex items-center gap-1.5">
-                            <span className="px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/30 font-mono text-[10px]">
+                            <span className={`px-2 py-0.5 rounded border font-mono text-[10px] ${
+                              isLight ? 'bg-slate-100 border-slate-300 text-slate-800' : 'bg-zinc-800 border-zinc-700 text-zinc-200'
+                            }`}>
                               Shared: {activeShare.org_name || `Org #${activeShare.org_id}`}
                             </span>
                             <button
                               type="button"
                               onClick={() => handleRevokeShare(s.id, activeShare.org_id)}
-                              className="text-[10px] text-red-400 hover:underline"
+                              className={`text-[10px] hover:underline cursor-pointer ${isLight ? 'text-slate-600' : 'text-zinc-400'}`}
                             >
                               Revoke
                             </button>
                           </div>
                         ) : (
-                          <span className="text-[#9a9aa2] font-mono text-[10px] flex items-center gap-1">
+                          <span className={`font-mono text-[10px] flex items-center gap-1 ${isLight ? 'text-slate-500' : 'text-[#9a9aa2]'}`}>
                             <Lock className="w-3 h-3" /> Private
                           </span>
                         )}
@@ -977,7 +1033,11 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
                               setSelectedSession(s);
                               setDetailModalOpen(true);
                             }}
-                            className="p-1.5 rounded bg-[#0b0b0c] border border-[#26262a] text-[#ededed] hover:border-[#e8ff59] transition-colors"
+                            className={`p-1.5 rounded border transition-colors cursor-pointer ${
+                              isLight
+                                ? 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-800'
+                                : 'bg-[#0b0b0c] hover:bg-[#19191d] border-[#26262a] text-[#ededed]'
+                            }`}
                             title="Play & View Checks"
                           >
                             <Eye className="w-3.5 h-3.5" />
@@ -985,7 +1045,11 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
                           <button
                             type="button"
                             onClick={() => setShareModalSession(s)}
-                            className="p-1.5 rounded bg-[#0b0b0c] border border-[#26262a] text-blue-400 hover:border-blue-400 transition-colors"
+                            className={`p-1.5 rounded border transition-colors cursor-pointer ${
+                              isLight
+                                ? 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-800'
+                                : 'bg-[#0b0b0c] hover:bg-[#19191d] border-[#26262a] text-zinc-300'
+                            }`}
                             title="Share with Org"
                           >
                             <Share2 className="w-3.5 h-3.5" />
@@ -993,7 +1057,11 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
                           <button
                             type="button"
                             onClick={() => setDeletingId(s.id)}
-                            className="p-1.5 rounded bg-[#0b0b0c] border border-[#26262a] text-red-400 hover:border-red-400 transition-colors"
+                            className={`p-1.5 rounded border transition-colors cursor-pointer ${
+                              isLight
+                                ? 'bg-slate-100 hover:bg-red-50 border-slate-300 text-red-600'
+                                : 'bg-[#0b0b0c] hover:bg-red-950/30 border-[#26262a] text-red-400'
+                            }`}
                             title="Delete Session"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -1011,22 +1079,24 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
 
       {/* DETAIL & PLAYBACK MODAL */}
       {detailModalOpen && selectedSession && (
-        <div className="fixed inset-0 z-50 bg-black/85 flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-[#131315] border border-[#26262a] rounded-[8px] max-w-4xl w-full p-6 space-y-6 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+          <div className={`rounded-[8px] max-w-4xl w-full p-6 space-y-6 max-h-[90vh] overflow-y-auto border ${
+            isLight ? 'bg-white border-slate-300 text-slate-900 shadow-2xl' : 'bg-[#131315] border-[#26262a] text-[#ededed]'
+          }`}>
             {/* Modal Header */}
-            <div className="flex items-center justify-between pb-3 border-b border-[#26262a]">
+            <div className={`flex items-center justify-between pb-3 border-b ${isLight ? 'border-slate-200' : 'border-[#26262a]'}`}>
               <div>
-                <span className="text-[10px] font-mono uppercase text-[#e8ff59] font-semibold">
+                <span className={`text-[10px] font-mono uppercase font-semibold ${isLight ? 'text-slate-600' : 'text-zinc-400'}`}>
                   Recording Telemetry Dossier #{selectedSession.id}
                 </span>
-                <h3 className="text-lg font-bold text-[#ededed]">
+                <h3 className={`text-lg font-bold ${isLight ? 'text-slate-900' : 'text-[#ededed]'}`}>
                   Session Attestation & Video Playback
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setDetailModalOpen(false)}
-                className="text-[#9a9aa2] hover:text-white text-sm"
+                className={`text-sm cursor-pointer ${isLight ? 'text-slate-500 hover:text-slate-900' : 'text-[#9a9aa2] hover:text-white'}`}
               >
                 ✕ Close
               </button>
@@ -1034,10 +1104,12 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
 
             {/* Synchronized Playback Control Toolbar */}
             {selectedSession.final_screen_path && selectedSession.final_camera_path && (
-              <div className="flex items-center justify-between p-3 rounded-[6px] bg-[#0b0b0c] border border-[#26262a]">
+              <div className={`flex items-center justify-between p-3 rounded-[6px] border ${
+                isLight ? 'bg-slate-50 border-slate-200 text-slate-800' : 'bg-[#0b0b0c] border-[#26262a] text-[#ededed]'
+              }`}>
                 <div className="flex items-center gap-2">
-                  <Play className="w-4 h-4 text-[#e8ff59]" />
-                  <span className="text-xs font-mono font-bold text-[#ededed]">
+                  <Play className="w-4 h-4 fill-current opacity-80" />
+                  <span className="text-xs font-mono font-bold">
                     Dual-Track Synchronized Playback
                   </span>
                 </div>
@@ -1058,9 +1130,11 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
                       }
                     }
                   }}
-                  className="px-3 py-1.5 rounded-[4px] text-xs font-mono font-bold bg-[#e8ff59] hover:bg-[#d4eb44] text-black flex items-center gap-1.5 transition-colors cursor-pointer"
+                  className={`px-3 py-1.5 rounded-[4px] text-xs font-mono font-bold flex items-center gap-1.5 transition-colors cursor-pointer ${
+                    isLight ? 'bg-slate-900 hover:bg-slate-800 text-white' : 'bg-white hover:bg-slate-200 text-black'
+                  }`}
                 >
-                  <Play className="w-3.5 h-3.5 fill-black" />
+                  <Play className="w-3.5 h-3.5 fill-current" />
                   <span>Sync Play / Restart Both</span>
                 </button>
               </div>
@@ -1070,16 +1144,20 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[11px] font-mono text-[#9a9aa2] uppercase">
+                  <span className={`text-[11px] font-mono uppercase ${isLight ? 'text-slate-600' : 'text-[#9a9aa2]'}`}>
                     Screen Stream Capture
                   </span>
                   {selectedSession.final_screen_path && (
-                    <span className="text-[10px] font-mono text-[#e8ff59] bg-[#e8ff59]/10 px-2 py-0.5 rounded border border-[#e8ff59]/20">
+                    <span className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
+                      isLight ? 'bg-slate-100 text-slate-700 border-slate-300' : 'bg-zinc-800 text-zinc-300 border-zinc-700'
+                    }`}>
                       Primary Gameplay Stream
                     </span>
                   )}
                 </div>
-                <div className="aspect-video bg-black rounded border border-[#26262a] overflow-hidden flex items-center justify-center relative">
+                <div className={`aspect-video bg-black rounded border overflow-hidden flex items-center justify-center relative ${
+                  isLight ? 'border-slate-300' : 'border-[#26262a]'
+                }`}>
                   {selectedSession.final_screen_path ? (
                     <video
                       id="detail-modal-screen-video"
@@ -1091,23 +1169,27 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
                       className="w-full h-full object-contain bg-black"
                     />
                   ) : (
-                    <span className="text-xs text-[#9a9aa2]">No screen video assembled</span>
+                    <span className={`text-xs ${isLight ? 'text-slate-400' : 'text-[#9a9aa2]'}`}>No screen video assembled</span>
                   )}
                 </div>
               </div>
 
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[11px] font-mono text-[#9a9aa2] uppercase">
+                  <span className={`text-[11px] font-mono uppercase ${isLight ? 'text-slate-600' : 'text-[#9a9aa2]'}`}>
                     Webcam Stream Capture
                   </span>
                   {selectedSession.final_camera_path && (
-                    <span className="text-[10px] font-mono text-[#e8ff59] bg-[#e8ff59]/10 px-2 py-0.5 rounded border border-[#e8ff59]/20">
+                    <span className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
+                      isLight ? 'bg-slate-100 text-slate-700 border-slate-300' : 'bg-zinc-800 text-zinc-300 border-zinc-700'
+                    }`}>
                       Facial Telemetry Stream
                     </span>
                   )}
                 </div>
-                <div className="aspect-video bg-black rounded border border-[#26262a] overflow-hidden flex items-center justify-center relative">
+                <div className={`aspect-video bg-black rounded border overflow-hidden flex items-center justify-center relative ${
+                  isLight ? 'border-slate-300' : 'border-[#26262a]'
+                }`}>
                   {selectedSession.final_camera_path ? (
                     <video
                       id="detail-modal-cam-video"
@@ -1119,7 +1201,7 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
                       className="w-full h-full object-contain bg-black"
                     />
                   ) : (
-                    <span className="text-xs text-[#9a9aa2]">
+                    <span className={`text-xs ${isLight ? 'text-slate-400' : 'text-[#9a9aa2]'}`}>
                       {selectedSession.mode === 'screen_only' ? 'Screen-only mode (No webcam recorded)' : 'No camera video assembled'}
                     </span>
                   )}
@@ -1129,42 +1211,48 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
 
             {/* Integrity Check Results */}
             <div className="space-y-3">
-              <h4 className="text-xs font-mono uppercase text-[#9a9aa2] font-semibold">
+              <h4 className={`text-xs font-mono uppercase font-semibold ${isLight ? 'text-slate-600' : 'text-[#9a9aa2]'}`}>
                 Integrity Checks Evaluation
               </h4>
               <div className="space-y-2">
                 {selectedSession.checks.map(check => (
                   <div
                     key={check.id}
-                    className="p-3 rounded bg-[#0b0b0c] border border-[#26262a] flex items-start gap-3"
+                    className={`p-3 rounded border flex items-start gap-3 ${
+                      isLight ? 'bg-slate-50 border-slate-200 text-slate-800' : 'bg-[#0b0b0c] border-[#26262a] text-[#ededed]'
+                    }`}
                   >
                     {check.status === 'passed' ? (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                      <CheckCircle2 className={`w-4 h-4 shrink-0 mt-0.5 ${isLight ? 'text-slate-800' : 'text-zinc-200'}`} />
                     ) : check.status === 'warning' ? (
-                      <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                      <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
                     ) : (
-                      <XCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+                      <XCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
                     )}
                     <div className="flex-1 text-xs">
                       <div className="flex items-center justify-between">
-                        <span className="font-semibold text-[#ededed] capitalize">
+                        <span className={`font-semibold capitalize ${isLight ? 'text-slate-900' : 'text-[#ededed]'}`}>
                           {check.check_type.replace(/_/g, ' ')}
                         </span>
                         <span
-                          className={`text-[10px] font-mono uppercase px-1.5 py-0.5 rounded font-semibold ${
+                          className={`text-[10px] font-mono uppercase px-1.5 py-0.5 rounded font-semibold border ${
                             check.status === 'passed'
-                              ? 'bg-emerald-500/10 text-emerald-400'
+                              ? isLight
+                                ? 'bg-slate-200/60 text-slate-800 border-slate-300'
+                                : 'bg-zinc-800 text-zinc-300 border-zinc-700'
                               : check.status === 'warning'
-                              ? 'bg-amber-500/10 text-amber-400'
-                              : 'bg-red-500/10 text-red-400'
+                              ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30'
+                              : 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/30'
                           }`}
                         >
                           {check.status}
                         </span>
                       </div>
-                      <p className="text-[#9a9aa2] text-[11px] mt-0.5">{check.summary}</p>
+                      <p className={`text-[11px] mt-0.5 ${isLight ? 'text-slate-600' : 'text-[#9a9aa2]'}`}>{check.summary}</p>
                       {check.details_json && (
-                        <pre className="mt-1.5 p-2 bg-black/60 rounded text-[10px] font-mono text-zinc-400 overflow-x-auto">
+                        <pre className={`mt-1.5 p-2 rounded text-[10px] font-mono overflow-x-auto ${
+                          isLight ? 'bg-slate-100 text-slate-800 border border-slate-200' : 'bg-black/60 text-zinc-400'
+                        }`}>
                           {JSON.stringify(check.details_json, null, 2)}
                         </pre>
                       )}
@@ -1175,14 +1263,18 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
             </div>
 
             {/* Footer Actions */}
-            <div className="flex justify-between items-center pt-3 border-t border-[#26262a]">
-              <span className="text-[11px] font-mono text-[#9a9aa2]">
+            <div className={`flex justify-between items-center pt-3 border-t ${isLight ? 'border-slate-200' : 'border-[#26262a]'}`}>
+              <span className={`text-[11px] font-mono ${isLight ? 'text-slate-500' : 'text-[#9a9aa2]'}`}>
                 Token: {selectedSession.session_token.slice(0, 16)}...
               </span>
               <button
                 type="button"
                 onClick={() => setDetailModalOpen(false)}
-                className="px-4 py-1.5 rounded bg-[#0b0b0c] border border-[#26262a] text-xs text-white hover:bg-[#19191d]"
+                className={`px-4 py-1.5 rounded text-xs font-semibold cursor-pointer border ${
+                  isLight
+                    ? 'bg-slate-100 border-slate-300 text-slate-800 hover:bg-slate-200'
+                    : 'bg-[#0b0b0c] border-[#26262a] text-white hover:bg-[#19191d]'
+                }`}
               >
                 Done
               </button>
@@ -1193,19 +1285,23 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
 
       {/* SHARE MODAL */}
       {shareModalSession && (
-        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
-          <div className="bg-[#131315] border border-[#26262a] rounded-[8px] max-w-md w-full p-6 space-y-4">
-            <h3 className="text-base font-semibold text-[#ededed]">Share Recording with Organization</h3>
-            <p className="text-xs text-[#9a9aa2]">
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className={`rounded-[8px] max-w-md w-full p-6 space-y-4 border ${
+            isLight ? 'bg-white border-slate-300 text-slate-900 shadow-2xl' : 'bg-[#131315] border-[#26262a] text-[#ededed]'
+          }`}>
+            <h3 className={`text-base font-semibold ${isLight ? 'text-slate-900' : 'text-[#ededed]'}`}>Share Recording with Organization</h3>
+            <p className={`text-xs ${isLight ? 'text-slate-500' : 'text-[#9a9aa2]'}`}>
               Select an esports organization to grant trial scouting access to session #{shareModalSession.id}. You can revoke access at any time.
             </p>
 
             <div>
-              <label className="text-xs text-[#9a9aa2] block mb-1">Target Organization</label>
+              <label className={`text-xs block mb-1 ${isLight ? 'text-slate-600 font-medium' : 'text-[#9a9aa2]'}`}>Target Organization</label>
               <select
                 value={selectedOrgId}
                 onChange={e => setSelectedOrgId(Number(e.target.value))}
-                className="w-full p-2 bg-[#0b0b0c] border border-[#26262a] rounded text-xs text-[#ededed] focus:outline-none"
+                className={`w-full p-2 rounded text-xs focus:outline-none border ${
+                  isLight ? 'bg-slate-50 border-slate-300 text-slate-900' : 'bg-[#0b0b0c] border-[#26262a] text-[#ededed]'
+                }`}
               >
                 <option value={1}>Sentinels Esports (Org #1)</option>
                 <option value={2}>Cloud9 Esports (Org #2)</option>
@@ -1216,7 +1312,11 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
               <button
                 type="button"
                 onClick={() => setShareModalSession(null)}
-                className="px-3 py-1.5 rounded border border-[#26262a] text-xs text-[#9a9aa2] hover:bg-[#19191d]"
+                className={`px-3 py-1.5 rounded border text-xs cursor-pointer ${
+                  isLight
+                    ? 'border-slate-300 text-slate-700 hover:bg-slate-100'
+                    : 'border-[#26262a] text-[#9a9aa2] hover:bg-[#19191d]'
+                }`}
               >
                 Cancel
               </button>
@@ -1224,7 +1324,11 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
                 type="button"
                 disabled={isSharing}
                 onClick={handleShareSubmit}
-                className="px-4 py-1.5 rounded bg-[#e8ff59] text-[#0b0b0c] text-xs font-semibold hover:bg-[#d6f03d]"
+                className={`px-4 py-1.5 rounded text-xs font-semibold cursor-pointer ${
+                  isLight
+                    ? 'bg-slate-900 hover:bg-slate-800 text-white'
+                    : 'bg-white hover:bg-slate-200 text-black'
+                }`}
               >
                 {isSharing ? 'Sharing...' : 'Confirm Share'}
               </button>
@@ -1235,26 +1339,32 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
 
       {/* DELETE CONFIRMATION MODAL */}
       {deletingId && (
-        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
-          <div className="bg-[#131315] border border-[#26262a] rounded-[8px] max-w-sm w-full p-5 space-y-3">
-            <h3 className="text-sm font-semibold text-red-400 flex items-center gap-2">
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className={`rounded-[8px] max-w-sm w-full p-5 space-y-3 border ${
+            isLight ? 'bg-white border-slate-300 text-slate-900 shadow-2xl' : 'bg-[#131315] border-[#26262a] text-[#ededed]'
+          }`}>
+            <h3 className="text-sm font-semibold text-red-600 dark:text-red-400 flex items-center gap-2">
               <Trash2 className="w-4 h-4" /> Permanently Delete Recording?
             </h3>
-            <p className="text-xs text-[#9a9aa2]">
+            <p className={`text-xs ${isLight ? 'text-slate-500' : 'text-[#9a9aa2]'}`}>
               This will permanently delete session #{deletingId}, all assembled screen and webcam video files, stream chunks, and derived integrity checks from server vaults. This cannot be undone.
             </p>
             <div className="flex items-center justify-end gap-2 pt-2">
               <button
                 type="button"
                 onClick={() => setDeletingId(null)}
-                className="px-3 py-1.5 rounded border border-[#26262a] text-xs text-[#9a9aa2] hover:bg-[#19191d]"
+                className={`px-3 py-1.5 rounded border text-xs cursor-pointer ${
+                  isLight
+                    ? 'border-slate-300 text-slate-700 hover:bg-slate-100'
+                    : 'border-[#26262a] text-[#9a9aa2] hover:bg-[#19191d]'
+                }`}
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={() => handleDelete(deletingId)}
-                className="px-4 py-1.5 rounded bg-red-600 text-white text-xs font-semibold hover:bg-red-500"
+                className="px-4 py-1.5 rounded bg-red-600 text-white text-xs font-semibold hover:bg-red-500 cursor-pointer"
               >
                 Delete Forever
               </button>
