@@ -208,27 +208,33 @@ export function GameAuthorityModal({
         >
           <div className="flex items-center gap-3">
             <div
-              className={`w-8 h-8 rounded-[6px] font-black text-xs flex items-center justify-center ${config.badgeBg} ${config.badgeBorder} border ${config.textColor}`}
+              className={`w-8 h-8 rounded-[6px] font-black text-xs flex items-center justify-center border ${
+                isLight
+                  ? 'bg-slate-100 text-slate-800 border-slate-300'
+                  : 'bg-slate-800 text-slate-100 border-slate-700'
+              }`}
             >
               {config.avatarLetter}
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#9a9aa2]">
+                <span className={`text-xs font-mono font-bold uppercase tracking-wider ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
                   {config.company}
                 </span>
-                <span className="inline-flex items-center gap-1 text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
+                <span className="inline-flex items-center gap-1 text-[10px] font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
                   <Lock className="w-2.5 h-2.5" /> SSL 256-Bit
                 </span>
               </div>
-              <h3 className="text-sm font-bold">{config.name}</h3>
+              <h3 className={`text-sm font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>{config.name}</h3>
             </div>
           </div>
 
           <button
             type="button"
             onClick={onClose}
-            className="p-1 rounded text-[#9a9aa2] hover:text-white transition-colors cursor-pointer"
+            className={`p-1.5 rounded transition-colors cursor-pointer ${
+              isLight ? 'text-slate-400 hover:text-slate-700 hover:bg-slate-100' : 'text-slate-400 hover:text-white hover:bg-slate-800'
+            }`}
           >
             <X className="w-4 h-4" />
           </button>
@@ -236,33 +242,39 @@ export function GameAuthorityModal({
 
         {/* Modal Body */}
         <div className="p-6 space-y-5">
-          {/* Simulated Gateway URL Pill */}
-          <div
-            className={`p-2 rounded-[6px] text-[11px] font-mono flex items-center justify-between border ${
+          {/* Gateway URL - Clickable Link */}
+          <a
+            href={config.gateway}
+            target="_blank"
+            rel="noopener noreferrer"
+            title={`Open ${config.gateway} in a new tab`}
+            className={`p-2.5 rounded-[6px] text-[11px] font-mono flex items-center justify-between border transition-all cursor-pointer group ${
               isLight
-                ? 'bg-slate-100 border-slate-200 text-slate-600'
-                : 'bg-[#0b0b0c] border-[#26262a] text-[#9a9aa2]'
+                ? 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-700'
+                : 'bg-[#0b0b0c] hover:bg-[#151518] border-[#26262a] text-slate-300'
             }`}
           >
             <div className="flex items-center gap-2 truncate">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
-              <span className="truncate">{config.gateway}</span>
+              <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+              <span className="truncate group-hover:underline text-xs">{config.gateway}</span>
             </div>
-            <ExternalLink className="w-3.5 h-3.5 shrink-0 opacity-60 ml-2" />
-          </div>
+            <ExternalLink className="w-3.5 h-3.5 shrink-0 opacity-60 group-hover:opacity-100 transition-opacity ml-2 text-emerald-500" />
+          </a>
 
           {/* Verification Pipeline Steps */}
           <div className="space-y-2.5">
             <div className="flex items-center justify-between text-xs font-mono">
-              <span className="text-[#9a9aa2] uppercase font-bold">Authority Attestation Pipeline</span>
-              <span className="text-[#e8ff59]">
+              <span className={`uppercase font-bold ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                Authority Attestation Pipeline
+              </span>
+              <span>
                 {isVerifying ? (
-                  <span className="flex items-center gap-1.5">
-                    <RefreshCw className="w-3 h-3 animate-spin text-[#e8ff59]" />
+                  <span className={`flex items-center gap-1.5 ${isLight ? 'text-slate-700 font-medium' : 'text-slate-300 font-medium'}`}>
+                    <RefreshCw className="w-3 h-3 animate-spin text-emerald-500" />
                     Verifying Credentials ({step}/3)...
                   </span>
                 ) : (
-                  <span className="text-emerald-400 flex items-center gap-1">
+                  <span className="text-emerald-500 flex items-center gap-1 font-semibold">
                     <CheckCircle2 className="w-3.5 h-3.5" /> 100% Attested
                   </span>
                 )}
@@ -281,22 +293,22 @@ export function GameAuthorityModal({
                     className={`p-2.5 rounded-[6px] border text-xs transition-colors flex items-start gap-3 ${
                       isPassed
                         ? isLight
-                          ? 'bg-emerald-50/50 border-emerald-200 text-slate-800'
-                          : 'bg-emerald-950/10 border-emerald-500/20 text-[#ededed]'
+                          ? 'bg-emerald-50/40 border-emerald-200 text-slate-800'
+                          : 'bg-emerald-950/20 border-emerald-500/25 text-slate-200'
                         : isCurrent
                         ? isLight
-                          ? 'bg-blue-50/50 border-blue-200 text-slate-800 animate-pulse'
-                          : 'bg-[#18181b] border-[#e8ff59]/30 text-[#ededed]'
+                          ? 'bg-slate-100 border-slate-300 text-slate-900'
+                          : 'bg-[#18181b] border-slate-700 text-white'
                         : isLight
                         ? 'bg-slate-50 border-slate-200 text-slate-400 opacity-60'
-                        : 'bg-[#0b0b0c] border-[#26262a] text-[#9a9aa2] opacity-60'
+                        : 'bg-[#0b0b0c] border-[#26262a] text-slate-500 opacity-60'
                     }`}
                   >
                     <div className="shrink-0 mt-0.5">
                       {isPassed ? (
-                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                        <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                       ) : isCurrent ? (
-                        <RefreshCw className="w-4 h-4 text-[#e8ff59] animate-spin" />
+                        <RefreshCw className="w-4 h-4 text-emerald-500 animate-spin" />
                       ) : (
                         <div className="w-4 h-4 rounded-full border border-current flex items-center justify-center text-[9px] font-mono">
                           {stepNum}
@@ -305,12 +317,14 @@ export function GameAuthorityModal({
                     </div>
                     <div>
                       <div className="font-bold flex items-center gap-1.5">
-                        <span>{check.title}</span>
+                        <span className={isLight ? 'text-slate-900' : 'text-white'}>{check.title}</span>
                         {isPassed && (
-                          <span className="text-[10px] font-mono text-emerald-400">PASSED</span>
+                          <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400">PASSED</span>
                         )}
                       </div>
-                      <p className="text-[11px] opacity-80 mt-0.5">{check.description}</p>
+                      <p className={`text-[11px] mt-0.5 ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
+                        {check.description}
+                      </p>
                     </div>
                   </div>
                 );
@@ -323,32 +337,36 @@ export function GameAuthorityModal({
             className={`p-4 rounded-[8px] border transition-all ${
               step === 4
                 ? isLight
-                  ? 'bg-white border-slate-300 shadow-sm'
-                  : 'bg-[#0b0b0c] border-[#26262a]'
+                  ? 'bg-slate-50/50 border-slate-300 shadow-sm'
+                  : 'bg-[#0b0b0c] border-slate-800'
                 : 'opacity-50 pointer-events-none'
             }`}
           >
-            <div className="flex items-center justify-between pb-3 border-b border-[#26262a]">
+            <div className={`flex items-center justify-between pb-3 border-b ${isLight ? 'border-slate-200' : 'border-slate-800'}`}>
               <div className="flex items-center gap-3">
                 <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-sm text-black bg-[#e8ff59] shadow-sm`}
+                  className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-sm ${
+                    isLight ? 'bg-slate-900 text-white' : 'bg-white text-slate-900'
+                  }`}
                 >
                   {config.accountHandle.slice(0, 1)}
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h4 className="text-sm font-black text-[#ededed]">{config.accountHandle}</h4>
-                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
-                      VERIFIED COMPETITOR
+                    <h4 className={`text-sm font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                      {config.accountHandle}
+                    </h4>
+                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-bold">
+                      VERIFIED
                     </span>
                   </div>
-                  <p className="text-[11px] font-mono text-[#9a9aa2]">{config.accountId}</p>
+                  <p className="text-[11px] font-mono text-slate-500">{config.accountId}</p>
                 </div>
               </div>
 
               <div className="text-right">
-                <span className="text-[10px] font-mono uppercase text-[#9a9aa2] block">Anti-Cheat Status</span>
-                <span className="text-xs font-mono font-bold text-emerald-400">
+                <span className="text-[10px] font-mono uppercase text-slate-500 block">Anti-Cheat Status</span>
+                <span className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400">
                   {config.antiCheatStatus}
                 </span>
               </div>
@@ -356,12 +374,14 @@ export function GameAuthorityModal({
 
             <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
               <div>
-                <span className="text-[10px] font-mono uppercase text-[#9a9aa2] block">Verified Rank & Tier</span>
-                <p className="font-bold text-[#ededed] mt-0.5">{config.competitiveRank}</p>
+                <span className="text-[10px] font-mono uppercase text-slate-500 block">Verified Rank & Tier</span>
+                <p className={`font-bold mt-0.5 ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                  {config.competitiveRank}
+                </p>
               </div>
               <div>
-                <span className="text-[10px] font-mono uppercase text-[#9a9aa2] block">Telemetry Record</span>
-                <p className="text-[11px] text-[#9a9aa2] mt-0.5 truncate">{config.statsDetail}</p>
+                <span className="text-[10px] font-mono uppercase text-slate-500 block">Telemetry Record</span>
+                <p className="text-[11px] text-slate-500 mt-0.5 truncate">{config.statsDetail}</p>
               </div>
             </div>
           </div>
@@ -371,10 +391,10 @@ export function GameAuthorityModal({
             className={`p-3 rounded-[6px] border text-[11px] flex items-start gap-2.5 ${
               isLight
                 ? 'bg-slate-50 border-slate-200 text-slate-600'
-                : 'bg-[#0b0b0c] border-[#26262a] text-[#9a9aa2]'
+                : 'bg-[#0b0b0c] border-[#26262a] text-slate-400'
             }`}
           >
-            <Shield className="w-4 h-4 text-[#e8ff59] shrink-0 mt-0.5" />
+            <Shield className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
             <p>
               Signing in with <strong>{config.company}</strong> grants ScoutForge read-only access to your public
               competitive profile, match telemetry, and anti-cheat clearance. Your login credentials and passwords are
@@ -396,7 +416,7 @@ export function GameAuthorityModal({
             className={`px-4 py-2 rounded-[6px] text-xs font-semibold border transition-colors cursor-pointer ${
               isLight
                 ? 'border-slate-300 text-slate-700 hover:bg-slate-200'
-                : 'border-[#26262a] text-[#9a9aa2] hover:text-white hover:bg-[#19191d]'
+                : 'border-slate-700 text-slate-300 hover:text-white hover:bg-slate-800'
             }`}
           >
             Cancel
@@ -406,7 +426,11 @@ export function GameAuthorityModal({
             type="button"
             onClick={handleAuthorizeClick}
             disabled={isVerifying || isAuthorizing}
-            className="flex-1 sm:flex-none px-6 py-2.5 rounded-[6px] text-xs font-black transition-all flex items-center justify-center gap-2 cursor-pointer bg-[#e8ff59] hover:bg-[#d4eb44] text-black shadow-md shadow-lime-900/20 disabled:opacity-50 disabled:cursor-not-allowed"
+            className={`flex-1 sm:flex-none px-6 py-2.5 rounded-[6px] text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm disabled:opacity-50 disabled:cursor-not-allowed ${
+              isLight
+                ? 'bg-slate-900 hover:bg-slate-800 text-white'
+                : 'bg-white hover:bg-slate-100 text-slate-900'
+            }`}
           >
             {isAuthorizing ? (
               <>
