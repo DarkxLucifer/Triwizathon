@@ -71,6 +71,10 @@ export const VideoPlayerModal: React.FC<VideoPlayerModalProps> = ({
     (s) => currentTime >= s.start && currentTime <= s.end
   );
 
+  const resolvedVideoSrc = clip.videoUrl?.startsWith("/uploads/")
+    ? `http://127.0.0.1:8000${clip.videoUrl}`
+    : clip.videoUrl;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-150">
       <div 
@@ -119,10 +123,10 @@ export const VideoPlayerModal: React.FC<VideoPlayerModalProps> = ({
 
         {/* Video Player Screen */}
         <div className="relative bg-black aspect-video w-full flex items-center justify-center overflow-hidden group">
-          {clip.videoUrl ? (
+          {resolvedVideoSrc ? (
             <video
               ref={videoRef}
-              src={clip.videoUrl}
+              src={resolvedVideoSrc}
               autoPlay
               controls
               loop

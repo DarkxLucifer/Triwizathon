@@ -3,19 +3,24 @@ from typing import List, Optional
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+_BACKEND_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+_DEFAULT_DB_PATH = os.path.join(_BACKEND_DIR, "scoutforge.db").replace(os.sep, "/")
+_DEFAULT_UPLOAD_DIR = os.path.join(_BACKEND_DIR, "uploads")
+
+
 class Settings(BaseSettings):
     PROJECT_NAME: str = "ScoutForge"
     SECRET_KEY: str = "scoutforge-dev-secret-key-change-for-production"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440  # 24 hours
-    DATABASE_URL: str = "sqlite:///./scoutforge.db"
+    DATABASE_URL: str = f"sqlite:///{_DEFAULT_DB_PATH}"
     PANDASCORE_API_KEY: str = "C7-JS9mtsSnbxSYr7ycz4I8ZO_S9TyPUaO_LVD9wNY-o13FD5P8"
     LEETIFY_API_KEY: Optional[str] = "9d02b2b6-d0b2-4372-bbc3-5823f9f925bc"
     GROQ_API_KEY: Optional[str] = None
     GEMINI_API_KEY: Optional[str] = None
     WHISPER_MODEL_SIZE: str = "small"
     WHISPER_DEVICE: str = "cuda"
-    UPLOAD_DIR: str = "./uploads"
+    UPLOAD_DIR: str = _DEFAULT_UPLOAD_DIR
     CORS_ORIGINS: str = "http://localhost:3000,http://127.0.0.1:3000"
 
     model_config = SettingsConfigDict(

@@ -96,6 +96,8 @@ def get_my_dossier(
             tactical_score=c.tactical_score,
             verdict=c.verdict,
             soundness_reasoning=c.soundness_reasoning,
+            transcription=c.transcription,
+            transcript_segments=c.transcript_segments_json,
             created_at=c.created_at,
         )
         for c in clips_records

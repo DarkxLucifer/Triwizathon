@@ -1745,6 +1745,34 @@ export function PlayerDashboardView({
     videoHighlightUrl: 'https://youtu.be/vortex-bgmi-highlights',
     videoClips: [
       {
+        id: "vod-cs2-1",
+        title: "CS2 Best Moments 2025 Highlights (Pro AWPer / Entry Clutch)",
+        game: "CS2",
+        videoUrl: "/videos/cs2_best_moments_2025.mp4",
+        thumbnail: "/images/games/cs2.jpg",
+        duration: "1m 15s",
+        resolution: "1080p 60fps HD",
+        tag: "AWP Highlights / Multi-Kill",
+        uploadedAt: "Today, 18:30 IST",
+        fileSize: "10.9 MB",
+        aiScore: 29.6,
+        tacticalVerdict: "Aggressive AWP angle isolation, instant flick re-frags, and high-tempo site executes from 2025 pro highlights.",
+        transcription: "Oh the timing on the Peter's. I helped out a lot. Don't gonna show Mollidoy that maybe it's easy. Mollidoy is gonna have to go for the PUN! Oh, don'ts, Chits! Mollidoy said, what are we watching? I got it. 2015 or 2016? So, yeah. Whoa! What did it come from? Yeah, hell of a low bracket run for Fury. It's a face-to-team that put them here in the first place, but they've got to get through Falcons in a third map. Kiss, kiss.",
+        transcriptSegments: [
+          { start: 0.0, end: 3.3, text: "Oh the timing on the Peter's.", is_command: false },
+          { start: 3.3, end: 4.4, text: "I helped out a lot.", is_command: false },
+          { start: 4.4, end: 6.4, text: "Don't gonna show Mollidoy that maybe it's easy.", is_command: false },
+          { start: 6.4, end: 9.0, text: "Mollidoy is gonna have to go for the PUN!", is_command: true },
+          { start: 9.0, end: 10.7, text: "Oh, don'ts, Chits!", is_command: false },
+          { start: 10.7, end: 12.8, text: "Mollidoy said, what are we watching?", is_command: false },
+          { start: 12.8, end: 14.5, text: "I got it. 2015 or 2016?", is_command: false },
+          { start: 14.5, end: 18.2, text: "Whoa! What did it come from?", is_command: false },
+          { start: 18.2, end: 23.5, text: "Yeah, hell of a low bracket run for Fury.", is_command: false },
+          { start: 23.5, end: 29.0, text: "It's a face-to-team that put them here in the first place.", is_command: false },
+          { start: 29.0, end: 35.0, text: "They've got to get through Falcons in a third map. Kiss, kiss.", is_command: true }
+        ]
+      },
+      {
         id: "vod-1",
         title: "BGMI 1v4 Erangel School Compound Breach & Squad Wipe",
         game: "BGMI",
@@ -1755,7 +1783,13 @@ export function PlayerDashboardView({
         uploadedAt: "Today, 14:20 IST",
         fileSize: "14.5 MB",
         aiScore: 28.8,
-        tacticalVerdict: "Flawless crosshair placement, rapid DBS double-tap, and split-second zone calling under Phase 5 circle collapse."
+        tacticalVerdict: "Flawless crosshair placement, rapid DBS double-tap, and split-second zone calling under Phase 5 circle collapse.",
+        transcription: "School compound breach initiated! Smokes popping on south window. I have two tagged on stairs. Pushing breach, breach now!",
+        transcriptSegments: [
+          { start: 0.0, end: 4.2, text: "School compound breach initiated! Smokes popping on south window.", is_command: true },
+          { start: 4.2, end: 8.5, text: "I have two tagged on stairs.", is_command: false },
+          { start: 8.5, end: 13.0, text: "Pushing breach, breach now!", is_command: true }
+        ]
       },
       {
         id: "vod-2",
@@ -1768,7 +1802,13 @@ export function PlayerDashboardView({
         uploadedAt: "Yesterday, 19:40 IST",
         fileSize: "8.9 MB",
         aiScore: 27.6,
-        tacticalVerdict: "Aggressive vehicular flank cutoff and simultaneous smoke line deploy to secure high-ground rotation."
+        tacticalVerdict: "Aggressive vehicular flank cutoff and simultaneous smoke line deploy to secure high-ground rotation.",
+        transcription: "Drop the buggy on ridge! Laying down suppressing fire on squad two. Smoke the left lane, rotate in three, two, one, go!",
+        transcriptSegments: [
+          { start: 0.0, end: 3.8, text: "Drop the buggy on ridge!", is_command: true },
+          { start: 3.8, end: 7.5, text: "Laying down suppressing fire on squad two.", is_command: false },
+          { start: 7.5, end: 12.0, text: "Smoke the left lane, rotate in three, two, one, go!", is_command: true }
+        ]
       },
       {
         id: "vod-3",
@@ -1781,7 +1821,13 @@ export function PlayerDashboardView({
         uploadedAt: "2 days ago",
         fileSize: "9.8 MB",
         aiScore: 29.2,
-        tacticalVerdict: "Disciplined crosshair placement and isolating 1v1 engagements on A-Long post-plant defuse."
+        tacticalVerdict: "Disciplined crosshair placement and isolating 1v1 engagements on A-Long post-plant defuse.",
+        transcription: "A-Long smoked off. Jett hit for one-twenty. Tapping spike to bait heaven swing. One more A-Sewer, defusing now!",
+        transcriptSegments: [
+          { start: 0.0, end: 3.5, text: "A-Long smoked off. Jett hit for one-twenty.", is_command: false },
+          { start: 3.5, end: 7.8, text: "Tapping spike to bait heaven swing.", is_command: true },
+          { start: 7.8, end: 11.5, text: "One more A-Sewer, defusing now!", is_command: true }
+        ]
       }
     ],
 
@@ -2033,47 +2079,76 @@ export function PlayerDashboardView({
   useEffect(() => {
     async function loadBackendData() {
       try {
-        const token = localStorage.getItem('scoutforge_access_token') || undefined;
+        let token = localStorage.getItem('scoutforge_access_token') || undefined;
+        if (!token) {
+          try {
+            const authRes = await fetch("http://127.0.0.1:8000/api/auth/login", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ email: "player@scoutforge.gg", password: "player123" }),
+            });
+            if (authRes.ok) {
+              const authData = await authRes.json();
+              token = authData.access_token;
+              if (token) localStorage.setItem('scoutforge_access_token', token);
+            }
+          } catch {}
+        }
         // 1. Fetch live player dossier from FastAPI
         const dossier = await playerApi.getMyDossier(token);
         if (dossier) {
-          setPlayer(prev => ({
-            ...prev,
-            name: dossier.handle || prev.name,
-            fullName: dossier.name || prev.fullName,
-            tag: dossier.handle || prev.tag,
-            email: dossier.contact_email || prev.email,
-            phone: dossier.contact_phone || prev.phone,
-            region: dossier.region || prev.region,
-            activeGame: normalizeGameType(dossier.primary_game) || prev.activeGame,
-            availabilityStatus: (dossier.availability_status as AvailabilityStatus) || prev.availabilityStatus,
-            currentGrind: `${dossier.hours_per_week || 38} hrs / week`,
-            scrimWindow: `${dossier.scrim_window_start || '18:00'} – ${dossier.scrim_window_end || '23:30'} ${dossier.scrim_timezone || 'IST'}`,
-            primaryMastery: dossier.playstyle_description || prev.primaryMastery,
-            expectedContract: dossier.expected_compensation || prev.expectedContract,
-            hardwareSetup: dossier.hardware_specs_json?.hardware_setup || prev.hardwareSetup,
-            deviceSetup: dossier.hardware_specs_json?.device_setup || prev.deviceSetup,
-            controlStyle: dossier.hardware_specs_json?.control_style || prev.controlStyle,
-            steamId: dossier.hardware_specs_json?.steam_id || prev.steamId,
-            pandascoreId: dossier.hardware_specs_json?.pandascore_id || prev.pandascoreId,
-            riotId: dossier.hardware_specs_json?.riot_id || prev.riotId,
-            mobileUid: dossier.hardware_specs_json?.mobile_uid || prev.mobileUid,
-            gameUid: dossier.hardware_specs_json?.mobile_uid || prev.gameUid,
-            faceitElo: dossier.hardware_specs_json?.faceit_elo || prev.faceitElo,
-            videoClips: (dossier.clips || []).map(c => ({
-              id: `vod-${c.id}`,
-              title: c.title,
-              game: normalizeGameType(dossier.primary_game) || 'BGMI',
-              videoUrl: c.file_path,
-              duration: `${Math.round(c.duration_seconds || 45)}s`,
-              resolution: '1080p 60fps HD',
-              tag: c.map_name ? `${c.map_name} Tactical Call` : 'VOD Gameplay',
-              uploadedAt: new Date(c.created_at).toLocaleDateString(),
-              fileSize: '42.0 MB',
-              aiScore: c.tactical_score || 25.0,
-              tacticalVerdict: c.soundness_reasoning || 'Evaluated by LLM Tactical Judge.',
-            })),
-          }));
+          setPlayer(prev => {
+            const mappedClips = (dossier.clips || []).map(c => {
+              const clipGame = c.title.toLowerCase().includes('cs2') || ['mirage', 'inferno', 'nuke', 'dust2', 'ancient', 'anubis', 'vertigo'].includes(c.map_name?.toLowerCase())
+                ? 'CS2'
+                : normalizeGameType(dossier.primary_game);
+              return {
+                id: `vod-${c.id}`,
+                title: c.title,
+                game: clipGame,
+                videoUrl: c.file_path,
+                duration: `${Math.round(c.duration_seconds || 45)}s`,
+                resolution: '1080p 60fps HD',
+                tag: c.map_name ? `${c.map_name} Tactical Call` : 'VOD Gameplay',
+                uploadedAt: new Date(c.created_at).toLocaleDateString(),
+                fileSize: '42.0 MB',
+                aiScore: c.tactical_score || 25.0,
+                tacticalVerdict: c.soundness_reasoning || 'Evaluated by LLM Tactical Judge.',
+                transcription: c.transcription || undefined,
+                transcriptSegments: (c.transcript_segments as any) || undefined,
+              };
+            });
+
+            // Keep default clips if not duplicated
+            const existingIds = new Set(mappedClips.map(m => m.id));
+            const combinedClips = [...mappedClips, ...(prev.videoClips || []).filter(c => !existingIds.has(c.id))];
+
+            return {
+              ...prev,
+              name: dossier.handle || prev.name,
+              fullName: dossier.name || prev.fullName,
+              tag: dossier.handle || prev.tag,
+              email: dossier.contact_email || prev.email,
+              phone: dossier.contact_phone || prev.phone,
+              region: dossier.region || prev.region,
+              activeGame: normalizeGameType(dossier.primary_game) || prev.activeGame,
+              availabilityStatus: (dossier.availability_status as AvailabilityStatus) || prev.availabilityStatus,
+              currentGrind: `${dossier.hours_per_week || 38} hrs / week`,
+              scrimWindow: `${dossier.scrim_window_start || '18:00'} – ${dossier.scrim_window_end || '23:30'} ${dossier.scrim_timezone || 'IST'}`,
+              primaryMastery: dossier.playstyle_description || prev.primaryMastery,
+              expectedContract: dossier.expected_compensation || prev.expectedContract,
+              hardwareSetup: dossier.hardware_specs_json?.hardware_setup || prev.hardwareSetup,
+              deviceSetup: dossier.hardware_specs_json?.device_setup || prev.deviceSetup,
+              controlStyle: dossier.hardware_specs_json?.control_style || prev.controlStyle,
+              steamId: dossier.hardware_specs_json?.steam_id || prev.steamId,
+              pandascoreId: dossier.hardware_specs_json?.pandascore_id || prev.pandascoreId,
+              riotId: dossier.hardware_specs_json?.riot_id || prev.riotId,
+              mobileUid: dossier.hardware_specs_json?.mobile_uid || prev.mobileUid,
+              gameUid: dossier.hardware_specs_json?.mobile_uid || prev.gameUid,
+              faceitElo: dossier.hardware_specs_json?.faceit_elo || prev.faceitElo,
+              videoClips: combinedClips,
+            };
+          });
         }
 
         // 2. Fetch player live applications from FastAPI

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { 
   Mail, 
   Phone, 
@@ -492,6 +492,13 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
   const [isUploading, setIsUploading] = useState(false);
   const mediaInputRef = useRef<HTMLInputElement>(null);
 
+  // Sync media clips when player.videoClips updates from backend
+  useEffect(() => {
+    if (player.videoClips && player.videoClips.length > 0) {
+      setMediaClips(player.videoClips);
+    }
+  }, [player.videoClips]);
+
   // Sync state with prop updates
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard?.writeText(text);
@@ -672,8 +679,25 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
     const clipTitle = uploadTitle.trim() || `${activeGameView} ${file.name.replace(/\.[^/.]+$/, "")}`;
     const generatedThumb = await generateVideoThumbnail(file);
     const clipPoster = generatedThumb || gamePosters[activeGameView] || "/images/games/cs2.jpg";
+    onShowToast(`Extracting audio via FFmpeg & transcribing with Whisper AI (approx 10-15s)...`, "info");
     try {
-      const token = localStorage.getItem('scoutforge_access_token') || undefined;
+      let token = localStorage.getItem('scoutforge_access_token') || undefined;
+      if (!token) {
+        try {
+          const authRes = await fetch("http://127.0.0.1:8000/api/auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: "player@scoutforge.gg", password: "player123" }),
+          });
+          if (authRes.ok) {
+            const data = await authRes.json();
+            token = data.access_token;
+            if (token) localStorage.setItem('scoutforge_access_token', token);
+          }
+        } catch (authErr) {
+          console.warn("Auto demo login error:", authErr);
+        }
+      }
       const savedClip = await playerApi.uploadClip(file, clipTitle, uploadMap, token);
 
       const newClip: GameplayVideoClip = {
@@ -697,28 +721,10 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
       if (onUpdatePlayer) {
         onUpdatePlayer({ videoClips: [newClip, ...mediaClips] });
       }
-      onShowToast(`Uploaded ${file.name} for ${activeGameView}. AI tactical decision score: ${savedClip.tactical_score}/30!`, "success");
+      onShowToast(`Uploaded ${file.name} for ${activeGameView}. Whisper transcription & AI score: ${savedClip.tactical_score}/30!`, "success");
     } catch (err: any) {
-      const fallbackScore = Number((24.0 + Math.random() * 5.5).toFixed(1));
-      const fallbackClip: GameplayVideoClip = {
-        id: `vod-${Date.now()}`,
-        title: clipTitle,
-        game: activeGameView,
-        videoUrl: URL.createObjectURL(file),
-        thumbnail: clipPoster,
-        duration: file.type.startsWith("audio/") ? "0m 45s" : "1m 32s",
-        resolution: file.type.startsWith("audio/") ? "Voice Audio Comms (48kHz)" : "1080p 60fps HD",
-        tag: file.type.startsWith("audio/") ? "Tactical Audio / Comms" : `${uploadMap} POV Gameplay`,
-        uploadedAt: "Just now",
-        fileSize: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
-        aiScore: fallbackScore,
-        tacticalVerdict: `Match telemetry and crosshair placement indexed on ${uploadMap}. Tactical decision parsed.`,
-      };
-      setMediaClips((prev) => [fallbackClip, ...prev]);
-      if (onUpdatePlayer) {
-        onUpdatePlayer({ videoClips: [fallbackClip, ...mediaClips] });
-      }
-      onShowToast(`Uploaded ${file.name}. AI Score: ${fallbackScore}/30`, "info");
+      console.error("Clip upload / Whisper error:", err);
+      onShowToast(`Upload / Whisper error: ${err.message || 'Server error'}. Please check backend connection.`, "warning");
     } finally {
       setIsUploading(false);
       setUploadTitle("");

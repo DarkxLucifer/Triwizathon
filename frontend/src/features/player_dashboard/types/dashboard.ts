@@ -175,6 +175,10 @@ export interface EvidenceItem {
   filesize?: string;
   videoUrl?: string;
   transcript?: TranscriptSnippet[];
+  transcription?: string;
+  transcriptSegments?: GameplayTranscriptSegment[];
+  tacticalScore?: number;
+  tacticalVerdict?: string;
 }
 
 export interface ScoutingTimelineEvent {
