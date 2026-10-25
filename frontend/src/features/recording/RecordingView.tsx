@@ -24,6 +24,7 @@ import {
   Radio,
   FileText,
   Lock,
+  Sparkles,
 } from 'lucide-react';
 import {
   recordingsApi,
@@ -91,10 +92,35 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
   const screenRecorderRef = useRef<MediaRecorder | null>(null);
   const webcamRecorderRef = useRef<MediaRecorder | null>(null);
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const screenVideoPreviewRef = useRef<HTMLVideoElement | null>(null);
   const webcamVideoPreviewRef = useRef<HTMLVideoElement | null>(null);
   const screenIndexRef = useRef(0);
   const cameraIndexRef = useRef(0);
   const screenEndedEarlyRef = useRef(false);
+
+  // Active Stream States for Live Preview in React DOM
+  const [activeScreenStream, setActiveScreenStream] = useState<MediaStream | null>(null);
+  const [activeWebcamStream, setActiveWebcamStream] = useState<MediaStream | null>(null);
+
+  // Connect active screen stream to video preview DOM element
+  useEffect(() => {
+    if (screenVideoPreviewRef.current && activeScreenStream) {
+      screenVideoPreviewRef.current.srcObject = activeScreenStream;
+      screenVideoPreviewRef.current.play().catch(e => {
+        console.warn('Screen live preview play failed:', e);
+      });
+    }
+  }, [activeScreenStream, isRecording]);
+
+  // Connect active webcam stream to video preview DOM element
+  useEffect(() => {
+    if (webcamVideoPreviewRef.current && activeWebcamStream) {
+      webcamVideoPreviewRef.current.srcObject = activeWebcamStream;
+      webcamVideoPreviewRef.current.play().catch(e => {
+        console.warn('Webcam live preview play failed:', e);
+      });
+    }
+  }, [activeWebcamStream, isRecording]);
 
   // Fetch recordings list
   const loadRecordings = useCallback(async () => {
@@ -119,6 +145,10 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
       if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
       screenStreamRef.current?.getTracks().forEach(t => t.stop());
       webcamStreamRef.current?.getTracks().forEach(t => t.stop());
+      screenStreamRef.current = null;
+      webcamStreamRef.current = null;
+      setActiveScreenStream(null);
+      setActiveWebcamStream(null);
     };
   }, []);
 
@@ -171,6 +201,7 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
           audio: true, // request system audio
         });
         screenStreamRef.current = screenStream;
+        setActiveScreenStream(screenStream);
       } catch (err: any) {
         setIsStarting(false);
         if (err.name === 'NotAllowedError') {
@@ -198,13 +229,12 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
             audio: enableMic,
           });
           webcamStreamRef.current = webcamStream;
-          if (webcamVideoPreviewRef.current && enableCamera) {
-            webcamVideoPreviewRef.current.srcObject = webcamStream;
-          }
+          setActiveWebcamStream(webcamStream);
         } catch (camErr: any) {
           console.warn('Camera/mic access failed, falling back to screen-only:', camErr.message);
           setWarningMessage('Webcam/Microphone access was denied. Continuing in screen-only capture mode.');
           webcamStream = null;
+          setActiveWebcamStream(null);
         }
       }
 
@@ -314,6 +344,10 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
       // Stop stream tracks
       screenStreamRef.current?.getTracks().forEach(t => t.stop());
       webcamStreamRef.current?.getTracks().forEach(t => t.stop());
+      screenStreamRef.current = null;
+      webcamStreamRef.current = null;
+      setActiveScreenStream(null);
+      setActiveWebcamStream(null);
 
       // Finalize session on backend
       if (activeSession) {
@@ -343,6 +377,10 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
     setIsRecording(false);
     screenStreamRef.current?.getTracks().forEach(t => t.stop());
     webcamStreamRef.current?.getTracks().forEach(t => t.stop());
+    screenStreamRef.current = null;
+    webcamStreamRef.current = null;
+    setActiveScreenStream(null);
+    setActiveWebcamStream(null);
 
     try {
       await recordingsApi.abortSession(activeSession.id);
@@ -598,54 +636,105 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
             </div>
           </div>
 
-          {/* Active Recording Monitor & Webcam Preview */}
+          {/* Active Recording Monitor & Live Video Previews */}
           {isRecording && (
-            <div className="mb-4 p-4 rounded-[6px] bg-[#0b0b0c] border border-red-500/30 flex flex-col md:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                {enableCamera && (
-                  <div className="w-28 h-20 bg-black rounded-[4px] border border-[#26262a] overflow-hidden relative shrink-0">
-                    <video
-                      ref={webcamVideoPreviewRef}
-                      autoPlay
-                      muted
-                      playsInline
-                      className="w-full h-full object-cover"
-                    />
-                    <span className="absolute bottom-1 right-1 text-[9px] font-mono bg-black/70 px-1 rounded text-white">
-                      CAM
-                    </span>
+            <div className="mb-6 p-4 rounded-[8px] bg-[#0b0b0c] border border-red-500/40 space-y-4 shadow-lg shadow-red-950/20">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-[#26262a]">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 px-2.5 py-1 rounded bg-red-500/10 border border-red-500/30 text-red-500 text-xs font-mono font-bold animate-pulse">
+                    <Radio className="w-3.5 h-3.5" />
+                    <span>REC LIVE</span>
                   </div>
-                )}
-                <div>
-                  <div className="flex items-center gap-2">
-                    <Radio className="w-4 h-4 text-red-500 animate-pulse" />
-                    <span className="text-xs font-semibold text-[#ededed]">Live Streaming Active</span>
+                  <div>
+                    <h4 className="text-sm font-bold text-[#ededed] flex items-center gap-2">
+                      <span>Active Stream Ingest</span>
+                      <span className="text-xs font-mono text-[#e8ff59] font-normal">
+                        [{formatTime(timerSec)}]
+                      </span>
+                    </h4>
+                    <p className="text-[11px] font-mono text-[#9a9aa2]">
+                      Screen chunks: {screenChunkCount} | Cam chunks: {cameraChunkCount} | Streamed: {formatBytes(uploadedBytes)}
+                    </p>
                   </div>
-                  <p className="text-[11px] font-mono text-[#9a9aa2] mt-1">
-                    Screen chunks: {screenChunkCount} | Cam chunks: {cameraChunkCount} | Streamed: {formatBytes(uploadedBytes)}
-                  </p>
-                  {uploadStatus && (
-                    <p className="text-[10px] font-mono text-[#e8ff59] mt-0.5">{uploadStatus}</p>
-                  )}
+                </div>
+
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <button
+                    type="button"
+                    onClick={handleStopRecording}
+                    className="flex-1 sm:flex-none px-4 py-2 rounded-[6px] text-xs font-bold bg-red-600 hover:bg-red-500 text-white inline-flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md shadow-red-600/20"
+                  >
+                    <Square className="w-3.5 h-3.5 fill-current" />
+                    <span>Stop & Finalize</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleAbortRecording}
+                    className="px-3 py-2 rounded-[6px] text-xs font-medium text-[#9a9aa2] hover:text-white border border-[#26262a] hover:bg-[#19191d] transition-colors cursor-pointer"
+                  >
+                    Abort
+                  </button>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 w-full md:w-auto">
-                <button
-                  type="button"
-                  onClick={handleStopRecording}
-                  className="flex-1 md:flex-none px-4 py-2 rounded-[6px] text-xs font-semibold bg-red-600 hover:bg-red-500 text-white inline-flex items-center justify-center gap-2 transition-colors cursor-pointer"
-                >
-                  <Square className="w-3.5 h-3.5" /> Stop & Finalize
-                </button>
-                <button
-                  type="button"
-                  onClick={handleAbortRecording}
-                  className="px-3 py-2 rounded-[6px] text-xs text-[#9a9aa2] hover:text-white border border-[#26262a] hover:bg-[#19191d] transition-colors"
-                >
-                  Abort
-                </button>
+              {/* Dual Stream Live Displays */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Screen Share Live Feed (Takes 2/3 width if cam active, else full 3/3) */}
+                <div className={`${enableCamera && activeWebcamStream ? 'md:col-span-2' : 'md:col-span-3'} space-y-1.5`}>
+                  <div className="flex items-center justify-between text-[11px] font-mono text-[#9a9aa2]">
+                    <span className="flex items-center gap-1.5">
+                      <Monitor className="w-3.5 h-3.5 text-[#e8ff59]" />
+                      SCREEN SHARE LIVE OUTPUT
+                    </span>
+                    <span className="text-emerald-400 text-[10px]">Active MediaStream</span>
+                  </div>
+                  <div className="aspect-video bg-black rounded-[6px] border border-[#26262a] overflow-hidden relative shadow-inner flex items-center justify-center">
+                    <video
+                      ref={screenVideoPreviewRef}
+                      autoPlay
+                      muted
+                      playsInline
+                      className="w-full h-full object-contain bg-black"
+                    />
+                    <div className="absolute top-2 left-2 px-2 py-0.5 rounded bg-black/80 backdrop-blur-xs text-[10px] font-mono text-white border border-white/10 flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
+                      <span>LIVE SCREEN</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Webcam Live Feed */}
+                {enableCamera && activeWebcamStream && (
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between text-[11px] font-mono text-[#9a9aa2]">
+                      <span className="flex items-center gap-1.5">
+                        <Camera className="w-3.5 h-3.5 text-[#e8ff59]" />
+                        FACECAM LIVE OUTPUT
+                      </span>
+                      <span className="text-emerald-400 text-[10px]">Webcam Ingest</span>
+                    </div>
+                    <div className="aspect-video bg-black rounded-[6px] border border-[#26262a] overflow-hidden relative shadow-inner flex items-center justify-center">
+                      <video
+                        ref={webcamVideoPreviewRef}
+                        autoPlay
+                        muted
+                        playsInline
+                        className="w-full h-full object-cover bg-black"
+                      />
+                      <div className="absolute top-2 left-2 px-2 py-0.5 rounded bg-black/80 backdrop-blur-xs text-[10px] font-mono text-[#e8ff59] border border-[#e8ff59]/20">
+                        CAM VERIFIED
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
+
+              {uploadStatus && (
+                <div className="p-2.5 rounded bg-[#131315] border border-[#26262a] text-[11px] font-mono text-[#e8ff59] flex items-center gap-2">
+                  <Sparkles className="w-3.5 h-3.5 shrink-0" />
+                  <span>{uploadStatus}</span>
+                </div>
+              )}
             </div>
           )}
 
@@ -943,19 +1032,63 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
               </button>
             </div>
 
+            {/* Synchronized Playback Control Toolbar */}
+            {selectedSession.final_screen_path && selectedSession.final_camera_path && (
+              <div className="flex items-center justify-between p-3 rounded-[6px] bg-[#0b0b0c] border border-[#26262a]">
+                <div className="flex items-center gap-2">
+                  <Play className="w-4 h-4 text-[#e8ff59]" />
+                  <span className="text-xs font-mono font-bold text-[#ededed]">
+                    Dual-Track Synchronized Playback
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const screenVid = document.getElementById('detail-modal-screen-video') as HTMLVideoElement;
+                    const camVid = document.getElementById('detail-modal-cam-video') as HTMLVideoElement;
+                    if (screenVid && camVid) {
+                      if (screenVid.paused || camVid.paused) {
+                        screenVid.currentTime = 0;
+                        camVid.currentTime = 0;
+                        screenVid.play();
+                        camVid.play();
+                      } else {
+                        screenVid.pause();
+                        camVid.pause();
+                      }
+                    }
+                  }}
+                  className="px-3 py-1.5 rounded-[4px] text-xs font-mono font-bold bg-[#e8ff59] hover:bg-[#d4eb44] text-black flex items-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <Play className="w-3.5 h-3.5 fill-black" />
+                  <span>Sync Play / Restart Both</span>
+                </button>
+              </div>
+            )}
+
             {/* Video Players (Screen & Camera) */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <span className="text-[11px] font-mono text-[#9a9aa2] uppercase block mb-1.5">
-                  Screen Stream Capture
-                </span>
-                <div className="aspect-video bg-black rounded border border-[#26262a] overflow-hidden flex items-center justify-center">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[11px] font-mono text-[#9a9aa2] uppercase">
+                    Screen Stream Capture
+                  </span>
+                  {selectedSession.final_screen_path && (
+                    <span className="text-[10px] font-mono text-[#e8ff59] bg-[#e8ff59]/10 px-2 py-0.5 rounded border border-[#e8ff59]/20">
+                      Primary Gameplay Stream
+                    </span>
+                  )}
+                </div>
+                <div className="aspect-video bg-black rounded border border-[#26262a] overflow-hidden flex items-center justify-center relative">
                   {selectedSession.final_screen_path ? (
                     <video
+                      id="detail-modal-screen-video"
+                      key={`${selectedSession.id}_screen`}
                       controls
                       playsInline
+                      preload="metadata"
                       src={recordingsApi.getStreamUrl(selectedSession.id, 'screen')}
-                      className="w-full h-full object-contain"
+                      className="w-full h-full object-contain bg-black"
                     />
                   ) : (
                     <span className="text-xs text-[#9a9aa2]">No screen video assembled</span>
@@ -964,16 +1097,26 @@ export function RecordingView({ theme = 'dark' }: RecordingViewProps) {
               </div>
 
               <div>
-                <span className="text-[11px] font-mono text-[#9a9aa2] uppercase block mb-1.5">
-                  Webcam Stream Capture
-                </span>
-                <div className="aspect-video bg-black rounded border border-[#26262a] overflow-hidden flex items-center justify-center">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[11px] font-mono text-[#9a9aa2] uppercase">
+                    Webcam Stream Capture
+                  </span>
+                  {selectedSession.final_camera_path && (
+                    <span className="text-[10px] font-mono text-[#e8ff59] bg-[#e8ff59]/10 px-2 py-0.5 rounded border border-[#e8ff59]/20">
+                      Facial Telemetry Stream
+                    </span>
+                  )}
+                </div>
+                <div className="aspect-video bg-black rounded border border-[#26262a] overflow-hidden flex items-center justify-center relative">
                   {selectedSession.final_camera_path ? (
                     <video
+                      id="detail-modal-cam-video"
+                      key={`${selectedSession.id}_camera`}
                       controls
                       playsInline
+                      preload="metadata"
                       src={recordingsApi.getStreamUrl(selectedSession.id, 'camera')}
-                      className="w-full h-full object-contain"
+                      className="w-full h-full object-contain bg-black"
                     />
                   ) : (
                     <span className="text-xs text-[#9a9aa2]">

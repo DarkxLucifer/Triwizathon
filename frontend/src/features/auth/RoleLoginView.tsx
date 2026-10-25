@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
 import { authApi } from '@/lib/api/auth';
+import { GameAuthorityModal, GameAuthorityType } from './GameAuthorityModal';
 
 export type UserRole = 'player' | 'organiser';
 
@@ -61,6 +62,25 @@ export function RoleLoginView({
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
+
+  // Game Authority Mock Authentication State
+  const [authorityModalOpen, setAuthorityModalOpen] = useState(false);
+  const [selectedAuthority, setSelectedAuthority] = useState<GameAuthorityType>('steam');
+
+  const handleOpenAuthorityModal = (authType: GameAuthorityType) => {
+    setSelectedAuthority(authType);
+    setAuthorityModalOpen(true);
+  };
+
+  const handleAuthorizeWithAuthority = async (authType: GameAuthorityType) => {
+    // Authenticate with verified competitive gaming account
+    if (selectedRole === 'player') {
+      await doLogin('player@scoutforge.gg', 'player123', 'player');
+    } else {
+      await doLogin('analyst@cloud9.gg', 'scoutforge123', 'organiser');
+    }
+    setAuthorityModalOpen(false);
+  };
 
   const handleRoleChange = (role: UserRole) => {
     setSelectedRole(role);
@@ -538,7 +558,7 @@ export function RoleLoginView({
               /* --- SIGN IN MODE FORM --- */
               <>
                 {/* Quick 1-Click Demo Login Button */}
-                <div className="mb-6">
+                <div className="mb-5">
                   <button
                     type="button"
                     onClick={() => handleQuickLogin(selectedRole)}
@@ -577,6 +597,81 @@ export function RoleLoginView({
                     </div>
                     <ArrowRight className="w-4 h-4 text-[#e8ff59] transition-transform group-hover:translate-x-1 shrink-0" />
                   </button>
+                </div>
+
+                {/* Game Authorities Authentication Section */}
+                <div className="mb-5 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-mono uppercase font-bold text-[#9a9aa2] flex items-center gap-1.5">
+                      <Gamepad2 className="w-3.5 h-3.5 text-[#e8ff59]" />
+                      <span>Continue with Game Authorities</span>
+                    </span>
+                    <span className="text-[9px] font-mono text-[#e8ff59] bg-[#e8ff59]/10 px-1.5 py-0.5 rounded border border-[#e8ff59]/20 font-semibold">
+                      Live Attestation
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2">
+                    {/* Steam */}
+                    <button
+                      type="button"
+                      onClick={() => handleOpenAuthorityModal('steam')}
+                      disabled={loading}
+                      className={`p-2.5 rounded-[6px] border flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer group ${
+                        isLight
+                          ? 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-800'
+                          : 'bg-[#0b0b0c] hover:bg-[#18181b] border-[#26262a] hover:border-[#66c0f4]/50 text-[#ededed]'
+                      }`}
+                      title="Authenticate via Steam OpenID"
+                    >
+                      <div className="w-6 h-6 rounded flex items-center justify-center text-[#66c0f4] group-hover:scale-110 transition-transform">
+                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M11.979 0C5.678 0 .511 4.86.022 11.037l6.432 2.658c.545-.371 1.203-.59 1.912-.59.063 0 .125.004.188.006l2.861-4.142V8.91c0-2.495 2.028-4.524 4.524-4.524 2.494 0 4.524 2.029 4.524 4.524s-2.03 4.524-4.524 4.524h-.105l-4.076 2.911c0 .052.005.105.005.159 0 1.875-1.515 3.396-3.39 3.396-1.635 0-3.016-1.155-3.331-2.69L.618 14.88C2.08 20.08 6.822 24 12.49 24c6.627 0 12-5.373 12-12S18.607 0 11.979 0z"/>
+                        </svg>
+                      </div>
+                      <span className="text-[11px] font-bold tracking-tight">Steam</span>
+                    </button>
+
+                    {/* Riot Games */}
+                    <button
+                      type="button"
+                      onClick={() => handleOpenAuthorityModal('riot')}
+                      disabled={loading}
+                      className={`p-2.5 rounded-[6px] border flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer group ${
+                        isLight
+                          ? 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-800'
+                          : 'bg-[#0b0b0c] hover:bg-[#18181b] border-[#26262a] hover:border-[#ff4655]/50 text-[#ededed]'
+                      }`}
+                      title="Authenticate via Riot Sign On"
+                    >
+                      <div className="w-6 h-6 rounded flex items-center justify-center text-[#ff4655] group-hover:scale-110 transition-transform">
+                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M13.727 3.313L2.617 8.016v7.968l11.11 4.703 7.656-3.242V6.555l-7.656-3.242zm-1.09 2.457l5.454 2.312v5.836l-5.454 2.313-7.818-3.308V8.082l7.818-3.312z" />
+                        </svg>
+                      </div>
+                      <span className="text-[11px] font-bold tracking-tight">Riot Games</span>
+                    </button>
+
+                    {/* FACEIT */}
+                    <button
+                      type="button"
+                      onClick={() => handleOpenAuthorityModal('faceit')}
+                      disabled={loading}
+                      className={`p-2.5 rounded-[6px] border flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer group ${
+                        isLight
+                          ? 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-800'
+                          : 'bg-[#0b0b0c] hover:bg-[#18181b] border-[#26262a] hover:border-[#ff5500]/50 text-[#ededed]'
+                      }`}
+                      title="Authenticate via FACEIT Connect"
+                    >
+                      <div className="w-6 h-6 rounded flex items-center justify-center text-[#ff5500] group-hover:scale-110 transition-transform">
+                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M23.999 2.247c-.015-.098-.077-.183-.166-.227-.089-.045-.194-.041-.28.01L.226 13.91c-.135.08-.22.228-.225.386-.005.158.07.31.2.399l10.05 6.94c.094.065.215.08.323.04.107-.04.186-.13.21-.242l2.36-11.082 10.9-8.082c.08-.059.125-.152.12-.25l-.015-.099z"/>
+                        </svg>
+                      </div>
+                      <span className="text-[11px] font-bold tracking-tight">FACEIT</span>
+                    </button>
+                  </div>
                 </div>
 
                 {/* Divider */}
@@ -765,6 +860,14 @@ export function RoleLoginView({
       >
         ScoutForge Intelligence Systems • Dual-Role Esports Platform
       </footer>
+      {/* Game Authority Interactive Verification Modal */}
+      <GameAuthorityModal
+        isOpen={authorityModalOpen}
+        authority={selectedAuthority}
+        onClose={() => setAuthorityModalOpen(false)}
+        onAuthorize={handleAuthorizeWithAuthority}
+        isLight={isLight}
+      />
     </div>
   );
 }

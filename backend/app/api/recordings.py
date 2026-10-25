@@ -7,6 +7,8 @@ from fastapi import (
     UploadFile,
     File,
     Form,
+    Query,
+    Header,
     status,
     BackgroundTasks,
 )
@@ -14,6 +16,7 @@ from fastapi.responses import FileResponse, StreamingResponse
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.security import decode_access_token
 from app.api.deps import get_current_user
 from app.models.user import User
 from app.models.organization import Organization
@@ -287,14 +290,62 @@ def revoke(
     )
 
 
+def resolve_media_user(
+    db: Session,
+    token: Optional[str] = None,
+    authorization: Optional[str] = None,
+) -> User:
+    """Helper to authenticate user from either Bearer header or ?token= query parameter."""
+    auth_token = None
+    if authorization and authorization.lower().startswith("bearer "):
+        auth_token = authorization[7:].strip()
+    elif token:
+        auth_token = token.strip()
+
+    if not auth_token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication token required via Bearer header or 'token' query parameter.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    payload = decode_access_token(auth_token)
+    if not payload:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials: invalid or expired token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    user_id = payload.get("sub")
+    if not user_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token subject missing",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    user = db.query(User).filter(User.id == int(user_id)).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return user
+
+
 @router.get("/sessions/{session_id}/stream/{track_kind}")
 def stream_media(
     session_id: int,
     track_kind: str,
+    token: Optional[str] = Query(None),
+    authorization: Optional[str] = Header(None),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
 ):
-    """Authenticated streaming endpoint for playback of assembled video."""
+    """Authenticated streaming endpoint for playback of assembled video supporting token in query or header."""
+    current_user = resolve_media_user(db=db, token=token, authorization=authorization)
+
     session = db.query(RecordingSession).filter(RecordingSession.id == session_id).first()
     if not session:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Recording session not found.")

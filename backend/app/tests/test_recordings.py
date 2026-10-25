@@ -258,3 +258,26 @@ def test_recording_failure_never_blocks_stats_ranking():
     assert perf > 0.0
     assert fit > 0.0
     assert failed_session_status in ("failed", "incomplete", "processing")
+
+
+def test_stream_media_authentication_token_query_and_header(db_session):
+    from app.core.security import create_access_token
+    from app.api.recordings import resolve_media_user
+
+    user = db_session.query(User).filter(User.role == "player").first()
+    assert user is not None
+
+    token = create_access_token(data={"sub": str(user.id), "role": user.role})
+
+    # Test resolving via ?token= query parameter (used by HTML5 <video> elements)
+    resolved_via_query = resolve_media_user(db_session, token=token, authorization=None)
+    assert resolved_via_query.id == user.id
+
+    # Test resolving via Bearer authorization header
+    resolved_via_header = resolve_media_user(db_session, token=None, authorization=f"Bearer {token}")
+    assert resolved_via_header.id == user.id
+
+    # Test failure when neither is provided
+    with pytest.raises(HTTPException) as exc:
+        resolve_media_user(db_session, token=None, authorization=None)
+    assert exc.value.status_code == 401
