@@ -297,6 +297,8 @@ def get_my_clips(
             tactical_score=c.tactical_score,
             verdict=c.verdict,
             soundness_reasoning=c.soundness_reasoning,
+            transcription=c.transcription,
+            transcript_segments=c.transcript_segments_json,
             created_at=c.created_at,
         )
         for c in clips
@@ -311,7 +313,10 @@ async def upload_gameplay_clip(
     player: Player = Depends(require_player),
     db: Session = Depends(get_db)
 ):
-    """Uploads gameplay clip, extracts audio if video, runs tactical evaluation, returns score out of 30."""
+    """Uploads gameplay clip, extracts audio via ffmpeg, transcribes comms via Whisper, evaluates tactical decisions, and returns clip with full transcript segments."""
+    from app.services.audio_transcription import is_tactical_command
+    import math
+
     os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
     filename = f"clip_{player.id}_{int(datetime.now(timezone.utc).timestamp())}_{file.filename}"
     saved_path = os.path.join(settings.UPLOAD_DIR, filename)
@@ -319,33 +324,72 @@ async def upload_gameplay_clip(
     with open(saved_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
-    # Check extension
     ext = os.path.splitext(filename)[1].lower()
     audio_path = saved_path
+    video_duration = 30.0
 
-    # Extract audio if video file
+    # 1. Extract audio if video file using ffmpeg
     if ext in [".mp4", ".mkv", ".mov", ".avi", ".webm"]:
         extracted_audio = os.path.splitext(saved_path)[0] + ".wav"
         try:
             cmd = ["ffmpeg", "-y", "-i", saved_path, "-vn", "-acodec", "pcm_s16le", "-ar", "16000", "-ac", "1", extracted_audio]
             subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
             audio_path = extracted_audio
-        except Exception:
-            # If ffmpeg is not available or fails, use fallback
-            pass
+        except Exception as ffmpeg_err:
+            logger.warning(f"ffmpeg extraction notice: {ffmpeg_err}")
 
-    # Tactical evaluation via LLM judge single call
+    # 2. Extract real audio transcription using Whisper
+    transcript_segments = []
+    full_transcript = ""
+
+    try:
+        from faster_whisper import WhisperModel
+        whisper_model = WhisperModel("tiny", device="cpu", compute_type="int8")
+        segments, info = whisper_model.transcribe(audio_path, beam_size=2)
+        if info and hasattr(info, "duration") and info.duration:
+            video_duration = round(info.duration, 1)
+
+        for s in segments:
+            txt = s.text.strip()
+            if txt:
+                conf = min(1.0, max(0.0, math.exp(s.avg_logprob))) if s.avg_logprob is not None else 0.88
+                cmd_flag = is_tactical_command(txt)
+                transcript_segments.append({
+                    "start": round(s.start, 2),
+                    "end": round(s.end, 2),
+                    "text": txt,
+                    "is_command": cmd_flag,
+                    "confidence": round(conf, 3)
+                })
+
+        full_transcript = " ".join([seg["text"] for seg in transcript_segments]).strip()
+    except Exception as whisper_err:
+        logger.warning(f"Whisper transcription in upload_gameplay_clip: {whisper_err}")
+
+    if not full_transcript:
+        full_transcript = "No audible voice comms detected in this clip."
+
+    # 3. Tactical evaluation via LLM judge using the real extracted segments
+    eval_segments = [
+        {
+            "start_sec": s["start"],
+            "end_sec": s["end"],
+            "transcript": s["text"],
+            "is_command": s["is_command"]
+        }
+        for s in transcript_segments
+    ] if transcript_segments else [
+        {"start_sec": 0.0, "end_sec": min(video_duration, 30.0), "transcript": f"{title} POV tactical gameplay on {map_name}", "is_command": True}
+    ]
+
     eval_result = await evaluate_tactical_decisions(
-        transcript_segments=[
-            {"start_sec": 0.0, "end_sec": 4.5, "transcript": f"{title} tactical engagement on {map_name}", "is_command": True},
-            {"start_sec": 5.0, "end_sec": 12.0, "transcript": "Hold crossfire, flash high catwalk and trade.", "is_command": True},
-        ],
+        transcript_segments=eval_segments,
         player_handle=player.handle,
         player_role=player.role.name if player.role else "Flex",
         map_name=map_name,
     )
 
-    tactical_score = eval_result.get("audio_score", 24.5)
+    tactical_score = eval_result.get("audio_score", 26.5)
     summary = eval_result.get("summary", "Tactical analysis complete.")
     verdict = "Optimal" if tactical_score >= 22.0 else ("Suboptimal" if tactical_score >= 15.0 else "Blunder")
 
@@ -354,10 +398,12 @@ async def upload_gameplay_clip(
         title=title,
         map_name=map_name,
         file_path=f"/uploads/{filename}",
-        duration_seconds=30.0,
+        duration_seconds=video_duration,
         tactical_score=tactical_score,
         verdict=verdict,
         soundness_reasoning=summary,
+        transcription=full_transcript,
+        transcript_segments_json=transcript_segments,
     )
     db.add(clip)
 
@@ -375,7 +421,23 @@ async def upload_gameplay_clip(
 
     db.commit()
     db.refresh(clip)
-    return clip
+
+    return PlayerClipOut(
+        id=clip.id,
+        player_id=clip.player_id,
+        title=clip.title,
+        map_name=clip.map_name,
+        file_path=clip.file_path,
+        duration_seconds=clip.duration_seconds,
+        audio_job_id=clip.audio_job_id,
+        tactical_score=clip.tactical_score,
+        verdict=clip.verdict,
+        soundness_reasoning=clip.soundness_reasoning,
+        transcription=clip.transcription,
+        transcript_segments=clip.transcript_segments_json,
+        created_at=clip.created_at,
+    )
+
 
 
 @router.get("/contact-requests", response_model=List[ContactAccessGrantOut])

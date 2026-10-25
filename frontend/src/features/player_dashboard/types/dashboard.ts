@@ -40,6 +40,14 @@ export interface SignatureMap {
 
 export type AvailabilityStatus = "Available for Trial" | "Open to Offers" | "In Active Scrims" | "Restricted";
 
+export interface GameplayTranscriptSegment {
+  start: number;
+  end: number;
+  text: string;
+  is_command?: boolean;
+  confidence?: number;
+}
+
 export interface GameplayVideoClip {
   id: string;
   title: string;
@@ -53,6 +61,8 @@ export interface GameplayVideoClip {
   fileSize?: string;
   tacticalVerdict?: string;
   aiScore?: number;
+  transcription?: string;
+  transcriptSegments?: GameplayTranscriptSegment[];
 }
 
 export interface PlayerProfile {

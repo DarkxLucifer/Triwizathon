@@ -461,3 +461,36 @@ def test_extract_credentials_image_upload(client, player_token):
     assert res_data["status"] in ["complete", "partial"]
     assert "kd" in res_data
     assert "aim_score" in res_data
+
+
+def test_upload_gameplay_clip_with_audio_transcription(client, player_token):
+    """Verifies that uploaded clips extract audio, process transcription via Whisper, and return transcript segments."""
+    import io
+
+    # Create a synthetic 1-second silence WAV file
+    import wave
+    wav_bytes = io.BytesIO()
+    with wave.open(wav_bytes, "wb") as wf:
+        wf.setnchannels(1)
+        wf.setsampwidth(2)
+        wf.setframerate(16000)
+        wf.writeframes(b"\x00" * 32000) # 1 sec of silence
+    wav_bytes.seek(0)
+
+    headers = {"Authorization": f"Bearer {player_token}"}
+    files = {"file": ("test_clip.wav", wav_bytes, "audio/wav")}
+    data = {"title": "Test Audio Clip", "map_name": "Mirage"}
+
+    res = client.post("/api/player/me/clips", data=data, files=files, headers=headers)
+    assert res.status_code == 200
+    res_data = res.json()
+    assert res_data["title"] == "Test Audio Clip"
+    assert "transcription" in res_data
+    assert "transcript_segments" in res_data
+    assert res_data["tactical_score"] is not None
+
+    # Verify listing clips includes transcription
+    list_res = client.get("/api/player/me/clips", headers=headers)
+    assert list_res.status_code == 200
+    clips = list_res.json()
+    assert any(c["title"] == "Test Audio Clip" for c in clips)

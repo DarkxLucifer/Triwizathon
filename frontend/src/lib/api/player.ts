@@ -44,6 +44,14 @@ export interface PlayerClip {
   tactical_score?: number | null;
   verdict?: string | null;
   soundness_reasoning?: string | null;
+  transcription?: string | null;
+  transcript_segments?: Array<{
+    start: number;
+    end: number;
+    text: string;
+    is_command?: boolean;
+    confidence?: number;
+  }> | null;
   created_at: string;
 }
 

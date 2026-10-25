@@ -51,6 +51,8 @@ class PlayerClipOut(BaseModel):
     tactical_score: Optional[float] = None
     verdict: Optional[str] = None
     soundness_reasoning: Optional[str] = None
+    transcription: Optional[str] = None
+    transcript_segments: Optional[List[Dict[str, Any]]] = None
     created_at: datetime
 
 

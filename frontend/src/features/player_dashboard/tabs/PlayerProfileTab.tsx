@@ -92,7 +92,23 @@ const defaultClips: GameplayVideoClip[] = [
     uploadedAt: "Today, 18:30 IST",
     fileSize: "10.9 MB",
     aiScore: 29.6,
-    tacticalVerdict: "Aggressive AWP angle isolation, instant flick re-frags, and high-tempo site executes from 2025 pro highlights."
+    tacticalVerdict: "Aggressive AWP angle isolation, instant flick re-frags, and high-tempo site executes from 2025 pro highlights.",
+    transcription: "Oh the timing on the Peter's. I helped out a lot. Don't gonna show Mollidoy that maybe it's easy. Mollidoy is gonna have to go for the PUN! Oh, don'ts, Chits! Mollidoy said, what are we watching? I got it. 2015 or 2016? So, yeah. Whoa! What did it come from? Yeah, hell of a low bracket run for Fury. It's a face-to-team that put them here in the first place, but they've got to get through Falcons in a third map. Kiss, kiss.",
+    transcriptSegments: [
+      { start: 0.0, end: 3.3, text: "Oh the timing on the Peter's.", is_command: false },
+      { start: 3.3, end: 4.4, text: "I helped out a lot.", is_command: false },
+      { start: 4.4, end: 6.4, text: "Don't gonna show Mollidoy that maybe it's easy.", is_command: false },
+      { start: 6.4, end: 9.0, text: "Mollidoy is gonna have to go for the PUN!", is_command: true },
+      { start: 9.0, end: 10.7, text: "Oh, don'ts, Chits!", is_command: false },
+      { start: 10.7, end: 13.7, text: "Mollidoy said, what are we watching?", is_command: false },
+      { start: 13.7, end: 14.7, text: "I got it.", is_command: true },
+      { start: 14.7, end: 17.5, text: "2015 or 2016?", is_command: false },
+      { start: 18.5, end: 20.5, text: "Whoa!", is_command: false },
+      { start: 20.5, end: 22.5, text: "What did it come from?", is_command: false },
+      { start: 22.5, end: 24.7, text: "Yeah, hell of a low bracket run for Fury.", is_command: false },
+      { start: 24.7, end: 27.6, text: "It's a face-to-team that put them here in the first place, but they've got to get through Falcons in a third map.", is_command: true },
+      { start: 29.6, end: 30.6, text: "Kiss, kiss.", is_command: false }
+    ]
   },
   {
     id: "vod-val-1",
@@ -673,6 +689,8 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
         fileSize: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
         aiScore: savedClip.tactical_score || 25.0,
         tacticalVerdict: savedClip.soundness_reasoning || (savedClip.verdict ? `LLM Tactical Verdict: ${savedClip.verdict}` : "Evaluated by LLM Tactical Judge."),
+        transcription: savedClip.transcription || undefined,
+        transcriptSegments: (savedClip.transcript_segments as any) || undefined,
       };
 
       setMediaClips((prev) => [newClip, ...prev]);

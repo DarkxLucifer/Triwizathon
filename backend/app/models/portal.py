@@ -55,6 +55,8 @@ class PlayerClip(Base):
     tactical_score = Column(Float, nullable=True)     # Real LLM judge score (out of 30)
     verdict = Column(String(50), nullable=True)       # Optimal, Suboptimal, Blunder
     soundness_reasoning = Column(Text, nullable=True)
+    transcription = Column(Text, nullable=True)
+    transcript_segments_json = Column(JSON, nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
 
     player = relationship("Player", back_populates="clips")
