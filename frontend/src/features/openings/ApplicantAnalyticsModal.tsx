@@ -108,7 +108,7 @@ export function ApplicantAnalyticsModal({
   const rankBadge =
     rank === 1 ? {
       label: 'Rank #1 Contender',
-      color: 'bg-[#e8ff59]/15 text-[#e8ff59] border-[#e8ff59]/40',
+      color: 'bg-[#18181b] text-white border border-white/30',
       icon: Trophy,
     } : rank === 2 ? {
       label: 'Rank #2 Contender',
@@ -231,10 +231,10 @@ export function ApplicantAnalyticsModal({
             >
               <div className="flex items-center gap-4">
                 <div className="relative">
-                  <div className="w-16 h-16 rounded-[8px] bg-[#e8ff59] text-black font-black text-2xl flex items-center justify-center shadow-md">
+                  <div className="w-16 h-16 rounded-[8px] bg-[#18181b] border border-[#26262a] text-white font-black text-2xl flex items-center justify-center shadow-md">
                     {(applicant.player_handle || 'P').charAt(0).toUpperCase()}
                   </div>
-                  <span className="absolute -bottom-1 -right-1 px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-black text-[#e8ff59] border border-[#e8ff59]/40">
+                  <span className="absolute -bottom-1 -right-1 px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-black text-white border border-white/20">
                     LVL 10
                   </span>
                 </div>
@@ -244,7 +244,7 @@ export function ApplicantAnalyticsModal({
                     <h2 className="text-xl font-black tracking-tight">
                       {applicant.player_handle || 'Player'}
                     </h2>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#e8ff59]/10 text-[#e8ff59] border border-[#e8ff59]/30">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#18181b] text-white border border-[#26262a]">
                       VERIFIED PRO CANDIDATE
                     </span>
                   </div>
@@ -255,7 +255,7 @@ export function ApplicantAnalyticsModal({
 
                   <div className="flex flex-wrap items-center gap-3 mt-2 text-xs">
                     <span className="flex items-center gap-1 font-mono text-[11px] text-slate-400">
-                      <Mail className="w-3.5 h-3.5 text-[#e8ff59]" />
+                      <Mail className="w-3.5 h-3.5 text-[#9a9aa2]" />
                       <span>{playerDetails?.contact_email || 'player@scoutforge.gg'}</span>
                     </span>
                     <span className="flex items-center gap-1 font-mono text-[11px] text-slate-400">
@@ -263,7 +263,7 @@ export function ApplicantAnalyticsModal({
                       <span>{playerDetails?.contact_phone || '+1 (555) 019-2834'}</span>
                     </span>
                     <span className="flex items-center gap-1 font-mono text-[11px] text-slate-400">
-                      <MessageSquare className="w-3.5 h-3.5 text-[#e8ff59]" />
+                      <MessageSquare className="w-3.5 h-3.5 text-[#9a9aa2]" />
                       <span>{applicant.player_handle || 'Vortex'}#0001</span>
                     </span>
                   </div>
@@ -277,7 +277,7 @@ export function ApplicantAnalyticsModal({
                     type="button"
                     disabled={updatingStatus !== null}
                     onClick={() => handleStatusChange('shortlisted')}
-                    className="px-3.5 py-2 rounded-[6px] text-xs font-bold border border-[#26262a] text-[#ededed] hover:bg-[#18181b] transition-colors cursor-pointer text-center"
+                    className="px-3.5 py-2 rounded-[6px] text-xs font-bold border border-yellow-400/80 text-yellow-400 hover:bg-yellow-400 hover:text-black transition-colors cursor-pointer text-center"
                   >
                     Shortlist Candidate
                   </button>
@@ -288,7 +288,7 @@ export function ApplicantAnalyticsModal({
                     type="button"
                     disabled={updatingStatus !== null}
                     onClick={() => handleStatusChange('trial')}
-                    className="px-3.5 py-2 rounded-[6px] text-xs font-bold bg-[#e8ff59] text-black hover:bg-[#d8ef49] transition-colors cursor-pointer text-center font-black shadow-xs"
+                    className="px-3.5 py-2 rounded-[6px] text-xs font-black bg-yellow-400 text-black hover:bg-yellow-300 transition-colors cursor-pointer text-center shadow-xs"
                   >
                     Invite to Trial Scrims
                   </button>
@@ -299,7 +299,7 @@ export function ApplicantAnalyticsModal({
                     type="button"
                     disabled={updatingStatus !== null}
                     onClick={() => handleStatusChange('accepted')}
-                    className="px-3.5 py-2 rounded-[6px] text-xs font-bold border border-[#e8ff59]/40 text-[#e8ff59] hover:bg-[#e8ff59]/10 transition-colors cursor-pointer text-center"
+                    className="px-3.5 py-2 rounded-[6px] text-xs font-bold border border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-black transition-colors cursor-pointer text-center"
                   >
                     Accept to Roster
                   </button>
@@ -328,15 +328,15 @@ export function ApplicantAnalyticsModal({
                 }`}
               >
                 <div className="flex items-center justify-between text-xs font-mono font-bold mb-1">
-                  <span className="text-[#e8ff59]">OVERALL FITSCORE</span>
-                  <Trophy className="w-4 h-4 text-[#e8ff59]" />
+                  <span className="text-white">OVERALL FITSCORE</span>
+                  <Trophy className="w-4 h-4 text-white" />
                 </div>
                 <div className="text-3xl font-black font-mono">{overallScore} / 100</div>
                 <p className="text-[11px] text-[#9a9aa2] font-medium mt-1">
                   Top 1.5% Global Pro Benchmark for {applicant.role_name || 'Roster Role'}
                 </p>
                 <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden mt-3">
-                  <div className="h-full bg-[#e8ff59]" style={{ width: `${overallScore}%` }} />
+                  <div className="h-full bg-white" style={{ width: `${overallScore}%` }} />
                 </div>
               </div>
 
@@ -364,15 +364,15 @@ export function ApplicantAnalyticsModal({
                 }`}
               >
                 <div className="flex items-center justify-between text-xs font-mono font-bold mb-1">
-                  <span className="text-[#e8ff59]">VOICE COMMS & TACTICAL</span>
-                  <Mic className="w-4 h-4 text-[#e8ff59]" />
+                  <span className="text-white">VOICE COMMS & TACTICAL</span>
+                  <Mic className="w-4 h-4 text-white" />
                 </div>
-                <div className="text-3xl font-black font-mono text-[#e8ff59]">{tacticalScore} / 30.0</div>
+                <div className="text-3xl font-black font-mono text-white">{tacticalScore} / 30.0</div>
                 <p className={`text-[11px] mt-1 ${isLight ? 'text-slate-500' : 'text-[#9a9aa2]'}`}>
                   Whisper AI transcribed audio comms & LLM tactical judge
                 </p>
                 <div className="w-full h-1.5 bg-[#26262a] rounded-full overflow-hidden mt-3">
-                  <div className="h-full bg-[#e8ff59]" style={{ width: `${(tacticalScore / 30) * 100}%` }} />
+                  <div className="h-full bg-white" style={{ width: `${(tacticalScore / 30) * 100}%` }} />
                 </div>
               </div>
             </div>
@@ -381,7 +381,7 @@ export function ApplicantAnalyticsModal({
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Zap className="w-4 h-4 text-[#e8ff59]" />
+                  <Zap className="w-4 h-4 text-white" />
                   <h3 className="text-xs font-mono font-black uppercase tracking-wider">
                     Total Combat Telemetry & Match Engine Analytics
                   </h3>
@@ -398,7 +398,7 @@ export function ApplicantAnalyticsModal({
                   }`}
                 >
                   <div className="text-[10px] font-mono text-slate-500 mb-0.5">ADR (DAMAGE/RND)</div>
-                  <div className="text-lg font-black font-mono text-[#e8ff59]">{adr} ADR</div>
+                  <div className="text-lg font-black font-mono text-white">{adr} ADR</div>
                   <div className="text-[10px] text-[#9a9aa2] font-bold mt-0.5">Top 3.2% Global</div>
                 </div>
 
@@ -418,7 +418,7 @@ export function ApplicantAnalyticsModal({
                   }`}
                 >
                   <div className="text-[10px] font-mono text-slate-500 mb-0.5">KILL / DEATH (K/D)</div>
-                  <div className="text-lg font-black font-mono text-[#e8ff59]">{kd}</div>
+                  <div className="text-lg font-black font-mono text-white">{kd}</div>
                   <div className="text-[10px] text-[#9a9aa2] font-bold mt-0.5">+4.8 Net Diff</div>
                 </div>
 
@@ -448,7 +448,7 @@ export function ApplicantAnalyticsModal({
                   }`}
                 >
                   <div className="text-[10px] font-mono text-slate-500 mb-0.5">OPENING DUEL WIN</div>
-                  <div className="text-lg font-black font-mono text-[#e8ff59]">{openingDuelWin}</div>
+                  <div className="text-lg font-black font-mono text-white">{openingDuelWin}</div>
                   <div className="text-[10px] text-[#9a9aa2] font-bold mt-0.5">First Pick Success</div>
                 </div>
               </div>
@@ -463,7 +463,7 @@ export function ApplicantAnalyticsModal({
                 }`}
               >
                 <div className="flex items-center justify-between pb-2 border-b border-inherit">
-                  <span className="text-xs font-bold uppercase font-mono text-[#e8ff59]">
+                  <span className="text-xs font-bold uppercase font-mono text-white">
                     Tactical & Utility Telemetry
                   </span>
                   <span className="text-[10px] font-mono text-slate-500">Steam64 Verified</span>
@@ -481,7 +481,7 @@ export function ApplicantAnalyticsModal({
                     <span className={isLight ? 'text-slate-600' : 'text-[#9a9aa2]'}>
                       Flash Assist Blind Duration:
                     </span>
-                    <span className="font-mono font-bold text-[#e8ff59]">{flashBlindDuration} / enemy</span>
+                    <span className="font-mono font-bold text-white">{flashBlindDuration} / enemy</span>
                   </div>
 
                   <div className="flex items-center justify-between">
@@ -502,7 +502,7 @@ export function ApplicantAnalyticsModal({
                     <span className={isLight ? 'text-slate-600' : 'text-[#9a9aa2]'}>
                       Round Win Delta on First Frag:
                     </span>
-                    <span className="font-mono font-bold text-[#e8ff59]">+16.4% Probability</span>
+                    <span className="font-mono font-bold text-white">+16.4% Probability</span>
                   </div>
                 </div>
               </div>
@@ -514,7 +514,7 @@ export function ApplicantAnalyticsModal({
                 }`}
               >
                 <div className="flex items-center justify-between pb-2 border-b border-inherit">
-                  <span className="text-xs font-bold uppercase font-mono text-[#e8ff59]">
+                  <span className="text-xs font-bold uppercase font-mono text-white">
                     Combat Competency Percentiles
                   </span>
                   <span className="text-[10px] font-mono text-slate-500">Scout Benchmark</span>
@@ -522,10 +522,10 @@ export function ApplicantAnalyticsModal({
 
                 <div className="space-y-2 text-xs">
                   {[
-                    { label: 'Aim Precision & Crosshair Placement', pct: 94, color: 'bg-[#e8ff59]' },
-                    { label: 'Map Geometry & Angle Isolation', pct: 90, color: 'bg-[#e8ff59]' },
+                    { label: 'Aim Precision & Crosshair Placement', pct: 94, color: 'bg-white' },
+                    { label: 'Map Geometry & Angle Isolation', pct: 90, color: 'bg-white' },
                     { label: 'Economic & Utility Discipline', pct: 86, color: 'bg-[#ededed]' },
-                    { label: 'Retake & Post-Plant Execution', pct: 92, color: 'bg-[#e8ff59]' },
+                    { label: 'Retake & Post-Plant Execution', pct: 92, color: 'bg-white' },
                     { label: 'Team Comms & Calling Clarity', pct: 88, color: 'bg-[#ededed]' },
                   ].map((item, idx) => (
                     <div key={idx} className="space-y-1">
@@ -546,12 +546,12 @@ export function ApplicantAnalyticsModal({
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Video className="w-4 h-4 text-[#e8ff59]" />
+                  <Video className="w-4 h-4 text-white" />
                   <h3 className="text-xs font-mono font-black uppercase tracking-wider">
                     Submitted Gameplay VODs & Whisper AI Voice Comms
                   </h3>
                 </div>
-                <span className="text-[10px] font-mono text-[#e8ff59] flex items-center gap-1">
+                <span className="text-[10px] font-mono text-white flex items-center gap-1">
                   <Volume2 className="w-3.5 h-3.5" />
                   Live Audio Telemetry Available
                 </span>
@@ -565,7 +565,7 @@ export function ApplicantAnalyticsModal({
                       setSelectedClip(clip);
                       setIsVideoModalOpen(true);
                     }}
-                    className={`p-4 rounded-[8px] border flex flex-col justify-between cursor-pointer transition-all hover:border-[#e8ff59]/60 hover:shadow-md ${
+                    className={`p-4 rounded-[8px] border flex flex-col justify-between cursor-pointer transition-all hover:border-zinc-500 hover:shadow-md ${
                       isLight ? 'bg-white border-slate-200' : 'bg-[#18181b] border-[#26262a]'
                     }`}
                   >
@@ -574,7 +574,7 @@ export function ApplicantAnalyticsModal({
                         <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#0b0b0c] text-[#ededed] border border-[#26262a]">
                           {clip.tag}
                         </span>
-                        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#e8ff59]/10 text-[#e8ff59] border border-[#e8ff59]/30">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#18181b] text-white border border-[#26262a]">
                           AI Score: {clip.aiScore ?? 28.5} / 30
                         </span>
                       </div>
@@ -597,7 +597,7 @@ export function ApplicantAnalyticsModal({
                       </span>
                       <button
                         type="button"
-                        className="flex items-center gap-1 font-black text-[#e8ff59] hover:underline"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-[4px] text-xs font-black bg-yellow-400 hover:bg-yellow-300 text-black transition-colors cursor-pointer shadow-xs"
                       >
                         <Play className="w-3.5 h-3.5 fill-current" />
                         <span>Play Video with Subtitles</span>
@@ -642,7 +642,7 @@ export function ApplicantAnalyticsModal({
                 </div>
                 <div>
                   <span className="block text-[11px] text-slate-500 font-mono">EXPECTED CONTRACT:</span>
-                  <span className="font-bold text-[#e8ff59]">
+                  <span className="font-bold text-white">
                     {playerDetails?.expected_compensation || '$1,500/mo (Open to Trial)'}
                   </span>
                 </div>
@@ -656,8 +656,8 @@ export function ApplicantAnalyticsModal({
               }`}
             >
               <div className="flex items-center gap-1.5 mb-1.5">
-                <Sparkles className="w-4 h-4 text-[#e8ff59]" />
-                <span className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-[#e8ff59]">
+                <Sparkles className="w-4 h-4 text-white" />
+                <span className="text-xs font-black uppercase tracking-wider text-white">
                   AI Scout Recommendation & Executive Evaluation
                 </span>
               </div>
