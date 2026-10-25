@@ -32,6 +32,7 @@ import {
 
   Layout,
   Briefcase,
+  Video,
 
 } from 'lucide-react';
 
@@ -59,6 +60,7 @@ export type SidebarNavId =
 
   | 'dossier'
   | 'openings'
+  | 'recording'
 
   | 'settings'
 
@@ -123,6 +125,7 @@ export function Sidebar({
           { id: 'player_portal' as SidebarNavId, label: 'Overview', icon: Layout },
 
           { id: 'dossier' as SidebarNavId, label: 'My Profile', icon: User },
+          { id: 'recording' as SidebarNavId, label: 'Recording', icon: Video },
           { id: 'openings' as SidebarNavId, label: 'Roster Openings & Applications', icon: Briefcase },
 
           { id: 'leaderboards' as SidebarNavId, label: 'Leaderboards', icon: Trophy },

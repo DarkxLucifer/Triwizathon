@@ -18,6 +18,7 @@ import { AcceptanceTestSuite } from '@/features/acceptance/AcceptanceTestSuite';
 import { PlayerDashboardView } from '@/features/player_dashboard/PlayerDashboardView';
 import { UserRole } from '@/features/auth/RoleLoginView';
 import { OrganiserOpeningsView } from '@/features/openings/OrganiserOpeningsView';
+import { RecordingView } from '@/features/recording/RecordingView';
 import { Role } from '@/types';
 
 export function DashboardApp() {
@@ -294,6 +295,11 @@ export function DashboardApp() {
                 }}
                 onToggleTheme={toggleTheme}
               />
+            )}
+
+            {/* 7b. Anti-Cheat Live Recording View */}
+            {authRole === 'player' && activeNav === 'recording' && (
+              <RecordingView theme={theme} />
             )}
 
             {/* 8. Settings / Scouting Brief Config */}

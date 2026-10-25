@@ -17,6 +17,14 @@ from app.models.portal import (
     ActivityEvent,
     Notification,
 )
+from app.models.recording import (
+    RecordingSession,
+    RecordingChallenge,
+    RecordingTrack,
+    RecordingChunk,
+    RecordingCheck,
+    RecordingShare,
+)
 
 __all__ = [
     "Base",
@@ -46,4 +54,10 @@ __all__ = [
     "PlayerWatchlist",
     "ActivityEvent",
     "Notification",
+    "RecordingSession",
+    "RecordingChallenge",
+    "RecordingTrack",
+    "RecordingChunk",
+    "RecordingCheck",
+    "RecordingShare",
 ]

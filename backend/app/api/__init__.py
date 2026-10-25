@@ -12,6 +12,7 @@ from app.api.player_portal import router as player_portal_router
 from app.api.openings import router as openings_router
 from app.api.dashboard import router as dashboard_router
 from app.api.leaderboards import router as leaderboards_router
+from app.api.recordings import router as recordings_router
 
 api_router = APIRouter(prefix="/api")
 
@@ -28,3 +29,4 @@ api_router.include_router(player_portal_router)
 api_router.include_router(openings_router)
 api_router.include_router(dashboard_router)
 api_router.include_router(leaderboards_router)
+api_router.include_router(recordings_router)
