@@ -4,6 +4,7 @@ from app.core.database import get_db
 from app.core.security import verify_password, get_password_hash, create_access_token
 from app.models.organization import Organization
 from app.models.user import User
+from app.models.esports import Player
 from app.models.portal import Notification
 from app.schemas.auth import (
     UserRegister,
@@ -29,11 +30,13 @@ def register(user_in: UserRegister, db: Session = Depends(get_db)):
         )
 
     org_id = None
-    if user_in.org_name:
-        org_slug = user_in.org_name.lower().replace(" ", "-")
+    # For organisers, analysts, scouts, or if an org_name was supplied
+    if user_in.org_name or user_in.role in ("organiser", "scout", "coach", "gm", "analyst"):
+        org_name = user_in.org_name or f"{user_in.full_name or 'Pro'} Esports"
+        org_slug = org_name.lower().replace(" ", "-").replace("'", "")
         org = db.query(Organization).filter(Organization.slug == org_slug).first()
         if not org:
-            org = Organization(name=user_in.org_name, slug=org_slug)
+            org = Organization(name=org_name, slug=org_slug)
             db.add(org)
             db.flush()
         org_id = org.id
@@ -48,6 +51,32 @@ def register(user_in: UserRegister, db: Session = Depends(get_db)):
         role=user_in.role,
     )
     db.add(user)
+    db.flush()
+
+    # If user registered as player, auto-provision their competitive Player profile
+    if user_in.role == "player":
+        base_handle = user_in.full_name.strip().replace(" ", "_") if user_in.full_name else f"Player_{user.id}"
+        handle = base_handle
+        existing_player = db.query(Player).filter(Player.handle == handle).first()
+        if existing_player:
+            handle = f"{base_handle}_{user.id}"
+
+        player = Player(
+            user_id=user.id,
+            name=user_in.full_name or "Competitive Player",
+            handle=handle,
+            contact_email=user_in.email,
+            primary_game="Counter-Strike 2",
+            playstyle="Aggressive Entry",
+            region="EU",
+            tier="Tier 1",
+            is_available=True,
+            availability_status="Open to Offers",
+        )
+        db.add(player)
+        db.flush()
+        user.player_id = player.id
+
     db.commit()
     db.refresh(user)
 

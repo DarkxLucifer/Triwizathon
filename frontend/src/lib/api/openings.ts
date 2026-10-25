@@ -25,7 +25,51 @@ export interface RosterOpeningItem {
   updated_at: string;
 }
 
+export interface CreateOpeningPayload {
+  title: string;
+  role_name: string;
+  game_name?: string;
+  description: string;
+  min_rank_text: string;
+  scrim_window: string;
+  package_text: string;
+  urgency?: 'Immediate' | 'High' | 'Medium' | 'Low';
+  status?: 'open' | 'closed' | 'paused';
+  roster_id?: number | null;
+  title_id?: number | null;
+  role_id?: number | null;
+}
+
 export const openingsApi = {
+  async createOpening(
+    payload: CreateOpeningPayload,
+    token?: string
+  ): Promise<RosterOpeningItem> {
+    return apiFetch<RosterOpeningItem>('/openings', {
+      method: 'POST',
+      token,
+      body: JSON.stringify(payload),
+    });
+  },
+
+  async getOrgApplications(
+    options: {
+      status?: string;
+      openingId?: number;
+      token?: string;
+    } = {}
+  ): Promise<ApplicationItem[]> {
+    const params = new URLSearchParams();
+    if (options.status) params.set('status', options.status);
+    if (options.openingId) params.set('opening_id', String(options.openingId));
+
+    const qs = params.toString() ? `?${params.toString()}` : '';
+    return apiFetch<ApplicationItem[]>(`/openings/org/applications${qs}`, {
+      method: 'GET',
+      token: options.token,
+    });
+  },
+
   async getOpenings(
     options: {
       role?: string;

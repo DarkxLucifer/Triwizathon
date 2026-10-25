@@ -121,7 +121,7 @@ def build_user_out(user: User, active_context: Optional[str] = None) -> UserOut:
     available_contexts = []
     if user.player_id is not None or user.role == "player":
         available_contexts.append("player")
-    if user.org_id is not None or user.role in ["analyst", "coach", "gm", "admin"]:
+    if user.org_id is not None or user.role in ["analyst", "coach", "gm", "admin", "organiser", "scout"]:
         available_contexts.append("organiser")
     if not available_contexts:
         available_contexts = ["organiser"]

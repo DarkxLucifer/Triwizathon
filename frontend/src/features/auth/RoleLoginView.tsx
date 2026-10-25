@@ -15,6 +15,9 @@ import {
   Moon,
   Trophy,
   Users,
+  UserPlus,
+  Mail,
+  CheckCircle2,
 } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
 import { authApi } from '@/lib/api/auth';
@@ -35,6 +38,7 @@ export function RoleLoginView({
   initialRole = 'organiser',
 }: RoleLoginViewProps) {
   const isLight = theme === 'light';
+  const [isRegisterMode, setIsRegisterMode] = useState(false);
   const [selectedRole, setSelectedRole] = useState<UserRole>(initialRole);
   const [identifier, setIdentifier] = useState(
     initialRole === 'player' ? 'player@scoutforge.gg' : 'analyst@cloud9.gg'
@@ -42,6 +46,13 @@ export function RoleLoginView({
   const [password, setPassword] = useState(
     initialRole === 'player' ? 'player123' : 'scoutforge123'
   );
+
+  // Register Form State
+  const [regFullName, setRegFullName] = useState('');
+  const [regEmail, setRegEmail] = useState('');
+  const [regPassword, setRegPassword] = useState('');
+  const [regOrgName, setRegOrgName] = useState('');
+
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
@@ -73,6 +84,43 @@ export function RoleLoginView({
       onLogin(res.user.active_context as UserRole, res.access_token, res.user);
     } catch (err: any) {
       setErrorMessage(err.message || 'Authentication failed. Please verify credentials.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const doRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!regEmail.trim() || !regPassword.trim() || !regFullName.trim()) {
+      setErrorMessage('Please fill in all required fields.');
+      return;
+    }
+    if (regPassword.length < 6) {
+      setErrorMessage('Password must be at least 6 characters long.');
+      return;
+    }
+
+    setLoading(true);
+    setErrorMessage(null);
+    try {
+      const res = await authApi.register({
+        email: regEmail.trim(),
+        password: regPassword,
+        full_name: regFullName.trim(),
+        role: selectedRole,
+        org_name: selectedRole === 'organiser' ? (regOrgName.trim() || undefined) : undefined,
+      });
+
+      localStorage.setItem('scoutforge_access_token', res.access_token);
+      localStorage.setItem('scoutforge_user', JSON.stringify(res.user));
+      localStorage.setItem('scoutforge_auth_role', res.user.active_context);
+      localStorage.setItem(
+        'scoutforge_available_contexts',
+        JSON.stringify(res.user.available_contexts)
+      );
+      onLogin(res.user.active_context as UserRole, res.access_token, res.user);
+    } catch (err: any) {
+      setErrorMessage(err.message || 'Registration failed. A user with this email may already exist.');
     } finally {
       setLoading(false);
     }
@@ -112,39 +160,72 @@ export function RoleLoginView({
                 : 'bg-[#131315] border-[#26262a] text-[#9a9aa2]'
             }`}
           >
-            ROLE-BASED AUTHENTICATION
+            {isRegisterMode ? 'USER ONBOARDING & REGISTRATION' : 'ROLE-BASED AUTHENTICATION'}
           </span>
         </div>
 
-        {/* Theme Toggle Button */}
-        {onToggleTheme && (
+        {/* Right Header Actions */}
+        <div className="flex items-center gap-2.5">
+          {/* New Small Account Action Button */}
           <button
             type="button"
-            onClick={onToggleTheme}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-[6px] border text-xs font-medium transition-colors cursor-pointer ${
-              isLight
-                ? 'border-slate-300 bg-white hover:bg-slate-100 text-slate-800'
-                : 'border-[#26262a] bg-[#131315] hover:bg-[#18181b] text-[#ededed]'
+            onClick={() => {
+              setIsRegisterMode(!isRegisterMode);
+              setErrorMessage(null);
+            }}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-[6px] border text-xs font-bold transition-all cursor-pointer shadow-xs ${
+              isRegisterMode
+                ? isLight
+                  ? 'bg-slate-900 hover:bg-black text-white border-slate-900'
+                  : 'bg-[#e8ff59] hover:bg-[#d8ef49] text-black border-[#e8ff59]'
+                : isLight
+                ? 'bg-white hover:bg-slate-50 text-slate-900 border-slate-300 hover:border-slate-400'
+                : 'bg-[#131315] hover:bg-[#1a1a1d] text-[#e8ff59] border-[#e8ff59]/40 hover:border-[#e8ff59]'
             }`}
           >
-            {isLight ? (
+            {isRegisterMode ? (
               <>
-                <Moon className="w-3.5 h-3.5 text-indigo-500" />
-                <span>Dark Mode</span>
+                <User className="w-3.5 h-3.5" />
+                <span>Sign In Instead</span>
               </>
             ) : (
               <>
-                <Sun className="w-3.5 h-3.5 text-amber-400" />
-                <span>Light Mode</span>
+                <UserPlus className="w-3.5 h-3.5" />
+                <span>Create New Account</span>
               </>
             )}
           </button>
-        )}
+
+          {/* Theme Toggle Button */}
+          {onToggleTheme && (
+            <button
+              type="button"
+              onClick={onToggleTheme}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-[6px] border text-xs font-medium transition-colors cursor-pointer ${
+                isLight
+                  ? 'border-slate-300 bg-white hover:bg-slate-100 text-slate-800'
+                  : 'border-[#26262a] bg-[#131315] hover:bg-[#18181b] text-[#ededed]'
+              }`}
+            >
+              {isLight ? (
+                <>
+                  <Moon className="w-3.5 h-3.5 text-indigo-500" />
+                  <span>Dark Mode</span>
+                </>
+              ) : (
+                <>
+                  <Sun className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Light Mode</span>
+                </>
+              )}
+            </button>
+          )}
+        </div>
       </header>
 
       {/* Main Authentication Card */}
-      <main className="flex-1 flex items-center justify-center px-4 py-10">
-        <div className="w-full max-w-lg space-y-6">
+      <main className="flex-1 flex items-center justify-center px-4 py-8">
+        <div className="w-full max-w-lg space-y-5">
           {/* Role Selection Switcher */}
           <div
             className={`p-1 rounded-[8px] border flex gap-1 ${
@@ -168,7 +249,7 @@ export function RoleLoginView({
               }`}
             >
               <Gamepad2 className="w-4 h-4 shrink-0" />
-              <span>Login as User (Player)</span>
+              <span>{isRegisterMode ? 'Register as Player' : 'Login as User (Player)'}</span>
             </button>
 
             {/* Organiser Option */}
@@ -186,7 +267,7 @@ export function RoleLoginView({
               }`}
             >
               <Building2 className="w-4 h-4 shrink-0" />
-              <span>Login as Organiser (Scout)</span>
+              <span>{isRegisterMode ? 'Register as Organiser' : 'Login as Organiser (Scout)'}</span>
             </button>
           </div>
 
@@ -225,7 +306,11 @@ export function RoleLoginView({
               </span>
 
               <h1 className="text-xl font-black tracking-tight">
-                {selectedRole === 'player'
+                {isRegisterMode
+                  ? selectedRole === 'player'
+                    ? 'Create New Player Account'
+                    : 'Create New Organiser Account'
+                  : selectedRole === 'player'
                   ? 'Sign in as Competitive Player'
                   : 'Sign in as Esports Organiser'}
               </h1>
@@ -235,212 +320,420 @@ export function RoleLoginView({
                   isLight ? 'text-slate-500' : 'text-[#9a9aa2]'
                 }`}
               >
-                {selectedRole === 'player'
+                {isRegisterMode
+                  ? selectedRole === 'player'
+                    ? 'Create your verified competitor account, upload gameplay telemetry, and apply to team trials.'
+                    : 'Register your esports organization to publish vacancies, review applicants, and scout talent.'
+                  : selectedRole === 'player'
                   ? 'Access your verified FitScore dossier, trajectory analytics, and apply to roster trials.'
                   : 'Manage 5-slot tactical rosters, evaluate candidate leaderboards, and process audio telemetry.'}
               </p>
             </div>
 
-            {/* Quick 1-Click Demo Login Button */}
-            <div className="mb-6">
-              <button
-                type="button"
-                onClick={() => handleQuickLogin(selectedRole)}
-                disabled={loading}
-                className={`w-full flex items-center justify-between px-4 py-3 rounded-[6px] border transition-all cursor-pointer group ${
-                  isLight
-                    ? 'bg-slate-900 hover:bg-black text-white border-slate-900 shadow-sm'
-                    : 'bg-[#0b0b0c] hover:bg-[#18181b] text-[#ededed] border-[#26262a] hover:border-[#e8ff59]/50'
-                }`}
-              >
-                <div className="flex items-center gap-3 text-left">
-                  <div className="w-8 h-8 rounded-[4px] font-mono font-black flex items-center justify-center text-xs shrink-0 bg-[#e8ff59] text-black">
-                    {selectedRole === 'player' ? 'P' : 'O'}
+            {errorMessage && (
+              <div className="mb-5 p-2.5 rounded-[6px] border border-red-500/30 bg-red-500/10 text-red-400 text-xs font-mono">
+                {errorMessage}
+              </div>
+            )}
+
+            {/* --- REGISTRATION MODE FORM --- */}
+            {isRegisterMode ? (
+              <form onSubmit={doRegister} className="space-y-4">
+                {/* Full Name */}
+                <div className="space-y-1.5">
+                  <label
+                    className={`block text-xs font-bold ${
+                      isLight ? 'text-slate-700' : 'text-[#ededed]'
+                    }`}
+                  >
+                    {selectedRole === 'player' ? 'Full Name / In-Game Alias *' : 'Full Name / Scout Lead *'}
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <User
+                        className={`w-4 h-4 ${
+                          isLight ? 'text-slate-400' : 'text-[#9a9aa2]'
+                        }`}
+                      />
+                    </div>
+                    <input
+                      type="text"
+                      required
+                      value={regFullName}
+                      onChange={e => setRegFullName(e.target.value)}
+                      placeholder={selectedRole === 'player' ? 'e.g. Alex "Apex" Mercer' : 'e.g. Alex Mercer'}
+                      className={`w-full pl-9 pr-3 py-2 rounded-[6px] text-xs font-mono font-medium border focus:outline-none transition-colors ${
+                        isLight
+                          ? 'border-slate-300 bg-slate-50 text-slate-900 focus:border-slate-900 focus:bg-white'
+                          : 'border-[#26262a] bg-[#0b0b0c] text-[#ededed] focus:border-[#e8ff59]'
+                      }`}
+                    />
                   </div>
-                  <div>
-                    <div className="text-xs font-bold flex items-center gap-1.5">
+                </div>
+
+                {/* Email Address */}
+                <div className="space-y-1.5">
+                  <label
+                    className={`block text-xs font-bold ${
+                      isLight ? 'text-slate-700' : 'text-[#ededed]'
+                    }`}
+                  >
+                    Email Address *
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Mail
+                        className={`w-4 h-4 ${
+                          isLight ? 'text-slate-400' : 'text-[#9a9aa2]'
+                        }`}
+                      />
+                    </div>
+                    <input
+                      type="email"
+                      required
+                      value={regEmail}
+                      onChange={e => setRegEmail(e.target.value)}
+                      placeholder="e.g. player@example.com"
+                      className={`w-full pl-9 pr-3 py-2 rounded-[6px] text-xs font-mono font-medium border focus:outline-none transition-colors ${
+                        isLight
+                          ? 'border-slate-300 bg-slate-50 text-slate-900 focus:border-slate-900 focus:bg-white'
+                          : 'border-[#26262a] bg-[#0b0b0c] text-[#ededed] focus:border-[#e8ff59]'
+                      }`}
+                    />
+                  </div>
+                </div>
+
+                {/* Password Input */}
+                <div className="space-y-1.5">
+                  <label
+                    className={`block text-xs font-bold ${
+                      isLight ? 'text-slate-700' : 'text-[#ededed]'
+                    }`}
+                  >
+                    Create Password (min 6 characters) *
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Lock
+                        className={`w-4 h-4 ${
+                          isLight ? 'text-slate-400' : 'text-[#9a9aa2]'
+                        }`}
+                      />
+                    </div>
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      required
+                      minLength={6}
+                      value={regPassword}
+                      onChange={e => setRegPassword(e.target.value)}
+                      placeholder="Enter a secure password"
+                      className={`w-full pl-9 pr-10 py-2 rounded-[6px] text-xs font-mono font-medium border focus:outline-none transition-colors ${
+                        isLight
+                          ? 'border-slate-300 bg-slate-50 text-slate-900 focus:border-slate-900 focus:bg-white'
+                          : 'border-[#26262a] bg-[#0b0b0c] text-[#ededed] focus:border-[#e8ff59]'
+                      }`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-xs text-[#9a9aa2] hover:text-[#ededed] cursor-pointer"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="w-3.5 h-3.5" />
+                      ) : (
+                        <Eye className="w-3.5 h-3.5" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Organization Name (for Organiser) */}
+                {selectedRole === 'organiser' && (
+                  <div className="space-y-1.5">
+                    <label
+                      className={`block text-xs font-bold ${
+                        isLight ? 'text-slate-700' : 'text-[#ededed]'
+                      }`}
+                    >
+                      Organization / Team Name *
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Building2
+                          className={`w-4 h-4 ${
+                            isLight ? 'text-slate-400' : 'text-[#9a9aa2]'
+                          }`}
+                        />
+                      </div>
+                      <input
+                        type="text"
+                        required
+                        value={regOrgName}
+                        onChange={e => setRegOrgName(e.target.value)}
+                        placeholder="e.g. Apex Esports, Cloud9, Sentinels"
+                        className={`w-full pl-9 pr-3 py-2 rounded-[6px] text-xs font-mono font-medium border focus:outline-none transition-colors ${
+                          isLight
+                            ? 'border-slate-300 bg-slate-50 text-slate-900 focus:border-slate-900 focus:bg-white'
+                            : 'border-[#26262a] bg-[#0b0b0c] text-[#ededed] focus:border-[#e8ff59]'
+                        }`}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Submit Register Button */}
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full mt-2 py-2.5 rounded-[6px] font-extrabold text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer bg-[#e8ff59] hover:bg-[#d4eb44] text-black shadow-sm"
+                >
+                  {loading ? (
+                    <span>Creating Account...</span>
+                  ) : (
+                    <>
                       <span>
                         {selectedRole === 'player'
-                          ? "1-Click Sign In: Sam 'Vortex'"
-                          : "1-Click Sign In: The Shadow GM"}
+                          ? 'Create Account & Enter Player Dashboard'
+                          : 'Create Account & Enter Organiser Platform'}
                       </span>
-                      <span className="text-[10px] text-[#e8ff59] font-mono font-normal">
-                        (Demo)
-                      </span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </>
+                  )}
+                </button>
+
+                {/* Switch back to sign in */}
+                <div className="text-center pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsRegisterMode(false);
+                      setErrorMessage(null);
+                    }}
+                    className={`text-xs hover:underline cursor-pointer ${
+                      isLight ? 'text-slate-600 hover:text-slate-900' : 'text-[#9a9aa2] hover:text-[#e8ff59]'
+                    }`}
+                  >
+                    Already have an account? <span className="font-bold underline">Sign in with credentials</span>
+                  </button>
+                </div>
+              </form>
+            ) : (
+              /* --- SIGN IN MODE FORM --- */
+              <>
+                {/* Quick 1-Click Demo Login Button */}
+                <div className="mb-6">
+                  <button
+                    type="button"
+                    onClick={() => handleQuickLogin(selectedRole)}
+                    disabled={loading}
+                    className={`w-full flex items-center justify-between px-4 py-3 rounded-[6px] border transition-all cursor-pointer group ${
+                      isLight
+                        ? 'bg-slate-900 hover:bg-black text-white border-slate-900 shadow-sm'
+                        : 'bg-[#0b0b0c] hover:bg-[#18181b] text-[#ededed] border-[#26262a] hover:border-[#e8ff59]/50'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3 text-left">
+                      <div className="w-8 h-8 rounded-[4px] font-mono font-black flex items-center justify-center text-xs shrink-0 bg-[#e8ff59] text-black">
+                        {selectedRole === 'player' ? 'P' : 'O'}
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold flex items-center gap-1.5">
+                          <span>
+                            {selectedRole === 'player'
+                              ? "1-Click Sign In: Sam 'Vortex'"
+                              : "1-Click Sign In: The Shadow GM"}
+                          </span>
+                          <span className="text-[10px] text-[#e8ff59] font-mono font-normal">
+                            (Demo)
+                          </span>
+                        </div>
+                        <div
+                          className={`text-[11px] ${
+                            isLight ? 'text-slate-300' : 'text-[#9a9aa2]'
+                          }`}
+                        >
+                          {selectedRole === 'player'
+                            ? 'Assaulter / IGL • BGMI & Valorant'
+                            : 'Pro Roster Organization • 5 Rosters'}
+                        </div>
+                      </div>
                     </div>
+                    <ArrowRight className="w-4 h-4 text-[#e8ff59] transition-transform group-hover:translate-x-1 shrink-0" />
+                  </button>
+                </div>
+
+                {/* Divider */}
+                <div className="relative my-5">
+                  <div
+                    className={`absolute inset-0 flex items-center ${
+                      isLight ? 'border-slate-200' : 'border-[#26262a]'
+                    }`}
+                  >
                     <div
-                      className={`text-[11px] ${
-                        isLight ? 'text-slate-300' : 'text-[#9a9aa2]'
+                      className={`w-full border-t ${
+                        isLight ? 'border-slate-200' : 'border-[#26262a]'
+                      }`}
+                    />
+                  </div>
+                  <div className="relative flex justify-center text-[10px] uppercase font-mono tracking-wider">
+                    <span
+                      className={`px-2 ${
+                        isLight
+                          ? 'bg-white text-slate-400'
+                          : 'bg-[#131315] text-[#9a9aa2]'
+                      }`}
+                    >
+                      or sign in with credentials
+                    </span>
+                  </div>
+                </div>
+
+                {/* Credentials Form */}
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  {/* Identifier Input */}
+                  <div className="space-y-1.5">
+                    <label
+                      className={`block text-xs font-bold ${
+                        isLight ? 'text-slate-700' : 'text-[#ededed]'
                       }`}
                     >
                       {selectedRole === 'player'
-                        ? 'Assaulter / IGL • BGMI & Valorant'
-                        : 'Pro Roster Organization • 5 Rosters'}
+                        ? 'Email / Player Identifier'
+                        : 'Organization Email / Staff ID'}
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <User
+                          className={`w-4 h-4 ${
+                            isLight ? 'text-slate-400' : 'text-[#9a9aa2]'
+                          }`}
+                        />
+                      </div>
+                      <input
+                        type="text"
+                        required
+                        value={identifier}
+                        onChange={e => setIdentifier(e.target.value)}
+                        placeholder={
+                          selectedRole === 'player'
+                            ? 'e.g., player@scoutforge.gg or Vortex'
+                            : 'e.g., analyst@cloud9.gg'
+                        }
+                        className={`w-full pl-9 pr-3 py-2 rounded-[6px] text-xs font-mono font-medium border focus:outline-none transition-colors ${
+                          isLight
+                            ? 'border-slate-300 bg-slate-50 text-slate-900 focus:border-slate-900 focus:bg-white'
+                            : 'border-[#26262a] bg-[#0b0b0c] text-[#ededed] focus:border-[#e8ff59]'
+                        }`}
+                      />
                     </div>
                   </div>
-                </div>
-                <ArrowRight className="w-4 h-4 text-[#e8ff59] transition-transform group-hover:translate-x-1 shrink-0" />
-              </button>
-            </div>
 
-            {/* Divider */}
-            <div className="relative my-5">
-              <div
-                className={`absolute inset-0 flex items-center ${
-                  isLight ? 'border-slate-200' : 'border-[#26262a]'
-                }`}
-              >
-                <div
-                  className={`w-full border-t ${
-                    isLight ? 'border-slate-200' : 'border-[#26262a]'
-                  }`}
-                />
-              </div>
-              <div className="relative flex justify-center text-[10px] uppercase font-mono tracking-wider">
-                <span
-                  className={`px-2 ${
-                    isLight
-                      ? 'bg-white text-slate-400'
-                      : 'bg-[#131315] text-[#9a9aa2]'
-                  }`}
-                >
-                  or sign in with credentials
-                </span>
-              </div>
-            </div>
+                  {/* Password Input */}
+                  <div className="space-y-1.5">
+                    <label
+                      className={`block text-xs font-bold ${
+                        isLight ? 'text-slate-700' : 'text-[#ededed]'
+                      }`}
+                    >
+                      Password
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Lock
+                          className={`w-4 h-4 ${
+                            isLight ? 'text-slate-400' : 'text-[#9a9aa2]'
+                          }`}
+                        />
+                      </div>
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        required
+                        value={password}
+                        onChange={e => setPassword(e.target.value)}
+                        placeholder="Enter password"
+                        className={`w-full pl-9 pr-10 py-2 rounded-[6px] text-xs font-mono font-medium border focus:outline-none transition-colors ${
+                          isLight
+                            ? 'border-slate-300 bg-slate-50 text-slate-900 focus:border-slate-900 focus:bg-white'
+                            : 'border-[#26262a] bg-[#0b0b0c] text-[#ededed] focus:border-[#e8ff59]'
+                        }`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-xs text-[#9a9aa2] hover:text-[#ededed] cursor-pointer"
+                      >
+                        {showPassword ? (
+                          <EyeOff className="w-3.5 h-3.5" />
+                        ) : (
+                          <Eye className="w-3.5 h-3.5" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
 
-            {/* Credentials Form */}
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {errorMessage && (
-                <div className="p-2.5 rounded-[6px] border border-red-500/30 bg-red-500/10 text-red-400 text-xs font-mono">
-                  {errorMessage}
-                </div>
-              )}
-              {/* Identifier Input */}
-              <div className="space-y-1.5">
-                <label
-                  className={`block text-xs font-bold ${
-                    isLight ? 'text-slate-700' : 'text-[#ededed]'
-                  }`}
-                >
-                  {selectedRole === 'player'
-                    ? 'In-Game Tag / Riot ID / Character ID'
-                    : 'Organization Email / Staff ID'}
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <User
-                      className={`w-4 h-4 ${
+                  {/* Remember Me */}
+                  <div className="flex items-center justify-between pt-1">
+                    <label className="flex items-center gap-2 cursor-pointer text-xs">
+                      <input
+                        type="checkbox"
+                        checked={rememberMe}
+                        onChange={e => setRememberMe(e.target.checked)}
+                        className="rounded-[3px] accent-[#c6ff00]"
+                      />
+                      <span
+                        className={isLight ? 'text-slate-600' : 'text-[#9a9aa2]'}
+                      >
+                        Remember active role
+                      </span>
+                    </label>
+                    <span
+                      className={`text-[11px] font-mono ${
                         isLight ? 'text-slate-400' : 'text-[#9a9aa2]'
                       }`}
-                    />
+                    >
+                      SSL 256-Bit Encrypted
+                    </span>
                   </div>
-                  <input
-                    type="text"
-                    required
-                    value={identifier}
-                    onChange={e => setIdentifier(e.target.value)}
-                    placeholder={
-                      selectedRole === 'player'
-                        ? 'e.g., Vortex#VAL or 5128940192'
-                        : 'e.g., scout@theshadow.gg'
-                    }
-                    className={`w-full pl-9 pr-3 py-2 rounded-[6px] text-xs font-mono font-medium border focus:outline-none transition-colors ${
-                      isLight
-                        ? 'border-slate-300 bg-slate-50 text-slate-900 focus:border-slate-900 focus:bg-white'
-                        : 'border-[#26262a] bg-[#0b0b0c] text-[#ededed] focus:border-[#e8ff59]'
-                    }`}
-                  />
-                </div>
-              </div>
 
-              {/* Password Input */}
-              <div className="space-y-1.5">
-                <label
-                  className={`block text-xs font-bold ${
-                    isLight ? 'text-slate-700' : 'text-[#ededed]'
-                  }`}
-                >
-                  Password
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Lock
-                      className={`w-4 h-4 ${
-                        isLight ? 'text-slate-400' : 'text-[#9a9aa2]'
-                      }`}
-                    />
-                  </div>
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    required
-                    value={password}
-                    onChange={e => setPassword(e.target.value)}
-                    placeholder="Enter password"
-                    className={`w-full pl-9 pr-10 py-2 rounded-[6px] text-xs font-mono font-medium border focus:outline-none transition-colors ${
-                      isLight
-                        ? 'border-slate-300 bg-slate-50 text-slate-900 focus:border-slate-900 focus:bg-white'
-                        : 'border-[#26262a] bg-[#0b0b0c] text-[#ededed] focus:border-[#e8ff59]'
-                    }`}
-                  />
+                  {/* Submit Button */}
                   <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-xs text-[#9a9aa2] hover:text-[#ededed] cursor-pointer"
+                    type="submit"
+                    disabled={loading}
+                    className="w-full py-2.5 rounded-[6px] font-extrabold text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer bg-[#e8ff59] hover:bg-[#d4eb44] text-black shadow-sm"
                   >
-                    {showPassword ? (
-                      <EyeOff className="w-3.5 h-3.5" />
+                    {loading ? (
+                      <span>Authenticating...</span>
                     ) : (
-                      <Eye className="w-3.5 h-3.5" />
+                      <>
+                        <span>
+                          {selectedRole === 'player'
+                            ? 'Enter Player Dashboard'
+                            : 'Enter Organiser Platform'}
+                        </span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </>
                     )}
                   </button>
-                </div>
-              </div>
 
-              {/* Remember Me */}
-              <div className="flex items-center justify-between pt-1">
-                <label className="flex items-center gap-2 cursor-pointer text-xs">
-                  <input
-                    type="checkbox"
-                    checked={rememberMe}
-                    onChange={e => setRememberMe(e.target.checked)}
-                    className="rounded-[3px] accent-[#c6ff00]"
-                  />
-                  <span
-                    className={isLight ? 'text-slate-600' : 'text-[#9a9aa2]'}
-                  >
-                    Remember active role
-                  </span>
-                </label>
-                <span
-                  className={`text-[11px] font-mono ${
-                    isLight ? 'text-slate-400' : 'text-[#9a9aa2]'
-                  }`}
-                >
-                  SSL 256-Bit Encrypted
-                </span>
-              </div>
-
-              {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-2.5 rounded-[6px] font-extrabold text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer bg-[#e8ff59] hover:bg-[#d4eb44] text-black shadow-sm"
-              >
-                {loading ? (
-                  <span>Authenticating...</span>
-                ) : (
-                  <>
-                    <span>
-                      {selectedRole === 'player'
-                        ? 'Enter Player Dashboard'
-                        : 'Enter Organiser Platform'}
+                  {/* New small link to switch to registration */}
+                  <div className="text-center pt-2 flex items-center justify-center gap-1.5 text-xs">
+                    <span className={isLight ? 'text-slate-500' : 'text-[#9a9aa2]'}>
+                      Don't have an account yet?
                     </span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </>
-                )}
-              </button>
-            </form>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsRegisterMode(true);
+                        setErrorMessage(null);
+                      }}
+                      className="font-bold underline text-[#e8ff59] hover:text-[#d4eb44] cursor-pointer"
+                    >
+                      Create New Account
+                    </button>
+                  </div>
+                </form>
+              </>
+            )}
           </div>
         </div>
       </main>

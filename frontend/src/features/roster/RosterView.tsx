@@ -78,6 +78,8 @@ export function RosterView({
             </div>
           )}
 
+          <button type="button" onClick={() => onNavigate('openings')} className="px-3 py-1.5 rounded-[6px] font-bold text-xs bg-[#e8ff59] hover:bg-[#d8ef49] text-black transition-colors cursor-pointer shadow-xs">+ Post Vacancy</button>
+
           {roster?.weakestRole && (
             <button
               type="button"

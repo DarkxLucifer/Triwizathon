@@ -141,6 +141,8 @@ export function Sidebar({
 
           { id: 'rosters' as SidebarNavId, label: 'Rosters', icon: Users },
 
+          { id: 'openings' as SidebarNavId, label: 'Postings & Applicants', icon: Briefcase },
+
           { id: 'recruitment' as SidebarNavId, label: 'Recruitment', icon: FileText },
 
           { id: 'analytics' as SidebarNavId, label: 'Analytics', icon: BarChart2 },

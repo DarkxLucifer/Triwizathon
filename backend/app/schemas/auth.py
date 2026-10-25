@@ -8,7 +8,7 @@ class UserRegister(BaseModel):
     password: str = Field(min_length=6)
     full_name: str
     org_name: Optional[str] = None
-    role: str = Field(default="analyst", pattern="^(analyst|coach|gm|player|admin)$")
+    role: str = Field(default="analyst", pattern="^(analyst|coach|gm|player|admin|organiser|scout)$")
 
 
 class UserLogin(BaseModel):

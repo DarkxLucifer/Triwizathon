@@ -2076,20 +2076,50 @@ export function PlayerDashboardView({
           }));
         }
 
-        // 2. Fetch live openings from FastAPI
+        // 2. Fetch player live applications from FastAPI
+        const myApps = await playerApi.getMyApplications(token);
+        const appliedOpeningIds = new Set((myApps || []).map(a => String(a.opening_id)));
+
+        if (myApps && myApps.length > 0) {
+          setApplications(myApps.map(a => ({
+            id: String(a.id),
+            openingId: String(a.opening_id),
+            teamName: a.org_name || 'Pro Team',
+            game: 'CS2' as GameType,
+            roleApplied: a.role_name || 'Flex',
+            submittedAt: new Date(a.created_at).toLocaleDateString(),
+            status: (a.status === 'accepted' ? 'Accepted to Roster' : a.status === 'trial' ? 'Shortlisted for Trial' : a.status === 'shortlisted' ? 'Shortlisted for Trial' : a.status === 'rejected' ? 'Application Declined' : 'Under Review') as any,
+            coachNote: a.reviewer_notes || 'Application submitted to pro roster review team.',
+            applicantIgn: a.player_handle || 'Vortex',
+            fitScore: Math.round(a.overall_score || 88),
+            message: a.cover_note || 'Interested in trial.',
+            gameUid: 'Verified Competitor ID',
+            experienceYears: 2,
+            experienceMonths: 6,
+            currentRank: 'Verified Pro Tier',
+            primaryAgentOrWeapon: 'Specialist',
+            discordContact: 'scoutforge_player',
+            scrimAvailability: 'Ready for Scrims',
+          })));
+        }
+
+        // 3. Fetch live openings from FastAPI
         const liveOpenings = await openingsApi.getOpenings({ token });
         if (liveOpenings && liveOpenings.length > 0) {
           setOpenings(liveOpenings.map(o => {
             let detectedGame: GameType = 'CS2';
+            const tName = o.title_name || '';
             const lowerTitle = (o.title + ' ' + o.description).toLowerCase();
-            if (lowerTitle.includes('bgis') || lowerTitle.includes('bgmi') || lowerTitle.includes('erangel') || lowerTitle.includes('m416')) {
-              detectedGame = 'BGMI';
-            } else if (lowerTitle.includes('vct') || lowerTitle.includes('valorant') || lowerTitle.includes('jett') || lowerTitle.includes('duelist')) {
+            if (tName.includes('Valorant') || lowerTitle.includes('vct') || lowerTitle.includes('valorant') || lowerTitle.includes('jett') || lowerTitle.includes('duelist')) {
               detectedGame = 'Valorant';
-            } else if (lowerTitle.includes('lol') || lowerTitle.includes('league') || lowerTitle.includes('gloo wall') || lowerTitle.includes('rusher')) {
+            } else if (tName.includes('League') || tName.includes('LoL') || lowerTitle.includes('lol') || lowerTitle.includes('league') || lowerTitle.includes('summoner')) {
               detectedGame = 'League of Legends';
-            } else if (lowerTitle.includes('rocket league') || lowerTitle.includes('rlcs') || lowerTitle.includes('ling') || lowerTitle.includes('jungler')) {
+            } else if (tName.includes('Rocket') || tName.includes('RLCS') || lowerTitle.includes('rocket league') || lowerTitle.includes('rlcs')) {
               detectedGame = 'Rocket League';
+            } else if (tName.includes('BGMI') || lowerTitle.includes('bgis') || lowerTitle.includes('bgmi') || lowerTitle.includes('erangel') || lowerTitle.includes('m416')) {
+              detectedGame = 'BGMI';
+            } else if (tName.includes('CS2') || tName.includes('Counter-Strike') || lowerTitle.includes('cs2') || lowerTitle.includes('faceit') || lowerTitle.includes('steam')) {
+              detectedGame = 'CS2';
             }
 
             return {
@@ -2108,36 +2138,11 @@ export function PlayerDashboardView({
               description: o.description,
               postedBy: 'Head Coach',
               postedAgo: 'Recent',
-              applied: false,
+              applied: appliedOpeningIds.has(String(o.id)),
               skillCategory: (o.role_name.includes('Sniper') || o.role_name.includes('AWP') ? 'Sniper' : o.role_name.includes('Entry') || o.role_name.includes('Duelist') ? 'Entry Fragger' : o.role_name.includes('IGL') || o.role_name.includes('Leader') ? 'IGL' : o.role_name.includes('Rusher') ? 'Rusher' : 'Assaulter') as any,
               skillsRequired: [o.min_rank_text, o.scrim_window],
             };
           }));
-        }
-
-        // 3. Fetch player live applications from FastAPI
-        const myApps = await playerApi.getMyApplications(token);
-        if (myApps && myApps.length > 0) {
-          setApplications(myApps.map(a => ({
-            id: String(a.id),
-            openingId: String(a.opening_id),
-            teamName: a.org_name || 'Pro Team',
-            game: 'CS2' as GameType,
-            roleApplied: a.role_name || 'Flex',
-            submittedAt: new Date(a.created_at).toLocaleDateString(),
-            status: (a.status === 'trial' ? 'Shortlisted for Trial' : a.status === 'shortlisted' ? 'Shortlisted for Trial' : 'Under Review') as any,
-            coachNote: a.reviewer_notes || 'Application submitted to pro roster review team.',
-            applicantIgn: a.player_handle || 'Vortex',
-            fitScore: Math.round(a.overall_score || 88),
-            message: a.cover_note || 'Interested in trial.',
-            gameUid: 'Steam64 / Telemetry Verified',
-            experienceYears: 3,
-            experienceMonths: 6,
-            currentRank: 'FACEIT Level 10',
-            primaryAgentOrWeapon: 'M416 / AWP',
-            discordContact: 'vortex#1337',
-            scrimAvailability: '18:00 – 23:30 IST',
-          })));
         }
       } catch (err) {
         console.warn('Backend live data sync notice:', err);

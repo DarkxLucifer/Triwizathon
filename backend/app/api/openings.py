@@ -53,6 +53,12 @@ def list_openings(
         org_name = op.organization.name if op.organization else "Pro Team"
         roster_name = op.roster.name if op.roster else None
         title_name = "Counter-Strike 2"
+        if getattr(op, "title_rel", None) and op.title_rel.name:
+            title_name = op.title_rel.name
+        elif op.title_id:
+            t = db.query(Title).filter(Title.id == op.title_id).first()
+            if t:
+                title_name = t.name
 
         out.append(RosterOpeningOut(
             id=op.id,
@@ -84,10 +90,26 @@ def create_opening(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_organiser),
 ):
+    title_id = opening_in.title_id
+    title_name = "Counter-Strike 2"
+    if opening_in.game_name:
+        game_slug = opening_in.game_name.lower().replace(" ", "-").replace("(", "").replace(")", "")
+        title_obj = db.query(Title).filter(
+            (Title.slug == game_slug) | (Title.name.ilike(f"%{opening_in.game_name}%"))
+        ).first()
+        if not title_obj:
+            title_obj = Title(name=opening_in.game_name, slug=game_slug)
+            db.add(title_obj)
+            db.flush()
+        title_id = title_obj.id
+        title_name = title_obj.name
+    elif not title_id:
+        title_id = 1
+
     opening = RosterOpening(
         org_id=current_user.org_id,
         roster_id=opening_in.roster_id,
-        title_id=opening_in.title_id or 1,
+        title_id=title_id,
         role_id=opening_in.role_id,
         title=opening_in.title,
         role_name=opening_in.role_name,
@@ -103,6 +125,9 @@ def create_opening(
     db.refresh(opening)
 
     org_name = current_user.organization.name if current_user.organization else "Pro Team"
+    if getattr(opening, "title_rel", None) and opening.title_rel:
+        title_name = opening.title_rel.name
+
     return RosterOpeningOut(
         id=opening.id,
         org_id=opening.org_id,
@@ -110,7 +135,7 @@ def create_opening(
         roster_id=opening.roster_id,
         roster_name=opening.roster.name if opening.roster else None,
         title_id=opening.title_id,
-        title_name="Counter-Strike 2",
+        title_name=title_name,
         role_id=opening.role_id,
         role_name=opening.role_name,
         title=opening.title,
@@ -124,6 +149,63 @@ def create_opening(
         created_at=opening.created_at,
         updated_at=opening.updated_at,
     )
+
+
+@router.get("/org/applications", response_model=List[ApplicationOut])
+def list_org_applications(
+    status: Optional[str] = Query(None, description="Filter by status: applied, shortlisted, trial, accepted, rejected"),
+    opening_id: Optional[int] = Query(None, description="Filter by opening ID"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_organiser),
+):
+    query = (
+        db.query(Application)
+        .join(RosterOpening, Application.opening_id == RosterOpening.id)
+        .filter(RosterOpening.org_id == current_user.org_id)
+    )
+    if status and status != "all":
+        query = query.filter(Application.status == status)
+    if opening_id:
+        query = query.filter(Application.opening_id == opening_id)
+
+    apps = query.order_by(Application.created_at.desc()).all()
+    org_name = current_user.organization.name if current_user.organization else "Pro Team"
+
+    out = []
+    for a in apps:
+        p = a.player
+        opening = a.opening
+        score_snap = (
+            db.query(PlayerScoreHistory)
+            .filter(PlayerScoreHistory.player_id == p.id)
+            .order_by(PlayerScoreHistory.recorded_at.desc())
+            .first()
+        )
+        combat_s = score_snap.combat_score if score_snap else 55.0
+        tactical_s = score_snap.tactical_score if score_snap else 24.0
+        overall_s = score_snap.overall_score if score_snap else round(combat_s + tactical_s, 1)
+
+        out.append(ApplicationOut(
+            id=a.id,
+            opening_id=opening.id,
+            opening_title=opening.title,
+            org_id=opening.org_id,
+            org_name=org_name,
+            player_id=p.id,
+            player_handle=p.handle,
+            player_name=p.name,
+            role_name=opening.role_name,
+            status=a.status,
+            source=a.source,
+            cover_note=a.cover_note,
+            reviewer_notes=a.reviewer_notes,
+            combat_score=combat_s,
+            tactical_score=tactical_s,
+            overall_score=overall_s,
+            created_at=a.created_at,
+            updated_at=a.updated_at,
+        ))
+    return out
 
 
 @router.get("/{opening_id}", response_model=RosterOpeningOut)

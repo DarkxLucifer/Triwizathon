@@ -39,7 +39,22 @@ export interface UserMeResponse {
   unread_notifications_count: number;
 }
 
+export interface RegisterPayload {
+  email: string;
+  password: string;
+  full_name: string;
+  role: 'player' | 'organiser';
+  org_name?: string;
+}
+
 export const authApi = {
+  async register(payload: RegisterPayload): Promise<LoginResponse> {
+    return apiFetch<LoginResponse>('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
+
   async login(email: string, password: string): Promise<LoginResponse> {
     return apiFetch<LoginResponse>('/auth/login', {
       method: 'POST',

@@ -133,17 +133,27 @@ export function DashboardView({
       } p-6 -m-6 min-h-[calc(100vh-3.5rem)] space-y-6 font-sans text-[14px] transition-colors`}
     >
       {/* 1. Greeting Header */}
-      <div className={`border-b ${isLight ? 'border-slate-200' : 'border-[#26262a]'} pb-4`}>
-        <h1
-          className={`text-[20px] font-bold ${
-            isLight ? 'text-slate-900' : 'text-[#ededed]'
-          } tracking-normal`}
+      <div className={`border-b ${isLight ? 'border-slate-200' : 'border-[#26262a]'} pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3`}>
+        <div>
+          <h1
+            className={`text-[20px] font-bold ${
+              isLight ? 'text-slate-900' : 'text-[#ededed]'
+            } tracking-normal`}
+          >
+            Good afternoon, Alex.
+          </h1>
+          <p className={`text-[12px] ${isLight ? 'text-slate-500' : 'text-[#9a9aa2]'} mt-0.5`}>
+            Active rosters, candidates, and scouting pipeline.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => onNavigate('openings')}
+          className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-[6px] font-bold text-xs bg-[#e8ff59] hover:bg-[#d8ef49] text-black transition-colors cursor-pointer shadow-xs self-start sm:self-auto"
         >
-          Good afternoon, Alex.
-        </h1>
-        <p className={`text-[12px] ${isLight ? 'text-slate-500' : 'text-[#9a9aa2]'} mt-0.5`}>
-          Active rosters, candidates, and scouting pipeline.
-        </p>
+          <span>+ Post Trial Vacancy</span>
+        </button>
       </div>
 
       {/* 2. ONE horizontal row for 4 stat metrics */}

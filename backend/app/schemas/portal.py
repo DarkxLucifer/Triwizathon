@@ -100,6 +100,7 @@ class RosterOpeningOut(BaseModel):
 class RosterOpeningCreate(BaseModel):
     roster_id: Optional[int] = None
     title_id: Optional[int] = None
+    game_name: Optional[str] = None
     role_id: Optional[int] = None
     role_name: str
     title: str
@@ -139,7 +140,7 @@ class ApplicationCreate(BaseModel):
 
 
 class ApplicationStatusUpdate(BaseModel):
-    status: str = Field(pattern="^(applied|viewed|shortlisted|trial|rejected|withdrawn)$")
+    status: str = Field(pattern="^(applied|viewed|shortlisted|trial|rejected|withdrawn|accepted)$")
     reviewer_notes: Optional[str] = None
 
 

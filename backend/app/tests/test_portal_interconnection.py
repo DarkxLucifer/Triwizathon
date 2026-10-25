@@ -494,3 +494,98 @@ def test_upload_gameplay_clip_with_audio_transcription(client, player_token):
     assert list_res.status_code == 200
     clips = list_res.json()
     assert any(c["title"] == "Test Audio Clip" for c in clips)
+
+
+def test_user_registration_and_opening_application_flow(client):
+    import uuid
+    suffix = uuid.uuid4().hex[:6]
+    player_email = f"newbie_{suffix}@scoutforge.gg"
+    org_email = f"scout_{suffix}@navi.gg"
+
+    # 1. Register a brand new player account
+    p_reg = client.post("/api/auth/register", json={
+        "email": player_email,
+        "password": "strongPassword123",
+        "full_name": "Apex Shooter",
+        "role": "player",
+    })
+    assert p_reg.status_code == 200
+    p_data = p_reg.json()
+    new_player_token = p_data["access_token"]
+    assert p_data["user"]["role"] == "player"
+    assert p_data["user"]["active_context"] == "player"
+    assert p_data["user"]["player_id"] is not None
+
+    # Check player profile immediately accessible
+    p_me = client.get("/api/player/me", headers={"Authorization": f"Bearer {new_player_token}"})
+    assert p_me.status_code == 200
+    assert p_me.json()["handle"].startswith("Apex_Shooter")
+
+    # 2. Register a brand new organiser account
+    o_reg = client.post("/api/auth/register", json={
+        "email": org_email,
+        "password": "strongPassword123",
+        "full_name": "Navi Head Scout",
+        "org_name": f"Natus Vincere Org {suffix}",
+        "role": "organiser",
+    })
+    assert o_reg.status_code == 200
+    o_data = o_reg.json()
+    new_org_token = o_data["access_token"]
+    assert o_data["user"]["active_context"] == "organiser"
+    assert o_data["user"]["org_id"] is not None
+
+    # 3. Organiser creates a recruitment post/opening
+    create_op = client.post("/api/openings", json={
+        "title": "NAVI Academy Dedicated AWPer Trial",
+        "role_name": "Sniper / AWPer",
+        "game_name": "Counter-Strike 2",
+        "description": "Seeking aggressive Tier 1 caliber AWPer with high opening duel success.",
+        "min_rank_text": "FACEIT Level 10 / 2500+ ELO",
+        "scrim_window": "18:00 - 23:00 CET",
+        "package_text": "$2,500/mo + Prize Share + Bootcamp",
+        "urgency": "Immediate",
+        "status": "open",
+    }, headers={"Authorization": f"Bearer {new_org_token}"})
+    assert create_op.status_code == 200
+    op_info = create_op.json()
+    opening_id = op_info["id"]
+    assert op_info["title"] == "NAVI Academy Dedicated AWPer Trial"
+    assert op_info["title_name"] == "Counter-Strike 2"
+
+    # 4. Player browses openings and finds the new post
+    ops_list = client.get("/api/openings", headers={"Authorization": f"Bearer {new_player_token}"})
+    assert ops_list.status_code == 200
+    found_ops = [op for op in ops_list.json() if op["id"] == opening_id]
+    assert len(found_ops) == 1
+
+    # 5. Player applies to the opening
+    apply_res = client.post(f"/api/openings/{opening_id}/apply", json={
+        "cover_note": "Game UID: 76561198000000001 | 3 years exp | FACEIT 2800 ELO | Ready for trial immediately."
+    }, headers={"Authorization": f"Bearer {new_player_token}"})
+    assert apply_res.status_code == 200
+    app_data = apply_res.json()
+    app_id = app_data["id"]
+    assert app_data["status"] == "applied"
+
+    # 6. Organiser views applicants for this opening & org applications
+    org_apps = client.get("/api/openings/org/applications", headers={"Authorization": f"Bearer {new_org_token}"})
+    assert org_apps.status_code == 200
+    matching_apps = [a for a in org_apps.json() if a["id"] == app_id]
+    assert len(matching_apps) == 1
+    assert "FACEIT 2800 ELO" in matching_apps[0]["cover_note"]
+
+    # 7. Organiser updates applicant status to 'shortlisted'
+    status_update = client.put(f"/api/openings/applications/{app_id}/status", json={
+        "status": "shortlisted",
+        "reviewer_notes": "Scout reviewed telemetry - invited to trial scrims on Monday."
+    }, headers={"Authorization": f"Bearer {new_org_token}"})
+    assert status_update.status_code == 200
+    assert status_update.json()["status"] == "shortlisted"
+
+    # 8. Player checks their applications and sees updated status
+    player_apps = client.get("/api/player/me/applications", headers={"Authorization": f"Bearer {new_player_token}"})
+    assert player_apps.status_code == 200
+    my_app = next(a for a in player_apps.json() if a["id"] == app_id)
+    assert my_app["status"] == "shortlisted"
+    assert "invited to trial scrims" in my_app["reviewer_notes"]

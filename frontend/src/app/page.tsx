@@ -33,6 +33,7 @@ import { AcceptanceTestSuite } from '@/features/acceptance/AcceptanceTestSuite';
 import { PlayerDashboardView } from '@/features/player_dashboard/PlayerDashboardView';
 
 import { RoleLoginView, UserRole } from '@/features/auth/RoleLoginView';
+import { OrganiserOpeningsView } from '@/features/openings/OrganiserOpeningsView';
 
 import { Role } from '@/types';
 
@@ -138,7 +139,7 @@ export default function ScoutForgeApp() {
 
   useEffect(() => {
 
-    if (authRole === 'organiser' && (activeNav === 'player_portal' || activeNav === 'dossier' || activeNav === 'openings')) {
+    if (authRole === 'organiser' && (activeNav === 'player_portal' || activeNav === 'dossier')) {
 
       setActiveNav('leaderboards');
 
@@ -390,6 +391,10 @@ export default function ScoutForgeApp() {
 
             )}
 
+            {authRole === 'organiser' && activeNav === 'openings' && (
+              <OrganiserOpeningsView theme={theme} />
+            )}
+
 
 
             {/* 2. Leaderboards View (with full Light/Dark support) */}
@@ -533,7 +538,7 @@ export default function ScoutForgeApp() {
 
             {/* 7. Player Portal / Gamer Dashboard View */}
 
-            {(activeNav === 'player_portal' || activeNav === 'dossier' || activeNav === 'openings') && (
+            {authRole === 'player' && (activeNav === 'player_portal' || activeNav === 'dossier' || activeNav === 'openings') && (
 
               <PlayerDashboardView
 

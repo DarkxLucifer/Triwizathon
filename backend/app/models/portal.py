@@ -101,6 +101,7 @@ class RosterOpening(Base):
 
     organization = relationship("Organization")
     roster = relationship("Roster")
+    title_rel = relationship("Title")
     applications = relationship("Application", back_populates="opening", cascade="all, delete-orphan")
 
 
