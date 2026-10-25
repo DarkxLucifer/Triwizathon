@@ -440,6 +440,44 @@ async def upload_gameplay_clip(
         created_at=clip.created_at,
     )
 
+@router.delete("/clips/{clip_id}")
+def delete_gameplay_clip(
+    clip_id: int,
+    player: Player = Depends(require_player),
+    db: Session = Depends(get_db),
+):
+    clip = db.query(PlayerClip).filter(
+        PlayerClip.id == clip_id,
+        PlayerClip.player_id == player.id,
+    ).first()
+    if not clip:
+        raise HTTPException(status_code=404, detail="Clip not found")
+
+    # If file exists on disk in uploads directory, remove it safely
+    try:
+        if clip.file_path and clip.file_path.startswith("/uploads/"):
+            relative_file = clip.file_path.replace("/uploads/", "")
+            full_path = os.path.join(settings.UPLOAD_DIR, relative_file)
+            if os.path.exists(full_path):
+                os.remove(full_path)
+    except Exception as e:
+        logger.warning(f"Could not remove local file for clip {clip_id}: {e}")
+
+    # Remove associated ActivityEvents
+    try:
+        db.query(ActivityEvent).filter(
+            ActivityEvent.subject_player_id == player.id,
+            ActivityEvent.entity_type == "clip",
+            ActivityEvent.entity_id == str(clip.id),
+        ).delete(synchronize_session=False)
+    except Exception as e:
+        logger.warning(f"Could not remove activity event for clip {clip_id}: {e}")
+
+    db.delete(clip)
+    db.commit()
+    return {"success": True, "message": "Clip deleted successfully", "id": clip_id}
+
+
 
 
 @router.get("/contact-requests", response_model=List[ContactAccessGrantOut])

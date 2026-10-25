@@ -495,6 +495,40 @@ def test_upload_gameplay_clip_with_audio_transcription(client, player_token):
     clips = list_res.json()
     assert any(c["title"] == "Test Audio Clip" for c in clips)
 
+def test_delete_gameplay_clip(client, player_token):
+    import io
+    import wave
+    wav_bytes = io.BytesIO()
+    with wave.open(wav_bytes, "wb") as wf:
+        wf.setnchannels(1)
+        wf.setsampwidth(2)
+        wf.setframerate(16000)
+        wf.writeframes(b"\x00" * 16000)
+    wav_bytes.seek(0)
+
+    headers = {"Authorization": f"Bearer {player_token}"}
+    files = {"file": ("clip_to_delete.wav", wav_bytes, "audio/wav")}
+    data = {"title": "Clip To Delete", "map_name": "Mirage"}
+
+    res = client.post("/api/player/me/clips", data=data, files=files, headers=headers)
+    assert res.status_code == 200
+    clip_id = res.json()["id"]
+
+    # Delete clip
+    del_res = client.delete(f"/api/player/me/clips/{clip_id}", headers=headers)
+    assert del_res.status_code == 200
+    assert del_res.json()["success"] is True
+
+    # Verify listing clips no longer includes this clip
+    list_res = client.get("/api/player/me/clips", headers=headers)
+    assert list_res.status_code == 200
+    assert all(c["id"] != clip_id for c in list_res.json())
+
+    # Deleting non-existent clip returns 404
+    del_404 = client.delete("/api/player/me/clips/9999999", headers=headers)
+    assert del_404.status_code == 404
+
+
 
 def test_user_registration_and_opening_application_flow(client):
     import uuid

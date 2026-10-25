@@ -200,6 +200,14 @@ export const playerApi = {
     });
   },
 
+  async deleteClip(clipId: number | string, token?: string): Promise<{ success: boolean; id: number }> {
+    const numericId = typeof clipId === 'string' ? clipId.replace(/^vod-/, '').replace(/^clip-/, '').replace(/^ev-/, '') : clipId;
+    return apiFetch<{ success: boolean; id: number }>(`/player/me/clips/${numericId}`, {
+      method: 'DELETE',
+      token,
+    });
+  },
+
   async getMyApplications(token?: string): Promise<ApplicationItem[]> {
     return apiFetch<ApplicationItem[]>('/player/me/applications', {
       method: 'GET',
@@ -302,4 +310,60 @@ export const playerApi = {
       token,
     });
   },
+};
+
+const DELETED_CLIPS_STORAGE_KEY = 'scoutforge_deleted_clips';
+
+export const getDeletedClipIds = (): Set<string> => {
+  if (typeof window === 'undefined') return new Set();
+  try {
+    const raw = localStorage.getItem(DELETED_CLIPS_STORAGE_KEY);
+    if (!raw) return new Set();
+    const arr = JSON.parse(raw);
+    if (Array.isArray(arr)) {
+      return new Set(arr.map(String));
+    }
+  } catch {}
+  return new Set();
+};
+
+export const markClipDeletedLocally = (id: string | number): void => {
+  if (typeof window === 'undefined') return;
+  try {
+    const set = getDeletedClipIds();
+    const str = String(id);
+    set.add(str);
+    if (str.startsWith('vod-')) {
+      set.add(str.replace(/^vod-/, ''));
+    } else if (str.startsWith('clip-')) {
+      set.add(str.replace(/^clip-/, ''));
+    } else if (str.startsWith('ev-')) {
+      set.add(str.replace(/^ev-/, ''));
+    } else {
+      set.add(`vod-${str}`);
+      set.add(`clip-${str}`);
+      set.add(`ev-${str}`);
+    }
+    localStorage.setItem(DELETED_CLIPS_STORAGE_KEY, JSON.stringify(Array.from(set)));
+  } catch (e) {
+    console.error('Failed to save deleted clip id:', e);
+  }
+};
+
+export const unmarkClipDeletedLocally = (id: string | number): void => {
+  if (typeof window === 'undefined') return;
+  try {
+    const set = getDeletedClipIds();
+    const str = String(id);
+    set.delete(str);
+    set.delete(str.replace(/^vod-/, ''));
+    set.delete(str.replace(/^clip-/, ''));
+    set.delete(str.replace(/^ev-/, ''));
+    set.delete(`vod-${str}`);
+    set.delete(`clip-${str}`);
+    set.delete(`ev-${str}`);
+    localStorage.setItem(DELETED_CLIPS_STORAGE_KEY, JSON.stringify(Array.from(set)));
+  } catch (e) {
+    console.error('Failed to unmark deleted clip id:', e);
+  }
 };

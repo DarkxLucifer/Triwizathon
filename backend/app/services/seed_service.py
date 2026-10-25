@@ -109,6 +109,7 @@ def seed_database(db: Session, force: bool = False):
     # Seed Player Demo User & Player Entity: Sam "Vortex" Sharma
     player_user = db.query(User).filter(User.email == "player@scoutforge.gg").first()
     vortex_player = db.query(Player).filter(Player.handle == "Vortex").first()
+    is_new_vortex = not vortex_player
 
     if not vortex_player:
         vortex_player = Player(
@@ -224,8 +225,8 @@ def seed_database(db: Session, force: bool = False):
                 recorded_at=rec_dt,
             ))
 
-    # Seed Gameplay Clip for Vortex
-    if db.query(PlayerClip).filter(PlayerClip.player_id == vortex_player.id).count() == 0:
+    # Seed Gameplay Clip for Vortex (only on initial creation)
+    if is_new_vortex and db.query(PlayerClip).filter(PlayerClip.player_id == vortex_player.id).count() == 0:
         db.add(PlayerClip(
             player_id=vortex_player.id,
             title="Mirage 4v2 A-Site Execute & Crossfire Call",

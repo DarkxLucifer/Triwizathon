@@ -39,7 +39,7 @@ import { LogoutModal } from './components/LogoutModal';
 
 
 import { PlayerLoginView } from './components/PlayerLoginView';
-import { playerApi, openingsApi } from '@/lib/api';
+import { playerApi, openingsApi, getDeletedClipIds } from '@/lib/api';
 
 
 
@@ -2098,30 +2098,40 @@ export function PlayerDashboardView({
         const dossier = await playerApi.getMyDossier(token);
         if (dossier) {
           setPlayer(prev => {
-            const mappedClips = (dossier.clips || []).map(c => {
-              const clipGame = c.title.toLowerCase().includes('cs2') || ['mirage', 'inferno', 'nuke', 'dust2', 'ancient', 'anubis', 'vertigo'].includes(c.map_name?.toLowerCase())
-                ? 'CS2'
-                : normalizeGameType(dossier.primary_game);
-              return {
-                id: `vod-${c.id}`,
-                title: c.title,
-                game: clipGame,
-                videoUrl: c.file_path,
-                duration: `${Math.round(c.duration_seconds || 45)}s`,
-                resolution: '1080p 60fps HD',
-                tag: c.map_name ? `${c.map_name} Tactical Call` : 'VOD Gameplay',
-                uploadedAt: new Date(c.created_at).toLocaleDateString(),
-                fileSize: '42.0 MB',
-                aiScore: c.tactical_score || 25.0,
-                tacticalVerdict: c.soundness_reasoning || 'Evaluated by LLM Tactical Judge.',
-                transcription: c.transcription || undefined,
-                transcriptSegments: (c.transcript_segments as any) || undefined,
-              };
-            });
+            const deletedIds = getDeletedClipIds();
+            const mappedClips = (dossier.clips || [])
+              .filter(c => !deletedIds.has(String(c.id)) && !deletedIds.has(`vod-${c.id}`))
+              .map(c => {
+                const clipGame = c.title.toLowerCase().includes('cs2') || ['mirage', 'inferno', 'nuke', 'dust2', 'ancient', 'anubis', 'vertigo'].includes(c.map_name?.toLowerCase())
+                  ? 'CS2'
+                  : normalizeGameType(dossier.primary_game);
+                return {
+                  id: `vod-${c.id}`,
+                  title: c.title,
+                  game: clipGame,
+                  videoUrl: c.file_path,
+                  duration: `${Math.round(c.duration_seconds || 45)}s`,
+                  resolution: '1080p 60fps HD',
+                  tag: c.map_name ? `${c.map_name} Tactical Call` : 'VOD Gameplay',
+                  uploadedAt: new Date(c.created_at).toLocaleDateString(),
+                  fileSize: '42.0 MB',
+                  aiScore: c.tactical_score || 25.0,
+                  tacticalVerdict: c.soundness_reasoning || 'Evaluated by LLM Tactical Judge.',
+                  transcription: c.transcription || undefined,
+                  transcriptSegments: (c.transcript_segments as any) || undefined,
+                };
+              });
 
-            // Keep default clips if not duplicated
+            // Keep default clips if not duplicated and not deleted
             const existingIds = new Set(mappedClips.map(m => m.id));
-            const combinedClips = [...mappedClips, ...(prev.videoClips || []).filter(c => !existingIds.has(c.id))];
+            const combinedClips = [
+              ...mappedClips,
+              ...(prev.videoClips || []).filter(
+                c => !existingIds.has(c.id) &&
+                     !deletedIds.has(String(c.id)) &&
+                     !deletedIds.has(String(c.id).replace(/^vod-/, ''))
+              ),
+            ];
 
             return {
               ...prev,

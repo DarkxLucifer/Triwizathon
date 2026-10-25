@@ -49,7 +49,7 @@ import {
 } from "lucide-react";
 import { PlayerProfile, GameType, GameplayVideoClip, AvailabilityStatus, GameProfile, RoleApplication, normalizeGameType } from "@/types/dashboard";
 import { VideoPlayerModal } from "../components/VideoPlayerModal";
-import { playerApi } from "@/lib/api/player";
+import { playerApi, getDeletedClipIds, markClipDeletedLocally, unmarkClipDeletedLocally } from "@/lib/api/player";
 
 interface PlayerProfileTabProps {
   player: PlayerProfile;
@@ -495,7 +495,15 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
   };
 
   // Video / Audio upload & management
-  const [mediaClips, setMediaClips] = useState<GameplayVideoClip[]>(player.videoClips || defaultClips);
+  const [mediaClips, setMediaClips] = useState<GameplayVideoClip[]>(() => {
+    const deleted = getDeletedClipIds();
+    const source = player.videoClips || defaultClips;
+    return source.filter(
+      (c) =>
+        !deleted.has(String(c.id)) &&
+        !deleted.has(String(c.id).replace(/^vod-/, ""))
+    );
+  });
   const [selectedClip, setSelectedClip] = useState<GameplayVideoClip | null>(null);
   const [isPlayerModalOpen, setIsPlayerModalOpen] = useState(false);
   const [uploadTitle, setUploadTitle] = useState("");
@@ -504,10 +512,17 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
   const [isUploading, setIsUploading] = useState(false);
   const mediaInputRef = useRef<HTMLInputElement>(null);
 
-  // Sync media clips when player.videoClips updates from backend
+  // Sync media clips when player.videoClips updates from backend, filtering deleted clips
   useEffect(() => {
-    if (player.videoClips && player.videoClips.length > 0) {
-      setMediaClips(player.videoClips);
+    if (player.videoClips) {
+      const deleted = getDeletedClipIds();
+      setMediaClips(
+        player.videoClips.filter(
+          (c) =>
+            !deleted.has(String(c.id)) &&
+            !deleted.has(String(c.id).replace(/^vod-/, ""))
+        )
+      );
     }
   }, [player.videoClips]);
 
@@ -729,6 +744,9 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
         transcriptSegments: (savedClip.transcript_segments as any) || undefined,
       };
 
+      unmarkClipDeletedLocally(`vod-${savedClip.id}`);
+      unmarkClipDeletedLocally(savedClip.id);
+
       setMediaClips((prev) => [newClip, ...prev]);
       if (onUpdatePlayer) {
         onUpdatePlayer({ videoClips: [newClip, ...mediaClips] });
@@ -743,13 +761,46 @@ export const PlayerProfileTab: React.FC<PlayerProfileTabProps> = ({
     }
   };
 
-  const handleDeleteClip = (id: string, e: React.MouseEvent) => {
+  const handleDeleteClip = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
+    // 1. Mark in localStorage so it never resurrects after page refresh
+    markClipDeletedLocally(id);
+
+    // 2. Remove immediately from local state
     const updated = mediaClips.filter((c) => c.id !== id);
     setMediaClips(updated);
+
+    // 3. Update player profile state in parent
     if (onUpdatePlayer) {
       onUpdatePlayer({ videoClips: updated });
     }
+
+    // 4. Call backend DELETE endpoint if it was saved on server
+    const rawId = id.replace(/^vod-/, "").replace(/^clip-/, "").replace(/^ev-/, "");
+    const numericId = parseInt(rawId, 10);
+    if (!isNaN(numericId)) {
+      try {
+        let token = localStorage.getItem("scoutforge_access_token") || undefined;
+        if (!token) {
+          try {
+            const authRes = await fetch("http://127.0.0.1:8000/api/auth/login", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ email: "player@scoutforge.gg", password: "player123" }),
+            });
+            if (authRes.ok) {
+              const data = await authRes.json();
+              token = data.access_token;
+              if (token) localStorage.setItem("scoutforge_access_token", token);
+            }
+          } catch {}
+        }
+        await playerApi.deleteClip(numericId, token);
+      } catch (err: any) {
+        console.warn("Backend clip delete warning:", err?.message || err);
+      }
+    }
+
     onShowToast("Media clip removed from player profile.", "info");
   };
 

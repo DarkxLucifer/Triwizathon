@@ -17,7 +17,63 @@ import {
 import { EvidenceItem, GameplayVideoClip } from "@/types/dashboard";
 import { TranscriptModal } from "../components/TranscriptModal";
 import { VideoPlayerModal } from "../components/VideoPlayerModal";
-import { playerApi } from "@/lib/api/player";
+import { playerApi, getDeletedClipIds, markClipDeletedLocally, unmarkClipDeletedLocally } from "@/lib/api/player";
+
+const DEFAULT_EVIDENCE_ITEMS: EvidenceItem[] = [
+  {
+    id: "ev-1",
+    filename: "CS2_Best_Moments_2025_Highlights.mp4",
+    type: "Gameplay Video",
+    durationOrRounds: "1m 15s",
+    status: "Complete",
+    submittedAt: "Today, 14:10 IST",
+    filesize: "10.9 MB",
+    videoUrl: "/videos/cs2_best_moments_2025.mp4",
+    tacticalScore: 29.6,
+    tacticalVerdict: "Aggressive AWP angle isolation, instant flick re-frags, and high-tempo site executes from 2025 pro highlights.",
+    transcription: "Oh the timing on the Peter's. I helped out a lot. Don't gonna show Mollidoy that maybe it's easy. Mollidoy is gonna have to go for the PUN! Oh, don'ts, Chits! Mollidoy said, what are we watching? I got it. 2015 or 2016? So, yeah. Whoa! What did it come from? Yeah, hell of a low bracket run for Fury. It's a face-to-team that put them here in the first place, but they've got to get through Falcons in a third map. Kiss, kiss.",
+    transcriptSegments: [
+      { start: 0.0, end: 3.3, text: "Oh the timing on the Peter's.", is_command: false },
+      { start: 3.3, end: 4.4, text: "I helped out a lot.", is_command: false },
+      { start: 4.4, end: 6.4, text: "Don't gonna show Mollidoy that maybe it's easy.", is_command: false },
+      { start: 6.4, end: 9.0, text: "Mollidoy is gonna have to go for the PUN!", is_command: true },
+      { start: 9.0, end: 10.7, text: "Oh, don'ts, Chits!", is_command: false },
+      { start: 10.7, end: 12.8, text: "Mollidoy said, what are we watching?", is_command: false },
+      { start: 12.8, end: 14.5, text: "I got it. 2015 or 2016?", is_command: false },
+      { start: 14.5, end: 18.2, text: "Whoa! What did it come from?", is_command: false },
+      { start: 18.2, end: 23.5, text: "Yeah, hell of a low bracket run for Fury.", is_command: false },
+      { start: 23.5, end: 29.0, text: "It's a face-to-team that put them here in the first place.", is_command: false },
+      { start: 29.0, end: 35.0, text: "They've got to get through Falcons in a third map. Kiss, kiss.", is_command: true }
+    ]
+  },
+  {
+    id: "ev-2",
+    filename: "TeamComms_Round18_Clutch.wav",
+    type: "Comms Audio",
+    durationOrRounds: "1m 48s",
+    status: "Complete",
+    submittedAt: "Today, 12:15 PM",
+    filesize: "18.4 MB",
+  },
+  {
+    id: "ev-3",
+    filename: "Scrim_Mirage_Tier2_Map1.json",
+    type: "Match Log",
+    durationOrRounds: "24 Rounds",
+    status: "Complete",
+    submittedAt: "Today, 11:30 AM",
+    filesize: "4.2 MB",
+  },
+  {
+    id: "ev-4",
+    filename: "Scrim_Inferno_Map2_Demo.csv",
+    type: "Match Log",
+    durationOrRounds: "21 Rounds",
+    status: "Complete",
+    submittedAt: "Yesterday",
+    filesize: "6.8 MB",
+  },
+];
 
 interface EvidenceAudioTabProps {
   onShowToast: (message: string, type?: "success" | "info" | "warning") => void;
@@ -36,61 +92,14 @@ export const EvidenceAudioTab: React.FC<EvidenceAudioTabProps> = ({
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [evidenceList, setEvidenceList] = useState<EvidenceItem[]>([
-    {
-      id: "ev-1",
-      filename: "CS2_Best_Moments_2025_Highlights.mp4",
-      type: "Gameplay Video",
-      durationOrRounds: "1m 15s",
-      status: "Complete",
-      submittedAt: "Today, 14:10 IST",
-      filesize: "10.9 MB",
-      videoUrl: "/videos/cs2_best_moments_2025.mp4",
-      tacticalScore: 29.6,
-      tacticalVerdict: "Aggressive AWP angle isolation, instant flick re-frags, and high-tempo site executes from 2025 pro highlights.",
-      transcription: "Oh the timing on the Peter's. I helped out a lot. Don't gonna show Mollidoy that maybe it's easy. Mollidoy is gonna have to go for the PUN! Oh, don'ts, Chits! Mollidoy said, what are we watching? I got it. 2015 or 2016? So, yeah. Whoa! What did it come from? Yeah, hell of a low bracket run for Fury. It's a face-to-team that put them here in the first place, but they've got to get through Falcons in a third map. Kiss, kiss.",
-      transcriptSegments: [
-        { start: 0.0, end: 3.3, text: "Oh the timing on the Peter's.", is_command: false },
-        { start: 3.3, end: 4.4, text: "I helped out a lot.", is_command: false },
-        { start: 4.4, end: 6.4, text: "Don't gonna show Mollidoy that maybe it's easy.", is_command: false },
-        { start: 6.4, end: 9.0, text: "Mollidoy is gonna have to go for the PUN!", is_command: true },
-        { start: 9.0, end: 10.7, text: "Oh, don'ts, Chits!", is_command: false },
-        { start: 10.7, end: 12.8, text: "Mollidoy said, what are we watching?", is_command: false },
-        { start: 12.8, end: 14.5, text: "I got it. 2015 or 2016?", is_command: false },
-        { start: 14.5, end: 18.2, text: "Whoa! What did it come from?", is_command: false },
-        { start: 18.2, end: 23.5, text: "Yeah, hell of a low bracket run for Fury.", is_command: false },
-        { start: 23.5, end: 29.0, text: "It's a face-to-team that put them here in the first place.", is_command: false },
-        { start: 29.0, end: 35.0, text: "They've got to get through Falcons in a third map. Kiss, kiss.", is_command: true }
-      ]
-    },
-    {
-      id: "ev-2",
-      filename: "TeamComms_Round18_Clutch.wav",
-      type: "Comms Audio",
-      durationOrRounds: "1m 48s",
-      status: "Complete",
-      submittedAt: "Today, 12:15 PM",
-      filesize: "18.4 MB",
-    },
-    {
-      id: "ev-3",
-      filename: "Scrim_Mirage_Tier2_Map1.json",
-      type: "Match Log",
-      durationOrRounds: "24 Rounds",
-      status: "Complete",
-      submittedAt: "Today, 11:30 AM",
-      filesize: "4.2 MB",
-    },
-    {
-      id: "ev-4",
-      filename: "Scrim_Inferno_Map2_Demo.csv",
-      type: "Match Log",
-      durationOrRounds: "21 Rounds",
-      status: "Complete",
-      submittedAt: "Yesterday",
-      filesize: "6.8 MB",
-    },
-  ]);
+  const [evidenceList, setEvidenceList] = useState<EvidenceItem[]>(() => {
+    const deleted = getDeletedClipIds();
+    return DEFAULT_EVIDENCE_ITEMS.filter(
+      (item) =>
+        !deleted.has(String(item.id)) &&
+        !deleted.has(String(item.id).replace(/^ev-/, ""))
+    );
+  });
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -174,11 +183,14 @@ export const EvidenceAudioTab: React.FC<EvidenceAudioTabProps> = ({
       }
 
       const savedClip = await playerApi.uploadClip(file, file.name, "Mirage", token);
+      unmarkClipDeletedLocally(`ev-${savedClip.id}`);
+      unmarkClipDeletedLocally(savedClip.id);
       setEvidenceList((prev) =>
         prev.map((item) =>
           item.id === newId
             ? {
                 ...item,
+                id: `ev-${savedClip.id}`,
                 status: "Complete",
                 transcription: savedClip.transcription || undefined,
                 transcriptSegments: (savedClip.transcript_segments as any) || undefined,
@@ -206,9 +218,40 @@ export const EvidenceAudioTab: React.FC<EvidenceAudioTabProps> = ({
     }
   };
 
-  const handleDeleteItem = (id: string, e: React.MouseEvent) => {
+  const handleDeleteItem = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
+    // 1. Mark in localStorage so it never resurrects after page refresh
+    markClipDeletedLocally(id);
+
+    // 2. Remove immediately from local state
     setEvidenceList((prev) => prev.filter((item) => item.id !== id));
+
+    // 3. Call backend DELETE endpoint if it was saved on server
+    const rawId = id.replace(/^vod-/, "").replace(/^clip-/, "").replace(/^ev-/, "");
+    const numericId = parseInt(rawId, 10);
+    if (!isNaN(numericId)) {
+      try {
+        let token = localStorage.getItem("scoutforge_access_token") || undefined;
+        if (!token) {
+          try {
+            const authRes = await fetch("http://127.0.0.1:8000/api/auth/login", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ email: "player@scoutforge.gg", password: "player123" }),
+            });
+            if (authRes.ok) {
+              const data = await authRes.json();
+              token = data.access_token;
+              if (token) localStorage.setItem("scoutforge_access_token", token);
+            }
+          } catch {}
+        }
+        await playerApi.deleteClip(numericId, token);
+      } catch (err: any) {
+        console.warn("Evidence clip backend delete warning:", err?.message || err);
+      }
+    }
+
     onShowToast("Evidence item removed from player dossier.", "info");
   };
 
@@ -232,61 +275,14 @@ export const EvidenceAudioTab: React.FC<EvidenceAudioTabProps> = ({
   };
 
   const handleResetSampleData = () => {
-    setEvidenceList([
-      {
-        id: "ev-1",
-        filename: "CS2_Best_Moments_2025_Highlights.mp4",
-        type: "Gameplay Video",
-        durationOrRounds: "1m 15s",
-        status: "Complete",
-        submittedAt: "Today, 14:10 IST",
-        filesize: "10.9 MB",
-        videoUrl: "/videos/cs2_best_moments_2025.mp4",
-        tacticalScore: 29.6,
-        tacticalVerdict: "Aggressive AWP angle isolation, instant flick re-frags, and high-tempo site executes from 2025 pro highlights.",
-        transcription: "Oh the timing on the Peter's. I helped out a lot. Don't gonna show Mollidoy that maybe it's easy. Mollidoy is gonna have to go for the PUN! Oh, don'ts, Chits! Mollidoy said, what are we watching? I got it. 2015 or 2016? So, yeah. Whoa! What did it come from? Yeah, hell of a low bracket run for Fury. It's a face-to-team that put them here in the first place, but they've got to get through Falcons in a third map. Kiss, kiss.",
-        transcriptSegments: [
-          { start: 0.0, end: 3.3, text: "Oh the timing on the Peter's.", is_command: false },
-          { start: 3.3, end: 4.4, text: "I helped out a lot.", is_command: false },
-          { start: 4.4, end: 6.4, text: "Don't gonna show Mollidoy that maybe it's easy.", is_command: false },
-          { start: 6.4, end: 9.0, text: "Mollidoy is gonna have to go for the PUN!", is_command: true },
-          { start: 9.0, end: 10.7, text: "Oh, don'ts, Chits!", is_command: false },
-          { start: 10.7, end: 12.8, text: "Mollidoy said, what are we watching?", is_command: false },
-          { start: 12.8, end: 14.5, text: "I got it. 2015 or 2016?", is_command: false },
-          { start: 14.5, end: 18.2, text: "Whoa! What did it come from?", is_command: false },
-          { start: 18.2, end: 23.5, text: "Yeah, hell of a low bracket run for Fury.", is_command: false },
-          { start: 23.5, end: 29.0, text: "It's a face-to-team that put them here in the first place.", is_command: false },
-          { start: 29.0, end: 35.0, text: "They've got to get through Falcons in a third map. Kiss, kiss.", is_command: true }
-        ]
-      },
-      {
-        id: "ev-2",
-        filename: "TeamComms_Round18_Clutch.wav",
-        type: "Comms Audio",
-        durationOrRounds: "1m 48s",
-        status: "Complete",
-        submittedAt: "Today, 12:15 PM",
-        filesize: "18.4 MB",
-      },
-      {
-        id: "ev-3",
-        filename: "Scrim_Mirage_Tier2_Map1.json",
-        type: "Match Log",
-        durationOrRounds: "24 Rounds",
-        status: "Complete",
-        submittedAt: "Today, 11:30 AM",
-        filesize: "4.2 MB",
-      },
-      {
-        id: "ev-4",
-        filename: "Scrim_Inferno_Map2_Demo.csv",
-        type: "Match Log",
-        durationOrRounds: "21 Rounds",
-        status: "Complete",
-        submittedAt: "Yesterday",
-        filesize: "6.8 MB",
-      },
-    ]);
+    const deleted = getDeletedClipIds();
+    setEvidenceList(
+      DEFAULT_EVIDENCE_ITEMS.filter(
+        (item) =>
+          !deleted.has(String(item.id)) &&
+          !deleted.has(String(item.id).replace(/^ev-/, ""))
+      )
+    );
     onShowToast("Default evidence ledger restored.", "info");
   };
 
