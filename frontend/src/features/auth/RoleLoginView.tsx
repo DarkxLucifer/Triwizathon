@@ -29,6 +29,7 @@ interface RoleLoginViewProps {
   theme?: 'dark' | 'light';
   onToggleTheme?: () => void;
   initialRole?: UserRole;
+  initialRegisterMode?: boolean;
   onBack?: () => void;
 }
 
@@ -37,10 +38,11 @@ export function RoleLoginView({
   theme = 'dark',
   onToggleTheme,
   initialRole = 'organiser',
+  initialRegisterMode = false,
   onBack,
 }: RoleLoginViewProps) {
   const isLight = theme === 'light';
-  const [isRegisterMode, setIsRegisterMode] = useState(false);
+  const [isRegisterMode, setIsRegisterMode] = useState(initialRegisterMode);
   const [selectedRole, setSelectedRole] = useState<UserRole>(initialRole);
   const [identifier, setIdentifier] = useState(
     initialRole === 'player' ? 'player@scoutforge.gg' : 'analyst@cloud9.gg'
