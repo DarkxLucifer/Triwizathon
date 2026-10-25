@@ -237,60 +237,26 @@ def seed_database(db: Session, force: bool = False):
             soundness_reasoning="Flawless man-advantage discipline; called off hunting exit kills and enforced site crossfires.",
         ))
 
-    # Seed Roster Openings for Cloud9, Fnatic, NAVI
+    # Seed Single Official Roster Opening for Cloud9
     c9_opening = db.query(RosterOpening).filter(RosterOpening.org_id == c9_org.id).first()
     if not c9_opening:
         c9_opening = RosterOpening(
             org_id=c9_org.id,
             title_id=title.id,
-            role_id=roles_map["IGL"].id,
-            title="Starting IGL - S-Tier International Circuit",
-            role_name="In-Game Leader",
-            description="Leading Tier 1 international LAN campaigns. Requires high tactical maturity, excellent vocal clarity, and structured mid-round adaptation.",
-            min_rank_text="Faceit Level 10 / 2500+ ELO",
-            scrim_window="18:00 - 23:30 CET",
-            package_text="$4,500/mo + Prize Share + Bootcamp",
-            urgency="High",
-            status="open",
-        )
-        db.add(c9_opening)
-
-    fnatic_opening = db.query(RosterOpening).filter(RosterOpening.org_id == fnatic_org.id).first()
-    if not fnatic_opening:
-        fnatic_opening = RosterOpening(
-            org_id=fnatic_org.id,
-            title_id=title.id,
-            role_id=roles_map["Entry"].id,
-            title="Primary Entry Fragger - European Masters",
-            role_name="Entry Fragger",
-            description="Aggressive site take specialist with exceptional crosshair placement and high opening duel conversion.",
-            min_rank_text="Faceit Level 10 / 2300+ ELO",
-            scrim_window="17:00 - 22:30 CET",
-            package_text="€3,800/mo + Housing Stipend",
+            role_id=roles_map.get("AWPer", roles_map["IGL"]).id,
+            title="Secondary Sniper - Academy Roster",
+            role_name="AWPer",
+            description="Looking for explosive opening duel sniper.",
+            min_rank_text="Faceit Level 10",
+            scrim_window="17:00 - 21:00 CET",
+            package_text="$2,500/mo",
             urgency="Medium",
             status="open",
         )
-        db.add(fnatic_opening)
-
-    navi_opening = db.query(RosterOpening).filter(RosterOpening.org_id == navi_org.id).first()
-    if not navi_opening:
-        navi_opening = RosterOpening(
-            org_id=navi_org.id,
-            title_id=title.id,
-            role_id=roles_map["Support"].id,
-            title="Support Anchor & Secondary Caller",
-            role_name="Support",
-            description="Utility mastery, trade setups, and late-round clutch composure for major cycle qualifiers.",
-            min_rank_text="Faceit Level 10 / 2200+ ELO",
-            scrim_window="18:00 - 23:00 EEST",
-            package_text="$3,200/mo + Health Benefits",
-            urgency="Low",
-            status="open",
-        )
-        db.add(navi_opening)
+        db.add(c9_opening)
     db.flush()
 
-    # Seed Applications at different stages
+    # Seed Single Player Application for Vortex
     if c9_opening:
         app_c9 = db.query(Application).filter(Application.opening_id == c9_opening.id, Application.player_id == vortex_player.id).first()
         if not app_c9:
@@ -299,20 +265,8 @@ def seed_database(db: Session, force: bool = False):
                 player_id=vortex_player.id,
                 status="trial",
                 source="player_applied",
-                cover_note="High-tempo tactical caller with extensive zone and mid-round adaptation experience.",
-                reviewer_notes="Analyzed tactical comms; exceptional 28.5/30 audio judge score. Invited to closed scrim trials.",
-            ))
-
-    if fnatic_opening:
-        app_fnc = db.query(Application).filter(Application.opening_id == fnatic_opening.id, Application.player_id == vortex_player.id).first()
-        if not app_fnc:
-            db.add(Application(
-                opening_id=fnatic_opening.id,
-                player_id=vortex_player.id,
-                status="shortlisted",
-                source="player_applied",
-                cover_note="Open to playing aggressive second entry or flex role.",
-                reviewer_notes="Matches statistical benchmark; pending VOD review with head coach.",
+                cover_note="Aggressive AWP caller ready for immediate trials.",
+                reviewer_notes="Accepted for test match trial.",
             ))
 
     # Seed Contact Grant for Cloud9
