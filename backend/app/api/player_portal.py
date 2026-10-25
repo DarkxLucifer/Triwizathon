@@ -448,29 +448,46 @@ def _calculate_derived_telemetry(game: str, adr_or_dmg: float, win_rate_num: flo
     import hashlib
     seed = int(hashlib.sha256(seed_str.encode()).hexdigest()[:8], 16) if seed_str else 42
     
-    if "cs2" in game.lower() or "counter" in game.lower():
-        base_factor = min(1.35, max(0.65, adr_or_dmg / 80.0))
-    elif "val" in game.lower():
-        base_factor = min(1.35, max(0.65, adr_or_dmg / 220.0))
+    game_lower = game.lower()
+    if "cs2" in game_lower or "counter" in game_lower:
+        base_factor = min(1.6, max(0.5, adr_or_dmg / 80.0))
+        win_factor = min(1.4, max(0.6, win_rate_num / 52.0))
+        kd = round(0.65 + base_factor * 0.60 + ((seed % 21) - 10) / 100.0, 2)
+        rating = round(0.68 + base_factor * 0.55 + ((seed >> 4) % 15 - 7) / 100.0, 2)
+        hs_num = int(min(82, max(24, 32 + base_factor * 20 + ((seed >> 8) % 19 - 9))))
+        opening_num = int(min(85, max(30, 36 + win_factor * 20 + ((seed >> 12) % 15 - 7))))
+    elif "val" in game_lower:
+        base_factor = min(1.6, max(0.5, adr_or_dmg / 210.0))
+        win_factor = min(1.4, max(0.6, win_rate_num / 52.0))
+        kd = round(0.65 + base_factor * 0.60 + ((seed % 21) - 10) / 100.0, 2)
+        rating = round(0.68 + base_factor * 0.55 + ((seed >> 4) % 15 - 7) / 100.0, 2)
+        hs_num = int(min(80, max(20, 28 + base_factor * 18 + ((seed >> 8) % 15 - 7))))
+        opening_num = int(min(85, max(30, 38 + win_factor * 18 + ((seed >> 12) % 15 - 7))))
+    elif "bgmi" in game_lower or "pubg" in game_lower:
+        base_factor = min(1.6, max(0.5, adr_or_dmg / 700.0))
+        win_factor = min(1.4, max(0.6, win_rate_num / 60.0))
+        kd = round(2.0 + base_factor * 4.2 + ((seed % 21) - 10) / 20.0, 2)
+        rating = round(0.70 + base_factor * 0.56 + ((seed >> 4) % 15 - 7) / 100.0, 2)
+        hs_num = int(min(65, max(18, 22 + base_factor * 16 + ((seed >> 8) % 13 - 6))))
+        opening_num = int(min(90, max(45, 52 + win_factor * 22 + ((seed >> 12) % 15 - 7))))
     else:
-        base_factor = min(1.35, max(0.65, adr_or_dmg / 750.0))
+        base_factor = min(1.6, max(0.5, adr_or_dmg / 80.0 if adr_or_dmg < 200 else adr_or_dmg / 600.0))
+        win_factor = min(1.4, max(0.6, win_rate_num / 55.0))
+        kd = round(0.70 + base_factor * 0.58 + ((seed % 21) - 10) / 100.0, 2)
+        rating = round(0.70 + base_factor * 0.52 + ((seed >> 4) % 15 - 7) / 100.0, 2)
+        hs_num = int(min(80, max(25, 34 + base_factor * 18 + ((seed >> 8) % 15 - 7))))
+        opening_num = int(min(85, max(35, 42 + win_factor * 18 + ((seed >> 12) % 15 - 7))))
 
-    win_factor = min(1.25, max(0.75, win_rate_num / 55.0))
+    trade_num = round(min(94.0, max(52.0, 58.0 + base_factor * 18.0 + ((seed >> 16) % 19 - 9) / 2.0)), 1)
+    flash_num = round(min(3.20, max(1.10, 1.45 + win_factor * 0.65 + ((seed >> 20) % 21 - 10) / 40.0)), 2)
+    util_hp = round(min(45.0, max(10.0, 14.0 + base_factor * 14.0 + ((seed >> 3) % 15 - 7) / 2.0)), 1)
+    clutch_num = int(min(68, max(18, 22 + win_factor * 16 + ((seed >> 7) % 15 - 7))))
+    delta_num = round(min(24.0, max(5.0, 8.0 + win_factor * 6.5 + ((seed >> 11) % 9 - 4) / 2.0)), 1)
 
-    kd = round(0.75 + base_factor * 0.55 + ((seed % 15) - 7) / 100.0, 2)
-    rating = round(0.72 + base_factor * 0.52 + ((seed >> 4) % 11 - 5) / 100.0, 2)
-    hs_num = int(min(78, max(28, 38 + base_factor * 18 + ((seed >> 8) % 15 - 7))))
-    opening_num = int(min(84, max(38, 44 + win_factor * 16 + ((seed >> 12) % 13 - 6))))
-    trade_num = round(min(92.0, max(58.0, 68.0 + base_factor * 14.0 + ((seed >> 16) % 19 - 9) / 2.0)), 1)
-    flash_num = round(min(3.10, max(1.20, 1.65 + win_factor * 0.45 + ((seed >> 20) % 21 - 10) / 50.0)), 2)
-    util_hp = round(min(42.0, max(12.0, 18.0 + base_factor * 10.0 + ((seed >> 3) % 15 - 7) / 2.0)), 1)
-    clutch_num = int(min(65, max(22, 28 + win_factor * 12 + ((seed >> 7) % 11 - 5))))
-    delta_num = round(min(22.0, max(6.0, 10.0 + win_factor * 4.5 + ((seed >> 11) % 9 - 4) / 2.0)), 1)
-
-    aim = int(min(99, max(55, 68 + base_factor * 22 + ((seed >> 15) % 9 - 4))))
-    pos = int(min(98, max(52, 66 + win_factor * 20 + ((seed >> 19) % 9 - 4))))
-    util = int(min(97, max(50, 65 + base_factor * 12 + win_factor * 10 + ((seed >> 2) % 9 - 4))))
-    retake = int(min(98, max(54, 67 + win_factor * 22 + ((seed >> 6) % 9 - 4))))
+    aim = int(min(99, max(50, 55 + base_factor * 28 + ((seed >> 15) % 9 - 4))))
+    pos = int(min(98, max(50, 54 + win_factor * 26 + ((seed >> 19) % 9 - 4))))
+    util = int(min(98, max(48, 52 + base_factor * 16 + win_factor * 14 + ((seed >> 2) % 9 - 4))))
+    retake = int(min(99, max(50, 56 + win_factor * 28 + ((seed >> 6) % 9 - 4))))
 
     return {
         "kd": str(kd),
@@ -486,6 +503,206 @@ def _calculate_derived_telemetry(game: str, adr_or_dmg: float, win_rate_num: flo
         "positioning_score": pos,
         "utility_score": util,
         "game_sense_score": retake
+    }
+
+
+def _parse_esports_text(text: str, game_title: str):
+    import re
+    text_clean = (text or "").strip()
+    if not text_clean:
+        return {}
+    
+    # 1. Game ID / UID
+    game_id = None
+    s64_match = re.search(r"\b(7656119\d{10})\b", text_clean)
+    if s64_match:
+        game_id = s64_match.group(1)
+    
+    if not game_id and ("val" in game_title.lower() or "league" in game_title.lower() or "lol" in game_title.lower()):
+        riot_match = re.search(r"\b([A-Za-z0-9_\s]{3,16}#[A-Za-z0-9]{3,6})\b", text_clean)
+        if riot_match:
+            game_id = riot_match.group(1).strip()
+
+    if not game_id:
+        uid_match = re.search(r"(?:uid|id|character|steam64|steam|player id|krafton id)[:\s#]+([A-Za-z0-9_#]+)", text_clean, re.IGNORECASE)
+        if uid_match:
+            game_id = uid_match.group(1).strip()
+    
+    if not game_id and ("bgmi" in game_title.lower() or "pubg" in game_title.lower()):
+        bgmi_uid = re.search(r"\b(\d{8,12})\b", text_clean)
+        if bgmi_uid:
+            game_id = bgmi_uid.group(1)
+
+    # 2. IGN
+    ign = None
+    ign_match = re.search(r"(?:ign|name|handle|player|nickname)[:\s]+([A-Za-z0-9_#\-\.\s]{2,20})(?=[,\n\r]|$)", text_clean, re.IGNORECASE)
+    if ign_match:
+        ign = ign_match.group(1).strip()
+    elif game_id and "#" in game_id:
+        ign = game_id.split("#")[0]
+
+    # 3. Competitive Rank
+    rank = None
+    rank_match = re.search(r"(?:rank|elo|division|tier)[:\s]+([^\r\n,;]+)", text_clean, re.IGNORECASE)
+    if rank_match:
+        rank = rank_match.group(1).strip()
+    else:
+        for pattern in [
+            r"\b(Conqueror(?:\s+Top\s+\d+)?)\b",
+            r"\b(Ace\s+(?:Dominator|Master)?)\b",
+            r"\b(FACEIT(?:\s+Level)?\s+\d+(?:\s*\(\d+\s*ELO\))?)\b",
+            r"\b(Radiant(?:\s*#\d+)?)\b",
+            r"\b(Immortal\s*[1-3]?)\b",
+            r"\b(Global\s+Elite)\b",
+            r"\b(Challenger(?:\s+\d+\s*LP)?)\b",
+            r"\b(Grandmaster)\b",
+            r"\b(Master)\b",
+            r"\b(Supersonic\s+Legend)\b",
+            r"\b(Champion\s*[1-3]?)\b",
+        ]:
+            m = re.search(pattern, text_clean, re.IGNORECASE)
+            if m:
+                rank = m.group(1).strip()
+                break
+
+    # 4. Role
+    role = None
+    role_match = re.search(r"(?:role)[:\s]+([^\r\n,;]+)", text_clean, re.IGNORECASE)
+    if role_match:
+        role = role_match.group(1).strip()
+    else:
+        for r_pat in [r"\b(Dedicated AWPer|AWPer|Sniper)\b", r"\b(Entry\s*Fragger|Entry)\b", r"\b(Assaulter\s*/\s*IGL|Assaulter|IGL)\b", r"\b(Duelist|Initiator|Controller|Sentinel)\b", r"\b(First\s*Man|Striker)\b", r"\b(Rifler|Flex\s*Rifler|Support)\b"]:
+            m = re.search(r_pat, text_clean, re.IGNORECASE)
+            if m:
+                role = m.group(1).strip()
+                break
+
+    # 5. Primary Stat
+    primary_stat = None
+    stat_match = re.search(r"(?:avg dmg|average damage|adr|acs|stat|damage|combat score)[:\s]+([0-9.]+(?:\s*(?:avg dmg|adr|acs|damage|hp))?)", text_clean, re.IGNORECASE)
+    if stat_match:
+        val = stat_match.group(1).strip()
+        if "cs2" in game_title.lower() and "adr" not in val.lower():
+            primary_stat = f"{val} ADR"
+        elif "val" in game_title.lower() and "acs" not in val.lower():
+            primary_stat = f"{val} ACS"
+        elif ("bgmi" in game_title.lower() or "pubg" in game_title.lower()) and "dmg" not in val.lower():
+            primary_stat = f"{val} Avg Dmg"
+        else:
+            primary_stat = val
+    else:
+        direct = re.search(r"([0-9.]+)\s*(ADR|ACS|Avg\s*Dmg|CS/Min|Goals/Game)", text_clean, re.IGNORECASE)
+        if direct:
+            primary_stat = f"{direct.group(1)} {direct.group(2).upper()}"
+
+    # 6. Win Rate
+    win_rate = None
+    wr_match = re.search(r"(?:win rate|winrate|wr)[:\s]+([0-9.]+\s*%)", text_clean, re.IGNORECASE) or re.search(r"\b([0-9]{2}(?:\.[0-9])?)\s*%\s*(?:win\s*rate|wr|wins)\b", text_clean, re.IGNORECASE)
+    if wr_match:
+        win_rate = wr_match.group(1).strip()
+        if "%" not in win_rate:
+            win_rate += "%"
+
+    # 7. K/D
+    kd = None
+    kd_match = re.search(r"(?:kd|k/d|kda|kill/death)[:\s]+([0-9.]+)", text_clean, re.IGNORECASE)
+    if kd_match:
+        kd = kd_match.group(1).strip()
+
+    # 8. Rating
+    rating = None
+    rating_match = re.search(r"(?:rating(?:\s*2\.0)?|combat rating|impact)[:\s]+([0-9.]+)", text_clean, re.IGNORECASE)
+    if rating_match:
+        rating = rating_match.group(1).strip()
+
+    # 9. Headshot
+    headshot = None
+    hs_match = re.search(r"(?:headshot|hs)(?:\s*conv|\s*rate|\s*%)?[:\s]+([0-9.]+\s*%?)", text_clean, re.IGNORECASE)
+    if hs_match:
+        headshot = hs_match.group(1).strip()
+        if "%" not in headshot:
+            headshot += "%"
+
+    # 10. Opening Duel
+    opening = None
+    op_match = re.search(r"(?:opening(?:\s*duel)?|first pick)[:\s]+([0-9.]+\s*%?)", text_clean, re.IGNORECASE)
+    if op_match:
+        opening = op_match.group(1).strip()
+        if "%" not in opening:
+            opening += "%"
+
+    # 11. Trade Efficiency
+    trade = None
+    tr_match = re.search(r"(?:trade(?:\s*efficiency|\s*re-frag)?|re-frag)[:\s]+([0-9.]+\s*%?)", text_clean, re.IGNORECASE)
+    if tr_match:
+        trade = tr_match.group(1).strip()
+        if "%" not in trade:
+            trade += "%"
+
+    # 12. Flash duration
+    flash = None
+    fl_match = re.search(r"(?:flash(?:\s*assist|\s*duration)?)[:\s]+([0-9.]+\s*s?)", text_clean, re.IGNORECASE)
+    if fl_match:
+        flash = fl_match.group(1).strip()
+        if "s" not in flash:
+            flash += "s"
+
+    # 13. Utility damage
+    utility = None
+    ut_match = re.search(r"(?:utility(?:\s*damage)?|util dmg)[:\s]+([0-9.]+\s*(?:hp)?)", text_clean, re.IGNORECASE)
+    if ut_match:
+        utility = ut_match.group(1).strip()
+        if "hp" not in utility.lower():
+            utility += " HP"
+
+    # 14. Clutch rate
+    clutch = None
+    cl_match = re.search(r"(?:clutch(?:\s*rate|\s*conversion)?|1vx)[:\s]+([0-9.]+\s*%?)", text_clean, re.IGNORECASE)
+    if cl_match:
+        clutch = cl_match.group(1).strip()
+        if "%" not in clutch:
+            clutch += "%"
+
+    # 15. Competency percentiles
+    aim = None
+    aim_match = re.search(r"(?:aim(?:\s*precision|\s*score)?|crosshair)[:\s]+([0-9]{2,3})", text_clean, re.IGNORECASE)
+    if aim_match:
+        aim = int(aim_match.group(1))
+
+    pos = None
+    pos_match = re.search(r"(?:positioning|map geometry|angles)[:\s]+([0-9]{2,3})", text_clean, re.IGNORECASE)
+    if pos_match:
+        pos = int(pos_match.group(1))
+
+    util_score = None
+    us_match = re.search(r"(?:utility score|economic discipline|econ)[:\s]+([0-9]{2,3})", text_clean, re.IGNORECASE)
+    if us_match:
+        util_score = int(us_match.group(1))
+
+    sense = None
+    se_match = re.search(r"(?:game sense|retake|post-plant)[:\s]+([0-9]{2,3})", text_clean, re.IGNORECASE)
+    if se_match:
+        sense = int(se_match.group(1))
+
+    return {
+        "ign": ign,
+        "game_id": game_id,
+        "rank": rank,
+        "role": role,
+        "primary_stat": primary_stat,
+        "win_rate": win_rate,
+        "kd": kd,
+        "rating": rating,
+        "headshot_rate": headshot,
+        "opening_duel": opening,
+        "trade_efficiency": trade,
+        "flash_duration": flash,
+        "utility_damage": utility,
+        "clutch_rate": clutch,
+        "aim_score": aim,
+        "positioning_score": pos,
+        "utility_score": util_score,
+        "game_sense_score": sense,
     }
 
 
@@ -772,12 +989,13 @@ async def extract_game_credentials(
     screenshot: Optional[UploadFile] = File(None),
     player: Player = Depends(require_player),
 ):
-    """Extracts in-game credentials (IGN, Character UID, Rank, Role, Stats, and Tactical Telemetry) from an uploaded screenshot or text using Gemini Multimodal AI."""
+    """Extracts in-game credentials (IGN, Character UID, Rank, Role, Stats, and Tactical Telemetry) from an uploaded screenshot or text using Gemini Multimodal AI and Windows Native OCR."""
     import base64
     import json
     import re
     import httpx
     import logging
+    import io
 
     logger = logging.getLogger(__name__)
 
@@ -806,10 +1024,10 @@ Analyze the provided in-game screenshot and/or text for competitive title '{game
   "flash_duration": "Flash duration e.g. 2.10s or null",
   "utility_damage": "Utility damage per round e.g. 26.0 HP or null",
   "clutch_rate": "1vX clutch conversion percentage e.g. 38% or null",
-  "aim_score": 94,
-  "positioning_score": 90,
-  "utility_score": 86,
-  "game_sense_score": 89
+  "aim_score": null,
+  "positioning_score": null,
+  "utility_score": null,
+  "game_sense_score": null
 }}
 CRITICAL RULES:
 1. If a field is NOT explicitly visible in the screenshot or text, set its value to null.
@@ -821,6 +1039,7 @@ CRITICAL RULES:
     if raw_text:
         parts.append({"text": f"User Provided Text / Match Report:\n{raw_text}"})
 
+    ocr_text = ""
     if screenshot:
         content_bytes = await screenshot.read()
         mime = screenshot.content_type or "image/png"
@@ -831,6 +1050,15 @@ CRITICAL RULES:
                 "data": b64_data
             }
         })
+        try:
+            from PIL import Image
+            import winocr
+            pil_img = Image.open(io.BytesIO(content_bytes))
+            raw_ocr = await winocr.to_coroutine(winocr.recognize_pil(pil_img))
+            ocr_res = winocr.picklify(raw_ocr)
+            ocr_text = ocr_res.get("text", "")
+        except Exception as ocr_err:
+            logger.warning(f"Windows OCR execution notice: {ocr_err}")
 
     result_json = None
     used_gemini = False
@@ -838,7 +1066,7 @@ CRITICAL RULES:
     if settings.GEMINI_API_KEY:
         try:
             url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key={settings.GEMINI_API_KEY}"
-            async with httpx.AsyncClient(timeout=25.0) as client:
+            async with httpx.AsyncClient(timeout=12.0) as client:
                 resp = await client.post(url, json={"contents": [{"parts": parts}]})
                 if resp.status_code == 200:
                     data = resp.json()
@@ -852,29 +1080,17 @@ CRITICAL RULES:
         except Exception as e:
             logger.warning(f"Gemini credentials extraction notice: {e}")
 
-    # Fallback heuristic regex parser if Gemini was unavailable or returned empty
-    if not result_json and raw_text:
-        text_clean = raw_text.strip()
-        uid_match = re.search(r"(?:uid|id|character|steam64|steam)[:\s]+([A-Za-z0-9_#]+)", text_clean, re.IGNORECASE) or re.search(r"(\d{8,17})", text_clean)
-        ign_match = re.search(r"(?:ign|name|handle|player)[:\s]+([A-Za-z0-9_#]+)", text_clean, re.IGNORECASE)
-        rank_match = re.search(r"(?:rank|elo|tier)[:\s]+([^\r\n,]+)", text_clean, re.IGNORECASE)
+    # Fallback / augment with Windows Native OCR & Heuristic Regex Extractor
+    combined_input_text = f"{raw_text or ''}\n{ocr_text or ''}".strip()
+    parsed_heuristic = _parse_esports_text(combined_input_text, game_title) if combined_input_text else {}
 
-        role_match = re.search(r"(?:role)[:\s]+([^\r\n,]+)", text_clean, re.IGNORECASE)
-
-        stat_match = re.search(r"(?:avg dmg|average damage|adr|acs|stat)[:\s]+([0-9.]+(?:\s*(?:avg dmg|adr|acs))?)", text_clean, re.IGNORECASE)
-        wr_match = re.search(r"(?:win rate|winrate|wr)[:\s]+([0-9.]+\s*%)", text_clean, re.IGNORECASE)
-        kd_match = re.search(r"(?:kd|k/d|kda)[:\s]+([0-9.]+)", text_clean, re.IGNORECASE)
-
-        result_json = {
-            "ign": ign_match.group(1).strip() if ign_match else None,
-            "game_id": uid_match.group(1).strip() if uid_match else None,
-            "rank": rank_match.group(1).strip() if rank_match else None,
-            "role": role_match.group(1).strip() if role_match else None,
-            "tier": None,
-            "primary_stat": stat_match.group(1).strip() if stat_match else None,
-            "win_rate": wr_match.group(1).strip() if wr_match else None,
-            "kd": kd_match.group(1).strip() if kd_match else None,
-        }
+    if not result_json:
+        result_json = parsed_heuristic
+    else:
+        # Augment any null or empty keys from heuristic parser
+        for k, v in parsed_heuristic.items():
+            if not result_json.get(k) and v is not None:
+                result_json[k] = v
 
     if not result_json:
         result_json = {}
@@ -910,7 +1126,7 @@ CRITICAL RULES:
     # Parse primary_stat number and win_rate number to compute full dynamic telemetry
     stat_val = 80.0
     if extracted_stat:
-        m = re.search(r"([0-9.]+)", extracted_stat)
+        m = re.search(r"([0-9.]+)", str(extracted_stat))
         if m:
             try:
                 stat_val = float(m.group(1))
@@ -919,15 +1135,18 @@ CRITICAL RULES:
 
     wr_val = 55.0
     if extracted_win_rate:
-        m = re.search(r"([0-9.]+)", extracted_win_rate)
+        m = re.search(r"([0-9.]+)", str(extracted_win_rate))
         if m:
             try:
                 wr_val = float(m.group(1))
             except ValueError:
                 wr_val = 55.0
 
-    # Derive dynamic tactical telemetry from this specific extract
-    derived = _calculate_derived_telemetry(game_title, stat_val, wr_val, extracted_game_id or "uploaded_media")
+    # Derive dynamic tactical telemetry with seed incorporating all extracted values
+    seed_key = f"{extracted_game_id}_{extracted_ign}_{extracted_rank}_{stat_val}_{wr_val}_{combined_input_text[:30]}"
+    derived = _calculate_derived_telemetry(game_title, stat_val, wr_val, seed_key)
+
+    source_label = "AI Multimodal (Gemini)" if used_gemini else ("Windows Native OCR Engine" if ocr_text else "Heuristic Text Extractor")
 
     return {
         "status": "complete" if is_complete else "partial" if any([extracted_ign, extracted_game_id, extracted_rank, extracted_stat]) else "unreadable",
@@ -941,7 +1160,7 @@ CRITICAL RULES:
         "win_rate": extracted_win_rate or "",
         "missing_fields": missing_fields,
         "message": msg,
-        "source": "AI Extracted (Gemini 2.5 Flash Lite)" if used_gemini else "Heuristic Extractor",
+        "source": source_label,
         # Full dynamic telemetry attached to response
         "kd": result_json.get("kd") or derived["kd"],
         "rating": result_json.get("rating") or derived["rating"],

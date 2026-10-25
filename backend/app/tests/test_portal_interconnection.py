@@ -406,3 +406,58 @@ def test_extract_credentials_missing_info_flow(client, player_token):
     assert "Primary Combat Metric (Avg Dmg / ADR)" in data["missing_fields"]
     assert "Partially extracted" in data["message"]
 
+
+
+def test_extract_credentials_dynamic_telemetry(client, player_token):
+    """Verifies that complete credentials extraction dynamically populates all tactical metrics and percentiles without hardcoded constants."""
+    headers = {"Authorization": f"Bearer {player_token}"}
+
+    payload = {
+        "game_title": "CS2",
+        "raw_text": "IGN: ShadowHawk, Steam64: 76561198088776655, Rank: FACEIT Level 9, ADR: 96.5, Win Rate: 65%, K/D: 1.42, Headshot: 54%"
+    }
+
+    res = client.post("/api/player/me/extract-credentials", data=payload, headers=headers)
+    assert res.status_code == 200
+    data = res.json()
+    assert data["is_complete"] is True
+    assert data["ign"] == "ShadowHawk"
+    assert data["game_id"] == "76561198088776655"
+    assert "96.5" in data["primary_stat"]
+    assert "65%" in data["win_rate"]
+    assert data["kd"] == "1.42"
+    assert data["headshot_rate"] == "54%"
+    assert data["aim_score"] is not None
+    assert data["positioning_score"] is not None
+    assert data["utility_score"] is not None
+    assert data["game_sense_score"] is not None
+
+
+def test_extract_credentials_image_upload(client, player_token):
+    """Verifies that an uploaded image scorecard is processed via OCR/Gemini and returns structured telemetry."""
+    import io
+    from PIL import Image, ImageDraw
+
+    # Create synthetic scorecard image
+    img = Image.new("RGB", (400, 200), color=(255, 255, 255))
+    draw = ImageDraw.Draw(img)
+    draw.text((20, 20), "IGN: Phantom", fill=(0, 0, 0))
+    draw.text((20, 50), "UID: 5129998888", fill=(0, 0, 0))
+    draw.text((20, 80), "Rank: Conqueror Top 100", fill=(0, 0, 0))
+    draw.text((20, 110), "Avg Dmg: 910.0", fill=(0, 0, 0))
+    draw.text((20, 140), "Win Rate: 70%", fill=(0, 0, 0))
+
+    img_bytes = io.BytesIO()
+    img.save(img_bytes, format="PNG")
+    img_bytes.seek(0)
+
+    headers = {"Authorization": f"Bearer {player_token}"}
+    files = {"screenshot": ("scorecard.png", img_bytes, "image/png")}
+    data = {"game_title": "BGMI"}
+
+    res = client.post("/api/player/me/extract-credentials", data=data, files=files, headers=headers)
+    assert res.status_code == 200
+    res_data = res.json()
+    assert res_data["status"] in ["complete", "partial"]
+    assert "kd" in res_data
+    assert "aim_score" in res_data
