@@ -14,9 +14,10 @@ from app.models.portal import (
     ActivityEvent,
     Notification,
     PlayerWatchlist,
+    PlayerClip,
 )
 from app.schemas.player import PlayerSummary, PlayerListResponse, PlayerProfileResponse, MatchStatItem
-from app.schemas.portal import ContactAccessGrantOut
+from app.schemas.portal import ContactAccessGrantOut, PlayerClipOut
 from app.services.scoring import (
     calculate_confidence,
     calculate_role_performance,
@@ -301,6 +302,27 @@ def get_player(
     # Privacy and contact masking check
     contact_email, contact_phone, contact_unlocked = check_and_mask_contact(player, current_user, db)
 
+    # Query uploaded clips & tactical audio comms
+    clips_records = db.query(PlayerClip).filter(PlayerClip.player_id == player.id).order_by(PlayerClip.created_at.desc()).all()
+    clips_out = [
+        PlayerClipOut(
+            id=c.id,
+            player_id=c.player_id,
+            title=c.title,
+            map_name=c.map_name,
+            file_path=c.file_path,
+            duration_seconds=c.duration_seconds,
+            audio_job_id=c.audio_job_id,
+            tactical_score=c.tactical_score,
+            verdict=c.verdict,
+            soundness_reasoning=c.soundness_reasoning,
+            transcription=c.transcription,
+            transcript_segments=c.transcript_segments_json,
+            created_at=c.created_at,
+        )
+        for c in clips_records
+    ]
+
     return PlayerProfileResponse(
         id=player.id,
         name=player.name,
@@ -338,6 +360,7 @@ def get_player(
         past_experience_json=player.past_experience_json,
         expected_compensation=player.expected_compensation,
         verification_status="linked" if player.source in ["leetify", "pandascore"] else "self_reported",
+        clips=clips_out,
     )
 
 

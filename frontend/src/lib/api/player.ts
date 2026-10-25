@@ -295,4 +295,11 @@ export const playerApi = {
       token,
     });
   },
+
+  async getPlayerById(playerId: number, token?: string): Promise<any> {
+    return apiFetch<any>(`/players/${playerId}`, {
+      method: 'GET',
+      token,
+    });
+  },
 };

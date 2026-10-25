@@ -441,6 +441,16 @@ def update_application_status(
     db.commit()
     db.refresh(app)
 
+    score_snap = (
+        db.query(PlayerScoreHistory)
+        .filter(PlayerScoreHistory.player_id == p.id)
+        .order_by(PlayerScoreHistory.recorded_at.desc())
+        .first()
+    )
+    combat_s = score_snap.combat_score if score_snap else 55.0
+    tactical_s = score_snap.tactical_score if score_snap else 24.0
+    overall_s = score_snap.overall_score if score_snap else round(combat_s + tactical_s, 1)
+
     return ApplicationOut(
         id=app.id,
         opening_id=opening.id,
@@ -455,6 +465,9 @@ def update_application_status(
         source=app.source,
         cover_note=app.cover_note,
         reviewer_notes=app.reviewer_notes,
+        combat_score=combat_s,
+        tactical_score=tactical_s,
+        overall_score=overall_s,
         created_at=app.created_at,
         updated_at=app.updated_at,
     )

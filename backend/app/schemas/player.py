@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Optional, List, Dict, Any
 from pydantic import BaseModel, ConfigDict
+from app.schemas.portal import PlayerClipOut
 
 
 class PlayerSummary(BaseModel):
@@ -85,3 +86,4 @@ class PlayerProfileResponse(BaseModel):
     past_experience_json: Optional[List[Dict[str, Any]]] = None
     expected_compensation: Optional[str] = None
     verification_status: str = "linked"
+    clips: List[PlayerClipOut] = []

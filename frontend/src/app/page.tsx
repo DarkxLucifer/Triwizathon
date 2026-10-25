@@ -383,6 +383,8 @@ export default function ScoutForgeApp() {
 
                   else if (screen === 'leaderboards') setActiveNav('leaderboards');
 
+                  else if (screen === 'openings') setActiveNav('openings');
+
                 }}
 
                 onSelectRoleToScout={handleSelectRoleToScout}
@@ -557,6 +559,8 @@ export default function ScoutForgeApp() {
                   if (screen === 'discover') setActiveNav('discover');
 
                   else if (screen === 'leaderboards') setActiveNav('leaderboards');
+
+                  else if (screen === 'openings') setActiveNav('openings');
 
                   else if (screen === 'comparison') setActiveNav('analytics');
 

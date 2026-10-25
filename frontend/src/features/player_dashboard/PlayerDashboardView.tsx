@@ -2080,7 +2080,8 @@ export function PlayerDashboardView({
     async function loadBackendData() {
       try {
         let token = localStorage.getItem('scoutforge_access_token') || undefined;
-        if (!token) {
+        const storedRole = typeof window !== 'undefined' ? localStorage.getItem('scoutforge_auth_role') : null;
+        if (!token || storedRole === 'organiser') {
           try {
             const authRes = await fetch("http://127.0.0.1:8000/api/auth/login", {
               method: "POST",
@@ -2090,7 +2091,6 @@ export function PlayerDashboardView({
             if (authRes.ok) {
               const authData = await authRes.json();
               token = authData.access_token;
-              if (token) localStorage.setItem('scoutforge_access_token', token);
             }
           } catch {}
         }
